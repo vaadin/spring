@@ -3,7 +3,9 @@ Vaadin Spring
 
 Vaadin Spring is the official Spring integration for Vaadin Framework version 7.
 
-This add-on is work in progress - please check back here later.
+Building the project
+----
+Execute `mvn clean install` in the root directory to build vaadin-spring.
 
 Issue tracking
 ----
