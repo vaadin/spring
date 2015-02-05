@@ -40,8 +40,8 @@
 
     <build>
         <plugins>
-            <!-- Do not deploy top level pom. The vaadin-spring module does not depend 
-				on it so no need for it to end up in Maven repositories -->
+            <!-- Do not deploy top level pom. The vaadin-spring module does 
+                not depend on it so no need for it to end up in Maven repositories -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
