@@ -1,0 +1,3 @@
+# Auto Configure Vaadin's Spring integration layer.
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.vaadin.spring.boot.VaadinAutoConfiguration

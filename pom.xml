@@ -63,6 +63,7 @@
 
     <modules>
         <module>vaadin-spring</module>
+        <module>vaadin-spring-boot</module>
     </modules>
 
 </project>
