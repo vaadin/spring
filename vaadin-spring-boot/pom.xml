@@ -70,7 +70,7 @@
         <project.build.encoding>UTF-8</project.build.encoding>
         <project.build.target>1.6</project.build.target>
         <project.build.source>1.6</project.build.source>
-        <spring-boot.version>1.2.0.RELEASE</spring-boot.version>
+        <spring-boot.version>1.2.1.RELEASE</spring-boot.version>
 
         <!-- ZIP Manifest fields -->
         <Implementation-Version>${project.version}</Implementation-Version>
