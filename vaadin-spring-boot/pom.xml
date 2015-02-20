@@ -129,6 +129,7 @@
                     <!-- exclude other META-INF data under build directory -->
                     <includes>
                         <include>META-INF/maven/${project.groupId}/${project.artifactId}/**</include>
+                        <include>META-INF/spring.factories</include>
                         <include>com/**</include>
                     </includes>
                 </configuration>
