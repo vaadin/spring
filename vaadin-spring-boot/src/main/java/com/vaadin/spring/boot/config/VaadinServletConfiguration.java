@@ -19,7 +19,9 @@ import javax.servlet.http.HttpServlet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -62,6 +64,11 @@ public class VaadinServletConfiguration extends AbstractServletConfiguration {
      * automatically mapped to the same servlet.
      */
     public static final String SERVLET_URL_MAPPING_PARAMETER_NAME = "vaadin.servlet.urlMapping";
+
+    @Autowired
+    public VaadinServletConfiguration(ApplicationContext applicationContext) {
+        super(applicationContext);
+    }
 
     @Override
     protected String getServletConfigurationParameterPrefix() {

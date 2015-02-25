@@ -22,7 +22,6 @@ import javax.servlet.http.HttpServlet;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
@@ -37,7 +36,7 @@ import com.vaadin.server.Constants;
  * @author Petter Holmström (petter@vaadin.com)
  * @author Henri Sara (hesara@vaadin.com)
  */
-abstract class AbstractServletConfiguration implements InitializingBean {
+public abstract class AbstractServletConfiguration implements InitializingBean {
 
     public static final String DEFAULT_SERVLET_URL_MAPPING = "/*";
 
@@ -47,11 +46,14 @@ abstract class AbstractServletConfiguration implements InitializingBean {
      */
     public static final String STATIC_RESOURCES_URL_MAPPING = "/VAADIN/*";
 
-    @Autowired
-    Environment environment;
+    protected final Environment environment;
 
-    @Autowired
-    ApplicationContext applicationContext;
+    protected final ApplicationContext applicationContext;
+
+    protected AbstractServletConfiguration(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+        environment = applicationContext.getBean(Environment.class);
+    }
 
     protected abstract String getServletConfigurationParameterPrefix();
 
