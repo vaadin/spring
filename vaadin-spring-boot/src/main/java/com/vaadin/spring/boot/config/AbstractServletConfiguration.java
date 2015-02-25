@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServlet;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
@@ -46,14 +47,11 @@ public abstract class AbstractServletConfiguration implements InitializingBean {
      */
     public static final String STATIC_RESOURCES_URL_MAPPING = "/VAADIN/*";
 
-    protected final Environment environment;
+    @Autowired
+    protected Environment environment;
 
-    protected final ApplicationContext applicationContext;
-
-    protected AbstractServletConfiguration(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-        environment = applicationContext.getBean(Environment.class);
-    }
+    @Autowired
+    protected ApplicationContext applicationContext;
 
     protected abstract String getServletConfigurationParameterPrefix();
 
@@ -82,11 +80,11 @@ public abstract class AbstractServletConfiguration implements InitializingBean {
         try {
             servlet = applicationContext.getBean(getServletClass());
             getLogger()
-            .info("Using servlet instance [{}] found in the application context",
-                    servlet);
+                    .info("Using servlet instance [{}] found in the application context",
+                            servlet);
         } catch (NoSuchBeanDefinitionException ex) {
             getLogger()
-            .info("Servlet was not found in the application context, using default");
+                    .info("Servlet was not found in the application context, using default");
             servlet = newServletInstance();
         }
         return servlet;
