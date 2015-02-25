@@ -78,7 +78,7 @@
         <Implementation-Title>Vaadin Spring Boot</Implementation-Title>
         <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
-        <Vaadin-Addon>vaadin-spring-${project.version}.jar</Vaadin-Addon>
+        <Vaadin-Addon>vaadin-spring-boot-${project.version}.jar</Vaadin-Addon>
     </properties>
 
     <dependencies>
