@@ -34,7 +34,7 @@ public final class Conventions {
     public static String deriveMappingForUI(Class<?> beanClass,
             SpringUI annotation) {
         String mapping = annotation.value();
-        if (!SpringUI.USE_CONVENTIONS.equals(mapping)) {
+        if (!mapping.equals("")) {
             return mapping;
         } else {
             // derive mapping from classname
@@ -47,17 +47,20 @@ public final class Conventions {
 
     public static String deriveMappingForView(Class<?> beanClass,
             SpringView annotation) {
-        if (annotation != null
-                && !SpringView.USE_CONVENTIONS.equals(annotation.value())) {
-            return annotation.value();
-        } else {
-            // derive mapping from classname
-            // do not use proxy class names
-            Class<?> realBeanClass = ClassUtils.getUserClass(beanClass);
-            String mapping = realBeanClass.getSimpleName().replaceFirst(
-                    "View$", "");
-            return upperCamelToLowerHyphen(mapping);
+        if (annotation != null) {
+            if(annotation.index()){
+                return "";
+            }
+            if(!annotation.value().equals("")) {
+                return annotation.value();
+            }
         }
+        // derive mapping from classname
+        // do not use proxy class names
+        Class<?> realBeanClass = ClassUtils.getUserClass(beanClass);
+        String mapping = realBeanClass.getSimpleName().replaceFirst(
+                "View$", "");
+        return upperCamelToLowerHyphen(mapping);
     }
 
     public static String upperCamelToLowerHyphen(String string) {

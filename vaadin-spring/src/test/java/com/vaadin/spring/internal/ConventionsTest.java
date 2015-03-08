@@ -33,7 +33,7 @@ public class ConventionsTest {
     public static class AnnotationUI {
     }
 
-    @SpringUI(SpringUI.USE_CONVENTIONS)
+    @SpringUI("/convention")
     public static class ConventionUI {
     }
 

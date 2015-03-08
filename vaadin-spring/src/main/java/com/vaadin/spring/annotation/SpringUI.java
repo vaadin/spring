@@ -61,7 +61,7 @@ public @interface SpringUI {
      * map the UI to the root of the servlet. Within a web application, there
      * must not be multiple UI sub classes with the same path.
      *
-     * By default, and if the special value {@link #USE_CONVENTIONS} is used,
+     * By default, and if the special value "" is used,
      * the mapping is derived from the simple name of the class. A class
      * WelcomeVaadin is going to be bound to "/welcome-vaadin" uri. A class
      * SampleApplicationUI will be bound to "/sample-application".
@@ -69,12 +69,6 @@ public @interface SpringUI {
      * To override the default behavior, see
      * {@link SpringAwareUIProvider#deriveMappingForUI()}.
      */
-    String value() default USE_CONVENTIONS;
-
-    /**
-     * USE_CONVENTIONS is treated as a special case that will cause the
-     * automatic UI mapping to occur.
-     */
-    public final static String USE_CONVENTIONS = "USE CONVENTIONS";
+    String value() default "";
 
 }
