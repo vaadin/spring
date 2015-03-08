@@ -71,4 +71,5 @@ public @interface SpringUI {
      */
     String value() default "";
 
+    boolean root() default false;
 }

@@ -41,7 +41,7 @@ public class ConventionsTest {
     public static class DefaultUI {
     }
 
-    @SpringUI("")
+    @SpringUI(root=true)
     public static class RootUI {
     }
 

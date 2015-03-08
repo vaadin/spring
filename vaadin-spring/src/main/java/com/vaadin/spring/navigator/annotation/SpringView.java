@@ -79,7 +79,7 @@ public @interface SpringView {
      */
     String value() default "";
 
-    boolean index() default false;
+    boolean root() default false;
 
     /**
      * By default, the view will be available for all UI subclasses in the

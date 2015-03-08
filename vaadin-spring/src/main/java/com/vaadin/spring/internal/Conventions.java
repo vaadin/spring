@@ -34,6 +34,9 @@ public final class Conventions {
     public static String deriveMappingForUI(Class<?> beanClass,
             SpringUI annotation) {
         String mapping = annotation.value();
+        if(annotation.root()){
+            return "";
+        }
         if (!mapping.equals("")) {
             return mapping;
         } else {
@@ -48,7 +51,7 @@ public final class Conventions {
     public static String deriveMappingForView(Class<?> beanClass,
             SpringView annotation) {
         if (annotation != null) {
-            if(annotation.index()){
+            if(annotation.root()){
                 return "";
             }
             if(!annotation.value().equals("")) {
