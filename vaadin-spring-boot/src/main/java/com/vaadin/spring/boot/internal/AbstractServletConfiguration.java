@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaadin.spring.boot.config;
+package com.vaadin.spring.boot.internal;
 
 import java.lang.reflect.Method;
 
@@ -32,7 +32,7 @@ import com.vaadin.server.Constants;
 
 /**
  * Base class for
- * {@link com.vaadin.spring.boot.config.VaadinServletConfiguration}.
+ * {@link com.vaadin.spring.boot.internal.VaadinServletConfiguration}.
  *
  * @author Petter Holmström (petter@vaadin.com)
  * @author Henri Sara (hesara@vaadin.com)

@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
 
-import com.vaadin.spring.boot.config.VaadinServletConfiguration;
+import com.vaadin.spring.boot.internal.VaadinServletConfiguration;
 
 /**
  * Annotation for enabling the Vaadin servlet.
