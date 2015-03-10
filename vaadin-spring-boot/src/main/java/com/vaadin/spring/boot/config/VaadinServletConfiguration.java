@@ -23,11 +23,11 @@ import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.vaadin.spring.servlet.SpringVaadinServlet;
+import com.vaadin.spring.server.SpringVaadinServlet;
 
 /**
  * Spring configuration that sets up a
- * {@link com.vaadin.spring.servlet.SpringVaadinServlet}. If you want to
+ * {@link com.vaadin.spring.server.SpringVaadinServlet}. If you want to
  * customize the servlet, extend it and make it available as a Spring bean.
  *
  * @author Petter Holmström (petter@vaadin.com)
