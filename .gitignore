@@ -3,3 +3,5 @@ target/
 .project
 .settings/
 vaadin-spring/target/
+.idea
+*.iml
