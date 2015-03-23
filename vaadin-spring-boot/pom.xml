@@ -92,6 +92,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring-boot.version}</version>
         </dependency>
+        <!-- @ConfigurationProperties annotation processing (metadata for IDEs) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <version>${spring-boot.version}</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
     
     <build>
@@ -129,7 +136,7 @@
                     <!-- exclude other META-INF data under build directory -->
                     <includes>
                         <include>META-INF/maven/${project.groupId}/${project.artifactId}/**</include>
-                        <include>META-INF/spring.factories</include>
+                        <include>META-INF/spring*</include>
                         <include>com/**</include>
                     </includes>
                 </configuration>

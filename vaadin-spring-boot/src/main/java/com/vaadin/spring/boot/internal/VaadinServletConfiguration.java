@@ -19,10 +19,16 @@ import javax.servlet.http.HttpServlet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.vaadin.server.Constants;
 import com.vaadin.spring.server.SpringVaadinServlet;
 
 /**
@@ -34,55 +40,38 @@ import com.vaadin.spring.server.SpringVaadinServlet;
  * @author Henri Sara (hesara@vaadin.com)
  */
 @Configuration
-public class VaadinServletConfiguration extends AbstractServletConfiguration {
+@EnableConfigurationProperties(VaadinServletConfigurationProperties.class)
+public class VaadinServletConfiguration implements InitializingBean {
+
+    public static final String DEFAULT_SERVLET_URL_MAPPING = "/*";
+
+    /**
+     * Mapping for static resources that is used in case a non-default mapping
+     * is used as the primary mapping.
+     */
+    public static final String STATIC_RESOURCES_URL_MAPPING = "/VAADIN/*";
 
     private static Logger logger = LoggerFactory
             .getLogger(VaadinServletConfiguration.class);
 
-    /**
-     * Prefix to be used for all Spring environment properties that configure
-     * the Vaadin servlet. The full format of the environment property name is
-     * {@code [prefix][initParameter]} where {@code [prefix]} is
-     * <code>{@value}</code> and {@code initParameter} is the name of one of the
-     * parameters defined in
-     * {@link com.vaadin.annotations.VaadinServletConfiguration}.
-     * <p>
-     * For example, to change the production mode of the servlet, a property
-     * named <code>{@value}productionMode</code> would be used.
-     *
-     * @see org.springframework.core.env.Environment
-     */
-    public static final String SERVLET_CONFIGURATION_PARAMETER_PREFIX = "vaadin.servlet.params.";
+    @Autowired
+    protected ApplicationContext applicationContext;
+    @Autowired
+    protected VaadinServletConfigurationProperties configurationProperties;
 
-    /**
-     * Name of the Spring environment property that contains the base URL
-     * mapping of the Vaadin servlet. By default, this mapping is {@code /*}.
-     *
-     * If a value other than {@code /*} is used, also {@code /VAADIN/*} is
-     * automatically mapped to the same servlet.
-     */
-    public static final String SERVLET_URL_MAPPING_PARAMETER_NAME = "vaadin.servlet.urlMapping";
-
-    @Override
-    protected String getServletConfigurationParameterPrefix() {
-        return SERVLET_CONFIGURATION_PARAMETER_PREFIX;
-    }
-
-    @Override
     protected Class<? extends HttpServlet> getServletClass() {
         return SpringVaadinServlet.class;
     }
 
-    @Override
     protected Logger getLogger() {
         return logger;
     }
 
-    @Override
     protected String[] getUrlMappings() {
-        String mapping = environment
-                .getProperty(SERVLET_URL_MAPPING_PARAMETER_NAME,
-                        DEFAULT_SERVLET_URL_MAPPING);
+        String mapping = configurationProperties.getUrlMapping();
+        if (mapping == null || "".equals(mapping.trim())) {
+            mapping = DEFAULT_SERVLET_URL_MAPPING;
+        }
         if (!DEFAULT_SERVLET_URL_MAPPING.equals(mapping)) {
             return new String[] { mapping, STATIC_RESOURCES_URL_MAPPING };
         } else {
@@ -93,6 +82,80 @@ public class VaadinServletConfiguration extends AbstractServletConfiguration {
     @Bean
     ServletRegistrationBean vaadinServletRegistration() {
         return createServletRegistrationBean();
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        getLogger().debug("{} initialized", getClass().getName());
+    }
+
+    private HttpServlet newServletInstance() {
+        try {
+            return getServletClass().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Could not create new servlet instance",
+                    e);
+        }
+    }
+
+    protected HttpServlet createServlet() {
+        HttpServlet servlet;
+        try {
+            servlet = applicationContext.getBean(getServletClass());
+            getLogger()
+                    .info("Using servlet instance [{}] found in the application context",
+                            servlet);
+        } catch (NoSuchBeanDefinitionException ex) {
+            getLogger()
+                    .info("Servlet was not found in the application context, using default");
+            servlet = newServletInstance();
+        }
+        return servlet;
+    }
+
+    protected ServletRegistrationBean createServletRegistrationBean() {
+        getLogger().info("Registering servlet of type [{}]",
+                getServletClass().getCanonicalName());
+        final String[] urlMappings = getUrlMappings();
+        getLogger().info("Servlet will be mapped to URLs {}",
+                (Object[]) urlMappings);
+        final HttpServlet servlet = createServlet();
+        final ServletRegistrationBean registrationBean = new ServletRegistrationBean(
+                servlet, urlMappings);
+        addInitParameters(registrationBean);
+        return registrationBean;
+    }
+
+    protected void addInitParameters(
+            ServletRegistrationBean servletRegistrationBean) {
+        getLogger().info("Setting servlet init parameters");
+
+        addInitParameter(servletRegistrationBean,
+                Constants.SERVLET_PARAMETER_PRODUCTION_MODE,
+                String.valueOf(configurationProperties.isProductionMode()));
+        addInitParameter(servletRegistrationBean,
+                Constants.SERVLET_PARAMETER_RESOURCE_CACHE_TIME,
+                String.valueOf(configurationProperties.getResourceCacheTime()));
+        addInitParameter(servletRegistrationBean,
+                Constants.SERVLET_PARAMETER_HEARTBEAT_INTERVAL,
+                String.valueOf(configurationProperties.getHeartbeatInterval()));
+        addInitParameter(servletRegistrationBean,
+                Constants.SERVLET_PARAMETER_CLOSE_IDLE_SESSIONS,
+                String.valueOf(configurationProperties.isCloseIdleSessions()));
+
+        addInitParameter(servletRegistrationBean,
+                Constants.PARAMETER_VAADIN_RESOURCES,
+                configurationProperties.getResources());
+    }
+
+    private void addInitParameter(
+            ServletRegistrationBean servletRegistrationBean, String paramName,
+            String propertyValue) {
+        if (propertyValue != null) {
+            getLogger().info("Set servlet init parameter [{}] = [{}]",
+                    paramName, propertyValue);
+            servletRegistrationBean.addInitParameter(paramName, propertyValue);
+        }
     }
 
 }
