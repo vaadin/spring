@@ -16,7 +16,6 @@
 package com.vaadin.spring.boot.internal;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import com.vaadin.annotations.VaadinServletConfiguration;
 
@@ -28,7 +27,6 @@ import com.vaadin.annotations.VaadinServletConfiguration;
  * @see <a
  *      href="http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html">http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-external-config.html</a>
  */
-@Component
 @ConfigurationProperties(prefix = "vaadin.servlet")
 public class VaadinServletConfigurationProperties {
     // note that the explicit values are used instead of constant references to
