@@ -10,13 +10,13 @@
     </parent>
 
     <groupId>com.vaadin</groupId>
-    <artifactId>vaadin-spring-main</artifactId>
+    <artifactId>vaadin-spring-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>vaadin-spring-main</name>
+    <name>vaadin-spring-parent</name>
     <description>
-        Provides Spring integration for Vaadin applications.
+        Parent module for Spring integration for Vaadin applications.
     </description>
     <url>https://github.com/vaadin/spring</url>
 
@@ -38,27 +38,161 @@
         <developerConnection>scm:git:git@github.com:vaadin/spring.git</developerConnection>
     </scm>
 
+    <developers>
+        <!-- In alphabetical order -->
+        <developer>
+            <name>AMahdy AbdElAziz</name>
+            <organization>Vaadin</organization>
+            <email>amahdy7@gmail.com</email>
+        </developer>
+        <developer>
+            <name>Chris Phillipson</name>
+            <email>fastnsilver@gmail.com</email>
+        </developer>
+        <developer>
+            <name>Henri Sara</name>
+            <organization>Vaadin</organization>
+            <email>hesara@vaadin.com</email>
+        </developer>
+        <developer>
+            <name>Josh Long</name>
+            <email>josh@joshlong.com</email>
+        </developer>
+        <developer>
+            <name>Matti Tahvonen</name>
+            <organization>Vaadin</organization>
+            <email>matti@vaadin.com</email>
+        </developer>
+        <developer>
+            <name>Nicolas Frankel</name>
+            <email>nicolas@frankel.ch</email>
+        </developer>
+        <developer>
+            <name>Peter Lehto</name>
+            <organization>Vaadin</organization>
+            <email>peter@vaadin.com</email>
+        </developer>
+        <developer>
+            <name>Petter Holmström</name>
+            <organization>Vaadin</organization>
+            <email>petter@vaadin.com</email>
+        </developer>
+    </developers>
+    
+    <properties>
+        <project.build.encoding>UTF-8</project.build.encoding>
+        <project.build.target>1.6</project.build.target>
+        <project.build.source>1.6</project.build.source>
+        
+        <!-- These are typically overridden with BOMs -->
+        <vaadin.version>7.4.2</vaadin.version>
+        <spring.version>4.1.6.RELEASE</spring.version>
+        <spring.boot.version>1.2.2.RELEASE</spring.boot.version>
+        
+        <slf4j.version>1.7.7</slf4j.version>
+
+        <!-- Additional manifest fields -->
+        <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
+    </properties>
+
     <build>
         <plugins>
-            <!-- Do not deploy top level pom. The vaadin-spring module does 
-                not depend on it so no need for it to end up in Maven repositories -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
                 <configuration>
-                    <skip>true</skip>
+                    <encoding>${project.build.encoding}</encoding>
+                    <target>${project.build.target}</target>
+                    <source>${project.build.source}</source>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.14</version>
+                <configuration>
+                    <enableRulesSummary>false</enableRulesSummary>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <configLocation>checkstyle/vaadin-checkstyle.xml</configLocation>
+                    <violationSeverity>error</violationSeverity>
+                    <headerLocation>checkstyle/header</headerLocation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
                 <version>2.2.1</version>
                 <configuration>
-                    <skipAssembly>true</skipAssembly>
+                    <excludeResources>true</excludeResources>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.apache.maven.plugins
+                                        </groupId>
+                                        <artifactId>
+                                            maven-checkstyle-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [2.14,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>check</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore></ignore>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
     <modules>

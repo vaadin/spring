@@ -1,16 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.vaadin</groupId>
     <artifactId>vaadin-spring-boot-starter</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
 
     <parent>
         <groupId>com.vaadin</groupId>
-        <artifactId>vaadin-parent</artifactId>
-        <version>1.0.0</version>
-        <!-- Parent POM is not in the containing directory -->
-        <relativePath></relativePath>
+        <artifactId>vaadin-spring-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <name>vaadin-spring-boot-starter</name>
@@ -19,33 +15,17 @@
     </description>
     <url>https://github.com/vaadin/spring</url>
 
-    <organization>
-        <name>Vaadin Ltd</name>
-        <url>http://vaadin.com</url>
-    </organization>
-
-    <licenses>
-        <license>
-            <name>Apache License 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-        </license>
-    </licenses>
-
-    <scm>
-        <url>https://github.com/vaadin/spring</url>
-        <connection>scm:git:git@github.com:vaadin/spring.git</connection>
-        <developerConnection>scm:git:git@github.com:vaadin/spring.git</developerConnection>
-    </scm>
-
-    <properties>
-        <vaadin.version>7.4.2</vaadin.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.boot.version}</version>
         </dependency>
 
         <dependency>
@@ -59,18 +39,5 @@
             <version>${vaadin.version}</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2.1</version>
-                <configuration>
-                    <skipAssembly>true</skipAssembly>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>
