@@ -15,20 +15,27 @@
  */
 package com.vaadin.spring.boot.internal;
 
-import javax.servlet.http.HttpServlet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.servlet.mvc.ServletForwardingController;
 
 import com.vaadin.server.Constants;
+import com.vaadin.server.VaadinServlet;
+import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.server.SpringVaadinServlet;
 
 /**
@@ -43,7 +50,9 @@ import com.vaadin.spring.server.SpringVaadinServlet;
 @EnableConfigurationProperties(VaadinServletConfigurationProperties.class)
 public class VaadinServletConfiguration implements InitializingBean {
 
-    public static final String DEFAULT_SERVLET_URL_MAPPING = "/*";
+    private static final String DEFAULT_SERVLET_URL_BASE = "/vaadinServlet";
+    public static final String DEFAULT_SERVLET_URL_MAPPING = DEFAULT_SERVLET_URL_BASE
+            + "/*";
 
     /**
      * Mapping for static resources that is used in case a non-default mapping
@@ -59,23 +68,95 @@ public class VaadinServletConfiguration implements InitializingBean {
     @Autowired
     protected VaadinServletConfigurationProperties configurationProperties;
 
-    protected Class<? extends HttpServlet> getServletClass() {
-        return SpringVaadinServlet.class;
+    // forward the root of all @SpringUIs to the Vaadin servlet
+    @Bean
+    public SimpleUrlHandlerMapping vaadinUiForwardingHandlerMapping() {
+        SimpleUrlHandlerMapping mapping = new SimpleUrlHandlerMapping();
+        mapping.setOrder(Integer.MIN_VALUE + 1);
+
+        Map<String, Object> urlMappings = new HashMap<String, Object>();
+
+        if (isMappedToRoot()) {
+
+            // map every @SpringUI both with and without trailing slash
+            for (String path : getUIPaths()) {
+                urlMappings.put("/" + path, vaadinUiForwardingController());
+                if (path.length() > 0) {
+                    urlMappings.put("/" + path + "/",
+                            vaadinUiForwardingController());
+                }
+            }
+
+            getLogger().info("Forwarding @SpringUI URLs from {}", urlMappings);
+
+        }
+
+        mapping.setUrlMap(urlMappings);
+
+        return mapping;
+    }
+
+    protected List<String> getUIPaths() {
+        List<String> uiMappings = new ArrayList<String>();
+        logger.info("Checking the application context for Vaadin UI mappings");
+        // more checks are performed by the UI provider
+        final String[] uiBeanNames = applicationContext
+                .getBeanNamesForAnnotation(SpringUI.class);
+        for (String uiBeanName : uiBeanNames) {
+            SpringUI annotation = applicationContext.findAnnotationOnBean(
+                    uiBeanName, SpringUI.class);
+            uiMappings.add(annotation.path().replaceFirst("^/", ""));
+        }
+        return uiMappings;
     }
 
     protected Logger getLogger() {
         return logger;
     }
 
-    protected String[] getUrlMappings() {
-        String mapping = configurationProperties.getUrlMapping();
-        if (mapping == null || "".equals(mapping.trim())) {
-            mapping = DEFAULT_SERVLET_URL_MAPPING;
+    /**
+     * Forwarding controller that sends requests for the root page of Vaadin
+     * servlets to the Vaadin servlet.
+     *
+     * @return forwarding controller
+     */
+    @Bean
+    public Controller vaadinUiForwardingController() {
+        VaadinServlet servlet = vaadinServlet();
+        getLogger().info("Registering Vaadin servlet of type [{}]",
+                servlet.getClass().getCanonicalName());
+        ServletForwardingController controller = new ServletForwardingController();
+        controller.setServletName(vaadinServletRegistration().getServletName());
+        return controller;
+    }
+
+    /**
+     * Returns true if the Vaadin servlet is mapped to the context root, false
+     * otherwise.
+     *
+     * @return true if the Vaadin servlet is mapped to the context root
+     */
+    protected boolean isMappedToRoot() {
+        String prefix = configurationProperties.getUrlMapping();
+        if (prefix == null) {
+            return true;
         }
-        if (!DEFAULT_SERVLET_URL_MAPPING.equals(mapping)) {
-            return new String[] { mapping, STATIC_RESOURCES_URL_MAPPING };
+        // strip trailing slash or /* to be tolerant of different user input
+        prefix = prefix.trim().replaceAll("(/\\**)?$", "");
+        return "".equals(prefix);
+    }
+
+    protected String[] getUrlMappings() {
+        // the Vaadin servlet is not at context root to allow DispatcherServlet
+        // to work
+        if (isMappedToRoot()) {
+            return new String[] { DEFAULT_SERVLET_URL_MAPPING,
+                    STATIC_RESOURCES_URL_MAPPING };
         } else {
-            return new String[] { mapping };
+            String mapping = configurationProperties.getUrlMapping();
+            String baseMapping = mapping.trim().replaceAll("(/\\**)?$", "");
+            return new String[] { baseMapping, baseMapping + "/*",
+                    STATIC_RESOURCES_URL_MAPPING };
         }
     }
 
@@ -89,37 +170,22 @@ public class VaadinServletConfiguration implements InitializingBean {
         getLogger().debug("{} initialized", getClass().getName());
     }
 
-    private HttpServlet newServletInstance() {
-        try {
-            return getServletClass().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException("Could not create new servlet instance",
-                    e);
-        }
-    }
-
-    protected HttpServlet createServlet() {
-        HttpServlet servlet;
-        try {
-            servlet = applicationContext.getBean(getServletClass());
-            getLogger()
-                    .info("Using servlet instance [{}] found in the application context",
-                            servlet);
-        } catch (NoSuchBeanDefinitionException ex) {
-            getLogger()
-                    .info("Servlet was not found in the application context, using default");
-            servlet = newServletInstance();
+    @Bean
+    public VaadinServlet vaadinServlet() {
+        SpringVaadinServlet servlet = new SpringVaadinServlet();
+        // TODO should this rather be done when registering the servlet
+        if (isMappedToRoot()) {
+            servlet.setServiceUrl(DEFAULT_SERVLET_URL_BASE);
         }
         return servlet;
     }
 
     protected ServletRegistrationBean createServletRegistrationBean() {
-        getLogger().info("Registering servlet of type [{}]",
-                getServletClass().getCanonicalName());
+        getLogger().info("Registering Vaadin servlet");
         final String[] urlMappings = getUrlMappings();
         getLogger().info("Servlet will be mapped to URLs {}",
-                (Object[]) urlMappings);
-        final HttpServlet servlet = createServlet();
+                (Object) urlMappings);
+        final VaadinServlet servlet = vaadinServlet();
         final ServletRegistrationBean registrationBean = new ServletRegistrationBean(
                 servlet, urlMappings);
         addInitParameters(registrationBean);
