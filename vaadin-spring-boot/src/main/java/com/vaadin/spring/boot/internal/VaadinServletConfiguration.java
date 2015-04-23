@@ -29,6 +29,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.ServletForwardingController;
@@ -42,6 +43,20 @@ import com.vaadin.spring.server.SpringVaadinServlet;
  * Spring configuration that sets up a
  * {@link com.vaadin.spring.server.SpringVaadinServlet}. If you want to
  * customize the servlet, extend it and make it available as a Spring bean.
+ * <p>
+ * By default, unless a custom mapping of the Vaadin servlet is performed using
+ * the URL mapping configuration property
+ * {@link VaadinServletConfigurationProperties#getUrlMapping()}, the Vaadin
+ * servlet is mapped to a hidden path not to block requests destined to
+ * {@link DispatcherServlet}. {@link ServletForwardingController} is then mapped
+ * so that requests to all {@link SpringUI} paths are forwarded to the servlet
+ * for the generation of a bootstrap page, which internally uses the Vaadin
+ * servlet path for all other communication.
+ * <p>
+ * This approach currently relies on a hack that modifies request servlet path
+ * and path info on the fly as those produced by
+ * {@link ServletForwardingController} are not what {@link VaadinServlet}
+ * expects. See {@link SpringVaadinServlet} for more information on this.
  *
  * @author Petter Holmström (petter@vaadin.com)
  * @author Henri Sara (hesara@vaadin.com)
@@ -161,7 +176,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     }
 
     @Bean
-    ServletRegistrationBean vaadinServletRegistration() {
+    protected ServletRegistrationBean vaadinServletRegistration() {
         return createServletRegistrationBean();
     }
 
@@ -172,12 +187,7 @@ public class VaadinServletConfiguration implements InitializingBean {
 
     @Bean
     public VaadinServlet vaadinServlet() {
-        SpringVaadinServlet servlet = new SpringVaadinServlet();
-        // TODO should this rather be done when registering the servlet
-        if (isMappedToRoot()) {
-            servlet.setServiceUrl(DEFAULT_SERVLET_URL_BASE);
-        }
-        return servlet;
+        return new SpringVaadinServlet();
     }
 
     protected ServletRegistrationBean createServletRegistrationBean() {
@@ -186,6 +196,15 @@ public class VaadinServletConfiguration implements InitializingBean {
         getLogger().info("Servlet will be mapped to URLs {}",
                 (Object) urlMappings);
         final VaadinServlet servlet = vaadinServlet();
+
+        // this is a hack to make is possible for Vaadin and Spring MVC
+        // applications to co-exist in the same global "namespace"
+        if (servlet instanceof SpringVaadinServlet && isMappedToRoot()) {
+            SpringVaadinServlet vaadinServlet = (SpringVaadinServlet) servlet;
+            vaadinServlet.setServiceUrl(DEFAULT_SERVLET_URL_BASE);
+            vaadinServlet.setClearServletPath(true);
+        }
+
         final ServletRegistrationBean registrationBean = new ServletRegistrationBean(
                 servlet, urlMappings);
         addInitParameters(registrationBean);
