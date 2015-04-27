@@ -201,7 +201,7 @@ public class VaadinServletConfiguration implements InitializingBean {
         // applications to co-exist in the same global "namespace"
         if (servlet instanceof SpringVaadinServlet && isMappedToRoot()) {
             SpringVaadinServlet vaadinServlet = (SpringVaadinServlet) servlet;
-            vaadinServlet.setServiceUrl(DEFAULT_SERVLET_URL_BASE);
+            vaadinServlet.setServiceUrlPath(DEFAULT_SERVLET_URL_BASE);
             vaadinServlet.setClearServletPath(true);
         }
 
