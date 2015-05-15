@@ -202,7 +202,6 @@ public class VaadinServletConfiguration implements InitializingBean {
         if (servlet instanceof SpringVaadinServlet && isMappedToRoot()) {
             SpringVaadinServlet vaadinServlet = (SpringVaadinServlet) servlet;
             vaadinServlet.setServiceUrlPath(DEFAULT_SERVLET_URL_BASE);
-            vaadinServlet.setClearServletPath(true);
         }
 
         final ServletRegistrationBean registrationBean = new ServletRegistrationBean(
