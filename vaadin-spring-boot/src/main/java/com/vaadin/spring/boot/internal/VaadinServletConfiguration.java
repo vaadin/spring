@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -186,6 +187,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public VaadinServlet vaadinServlet() {
         return new SpringVaadinServlet();
     }
