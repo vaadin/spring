@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.embedded.ServletRegistrationBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -57,7 +58,7 @@ import com.vaadin.spring.server.SpringVaadinServlet;
  * and path info on the fly as those produced by
  * {@link ServletForwardingController} are not what {@link VaadinServlet}
  * expects. See {@link SpringVaadinServlet} for more information on this.
- *
+ * 
  * @author Petter Holmström (petter@vaadin.com)
  * @author Henri Sara (hesara@vaadin.com)
  */
@@ -132,7 +133,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     /**
      * Forwarding controller that sends requests for the root page of Vaadin
      * servlets to the Vaadin servlet.
-     *
+     * 
      * @return forwarding controller
      */
     @Bean
@@ -148,7 +149,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     /**
      * Returns true if the Vaadin servlet is mapped to the context root, false
      * otherwise.
-     *
+     * 
      * @return true if the Vaadin servlet is mapped to the context root
      */
     protected boolean isMappedToRoot() {
@@ -186,6 +187,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     public VaadinServlet vaadinServlet() {
         return new SpringVaadinServlet();
     }
