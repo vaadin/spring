@@ -106,7 +106,7 @@ public class SpringUIProvider extends UIProvider {
     protected String deriveMappingForUI(String uiBeanName) {
         SpringUI annotation = getWebApplicationContext()
                 .findAnnotationOnBean(uiBeanName, SpringUI.class);
-        return annotation.path();
+        return resolvePropertyPlaceholders(annotation.path());
     }
 
     @Override
