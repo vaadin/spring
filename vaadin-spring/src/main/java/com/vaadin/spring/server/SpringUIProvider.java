@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.vaadin.server.UIClassSelectionEvent;
@@ -69,7 +70,8 @@ public class SpringUIProvider extends UIProvider {
         for (String uiBeanName : uiBeanNames) {
             Class<?> beanType = getWebApplicationContext().getType(uiBeanName);
             if (UI.class.isAssignableFrom(beanType)) {
-                logger.info("Found Vaadin UI [{}]", beanType.getCanonicalName());
+                logger.info("Found Vaadin UI [{}]",
+                        beanType.getCanonicalName());
                 final String path;
                 String tempPath = deriveMappingForUI(uiBeanName);
                 if (tempPath.length() > 0 && !tempPath.startsWith("/")) {
@@ -102,16 +104,16 @@ public class SpringUIProvider extends UIProvider {
      * @return path to map the UI to
      */
     protected String deriveMappingForUI(String uiBeanName) {
-        SpringUI annotation = getWebApplicationContext().findAnnotationOnBean(
-                uiBeanName, SpringUI.class);
+        SpringUI annotation = getWebApplicationContext()
+                .findAnnotationOnBean(uiBeanName, SpringUI.class);
         return annotation.path();
     }
 
     @Override
     public Class<? extends UI> getUIClass(
             UIClassSelectionEvent uiClassSelectionEvent) {
-        final String path = extractUIPathFromRequest(uiClassSelectionEvent
-                .getRequest());
+        final String path = extractUIPathFromRequest(
+                uiClassSelectionEvent.getRequest());
         if (pathToUIMap.containsKey(path)) {
             return pathToUIMap.get(path);
         }
@@ -173,6 +175,41 @@ public class SpringUIProvider extends UIProvider {
         } finally {
             CurrentInstance.set(key, null);
         }
+    }
+
+    @Override
+    public String getTheme(UICreateEvent event) {
+        String theme = super.getTheme(event);
+        if (theme != null) {
+            theme = resolvePropertyPlaceholders(theme);
+        }
+        return theme;
+    }
+
+    @Override
+    public String getPageTitle(UICreateEvent event) {
+        String pageTitle = super.getPageTitle(event);
+        if (pageTitle != null) {
+            pageTitle = resolvePropertyPlaceholders(pageTitle);
+        }
+        return pageTitle;
+    }
+
+    @Override
+    public String getWidgetset(UICreateEvent event) {
+        String widgetset = super.getWidgetset(event);
+        if (widgetset != null) {
+            widgetset = resolvePropertyPlaceholders(widgetset);
+        }
+        return widgetset;
+    }
+
+    private String resolvePropertyPlaceholders(String value) {
+        if (StringUtils.hasText(value)) {
+            return this.webApplicationContext.getEnvironment()
+                    .resolvePlaceholders(value);
+        }
+        return value;
     }
 
 }

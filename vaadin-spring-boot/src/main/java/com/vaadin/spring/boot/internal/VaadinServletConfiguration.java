@@ -30,6 +30,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.Controller;
@@ -58,7 +59,7 @@ import com.vaadin.spring.server.SpringVaadinServlet;
  * and path info on the fly as those produced by
  * {@link ServletForwardingController} are not what {@link VaadinServlet}
  * expects. See {@link SpringVaadinServlet} for more information on this.
- * 
+ *
  * @author Petter Holmström (petter@vaadin.com)
  * @author Henri Sara (hesara@vaadin.com)
  */
@@ -119,9 +120,10 @@ public class VaadinServletConfiguration implements InitializingBean {
         final String[] uiBeanNames = applicationContext
                 .getBeanNamesForAnnotation(SpringUI.class);
         for (String uiBeanName : uiBeanNames) {
-            SpringUI annotation = applicationContext.findAnnotationOnBean(
-                    uiBeanName, SpringUI.class);
-            uiMappings.add(annotation.path().replaceFirst("^/", ""));
+            SpringUI annotation = applicationContext
+                    .findAnnotationOnBean(uiBeanName, SpringUI.class);
+            uiMappings.add(resolvePropertyPlaceholders(annotation.path())
+                    .replaceFirst("^/", ""));
         }
         return uiMappings;
     }
@@ -133,7 +135,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     /**
      * Forwarding controller that sends requests for the root page of Vaadin
      * servlets to the Vaadin servlet.
-     * 
+     *
      * @return forwarding controller
      */
     @Bean
@@ -149,7 +151,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     /**
      * Returns true if the Vaadin servlet is mapped to the context root, false
      * otherwise.
-     * 
+     *
      * @return true if the Vaadin servlet is mapped to the context root
      */
     protected boolean isMappedToRoot() {
@@ -242,6 +244,14 @@ public class VaadinServletConfiguration implements InitializingBean {
                     paramName, propertyValue);
             servletRegistrationBean.addInitParameter(paramName, propertyValue);
         }
+    }
+
+    private String resolvePropertyPlaceholders(String value) {
+        if (StringUtils.hasText(value)) {
+            return this.applicationContext.getEnvironment()
+                    .resolvePlaceholders(value);
+        }
+        return value;
     }
 
 }
