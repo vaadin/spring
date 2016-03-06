@@ -70,8 +70,7 @@ public class SpringUIProvider extends UIProvider {
         for (String uiBeanName : uiBeanNames) {
             Class<?> beanType = getWebApplicationContext().getType(uiBeanName);
             if (UI.class.isAssignableFrom(beanType)) {
-                logger.info("Found Vaadin UI [{}]",
-                        beanType.getCanonicalName());
+                logger.info("Found Vaadin UI [{}]", beanType.getCanonicalName());
                 final String path;
                 String tempPath = deriveMappingForUI(uiBeanName);
                 if (tempPath.length() > 0 && !tempPath.startsWith("/")) {
@@ -104,16 +103,16 @@ public class SpringUIProvider extends UIProvider {
      * @return path to map the UI to
      */
     protected String deriveMappingForUI(String uiBeanName) {
-        SpringUI annotation = getWebApplicationContext()
-                .findAnnotationOnBean(uiBeanName, SpringUI.class);
+        SpringUI annotation = getWebApplicationContext().findAnnotationOnBean(
+                uiBeanName, SpringUI.class);
         return resolvePropertyPlaceholders(annotation.path());
     }
 
     @Override
     public Class<? extends UI> getUIClass(
             UIClassSelectionEvent uiClassSelectionEvent) {
-        final String path = extractUIPathFromRequest(
-                uiClassSelectionEvent.getRequest());
+        final String path = extractUIPathFromRequest(uiClassSelectionEvent
+                .getRequest());
         if (pathToUIMap.containsKey(path)) {
             return pathToUIMap.get(path);
         }
@@ -206,7 +205,7 @@ public class SpringUIProvider extends UIProvider {
 
     private String resolvePropertyPlaceholders(String value) {
         if (StringUtils.hasText(value)) {
-            return this.webApplicationContext.getEnvironment()
+            return getWebApplicationContext().getEnvironment()
                     .resolvePlaceholders(value);
         }
         return value;
