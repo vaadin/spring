@@ -19,7 +19,7 @@ import com.vaadin.server.UIClassSelectionEvent;
 import com.vaadin.server.UICreateEvent;
 import com.vaadin.server.UIProvider;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.spring.annotation.TranslatableTitle;
+import com.vaadin.spring.annotation.TranslatedTitle;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.internal.UIID;
 import com.vaadin.ui.UI;
@@ -182,12 +182,13 @@ public class SpringUIProvider extends UIProvider {
     }
 
     private String getPageTitleByMessageSource(UICreateEvent event) {
-        TranslatableTitle translatableTitleAnnotation = getAnnotationFor(event.getUIClass(), TranslatableTitle.class);
-        if (translatableTitleAnnotation == null) {
+        TranslatedTitle translatedTitleAnnotation = getAnnotationFor(event.getUIClass(), TranslatedTitle.class);
+        if (translatedTitleAnnotation == null) {
             return null;
         } else {
-            String messageCode = translatableTitleAnnotation.value();
-            String defaultMessage = "?" + messageCode + "?";
+            String messageCode = translatedTitleAnnotation.key();
+            String defaultMessage = translatedTitleAnnotation.defaultValue() == null
+                    ?  "?" + messageCode + "?" : translatedTitleAnnotation.defaultValue();
             return webApplicationContext.getMessage(messageCode, null, defaultMessage, event.getRequest().getLocale());
         }
     }

@@ -27,19 +27,29 @@ import java.lang.annotation.Target;
  * {@link org.springframework.context.MessageSource}.
  *
  * This annotation should be used instead of {@link com.vaadin.annotations.Title}. {@link com.vaadin.annotations.Title}
- * is always prefered before {@code TranslatableTitle} to guarantee the backwards compatibility.
+ * is always prefered before {@code TranslatedTitle} to guarantee the backwards compatibility.
  *
  * @author Benno Müller (benno.mueller@saxess.ag)
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface TranslatableTitle {
+public @interface TranslatedTitle {
 
     /**
      * Gets the HTML title as translatable message code that should be used if the UI is used on it's own.
      *
      * @return a message code for the page title string
      */
-    String value();
+    String key();
+
+    /**
+     * Gets the default message for the page title string, that is taken if there is no message for the
+     * {@link #key() message key} available.
+     *
+     * The fallback default value  is "?[key]?"
+     *
+     * @return default message for the page title string
+     */
+    String defaultValue();
 
 }
