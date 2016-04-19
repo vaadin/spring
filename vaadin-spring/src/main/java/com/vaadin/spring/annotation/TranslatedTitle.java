@@ -43,12 +43,12 @@ public @interface TranslatedTitle {
     String key();
 
     /**
-     * Gets the default message for the page title string, that is taken if there is no message for the
+     * Gets the default text for the page title string, that is taken if there is no message for the
      * {@link #key() message key} available.
      *
-     * The fallback default value  is "?[key]?"
+     * The fallback for {@code defaultValue} is "?[key]?"
      *
-     * @return default message for the page title string
+     * @return default text for the page title string
      */
     String defaultValue();
 

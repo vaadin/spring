@@ -187,9 +187,9 @@ public class SpringUIProvider extends UIProvider {
             return null;
         } else {
             String messageCode = translatedTitleAnnotation.key();
-            String defaultMessage = translatedTitleAnnotation.defaultValue() == null
+            String defaultText = translatedTitleAnnotation.defaultValue() == null
                     ?  "?" + messageCode + "?" : translatedTitleAnnotation.defaultValue();
-            return webApplicationContext.getMessage(messageCode, null, defaultMessage, event.getRequest().getLocale());
+            return webApplicationContext.getMessage(messageCode, null, defaultText, event.getRequest().getLocale());
         }
     }
 
