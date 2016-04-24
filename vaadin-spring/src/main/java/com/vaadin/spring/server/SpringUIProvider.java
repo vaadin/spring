@@ -15,21 +15,21 @@
  */
 package com.vaadin.spring.server;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.context.WebApplicationContext;
-
 import com.vaadin.server.UIClassSelectionEvent;
 import com.vaadin.server.UICreateEvent;
 import com.vaadin.server.UIProvider;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.spring.annotation.TranslatedTitle;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.internal.UIID;
 import com.vaadin.ui.UI;
 import com.vaadin.util.CurrentInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Vaadin {@link com.vaadin.server.UIProvider} that looks up UI classes from the
@@ -172,6 +172,24 @@ public class SpringUIProvider extends UIProvider {
             return webApplicationContext.getBean(event.getUIClass());
         } finally {
             CurrentInstance.set(key, null);
+        }
+    }
+
+    @Override
+    public String getPageTitle(UICreateEvent event) {
+        final String pageTitle = super.getPageTitle(event);
+        return pageTitle == null ? getPageTitleByMessageSource(event) : pageTitle;
+    }
+
+    private String getPageTitleByMessageSource(UICreateEvent event) {
+        TranslatedTitle translatedTitleAnnotation = getAnnotationFor(event.getUIClass(), TranslatedTitle.class);
+        if (translatedTitleAnnotation == null) {
+            return null;
+        } else {
+            String messageCode = translatedTitleAnnotation.key();
+            String defaultText = translatedTitleAnnotation.defaultValue() == null
+                    ?  "?" + messageCode + "?" : translatedTitleAnnotation.defaultValue();
+            return webApplicationContext.getMessage(messageCode, null, defaultText, event.getRequest().getLocale());
         }
     }
 
