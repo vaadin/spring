@@ -28,7 +28,6 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
 import com.vaadin.navigator.View;
@@ -39,6 +38,7 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.internal.Conventions;
 import com.vaadin.spring.internal.ViewCache;
 import com.vaadin.spring.internal.ViewScopeImpl;
+import com.vaadin.spring.server.SpringVaadinApplicationContext;
 import com.vaadin.ui.UI;
 
 /**
@@ -86,7 +86,6 @@ public class SpringViewProvider implements ViewProvider {
     // We can have multiple views with the same view name, as long as they
     // belong to different UI subclasses
     private final Map<String, Set<String>> viewNameToBeanNamesMap = new ConcurrentHashMap<String, Set<String>>();
-    private final ApplicationContext applicationContext;
     private final BeanDefinitionRegistry beanDefinitionRegistry;
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SpringViewProvider.class);
@@ -94,9 +93,7 @@ public class SpringViewProvider implements ViewProvider {
     private Class<? extends View> accessDeniedViewClass;
 
     @Autowired
-    public SpringViewProvider(ApplicationContext applicationContext,
-            BeanDefinitionRegistry beanDefinitionRegistry) {
-        this.applicationContext = applicationContext;
+    public SpringViewProvider(BeanDefinitionRegistry beanDefinitionRegistry) {
         this.beanDefinitionRegistry = beanDefinitionRegistry;
     }
 
@@ -132,18 +129,18 @@ public class SpringViewProvider implements ViewProvider {
     void init() {
         LOGGER.info("Looking up SpringViews");
         int count = 0;
-        final String[] viewBeanNames = applicationContext
+        final String[] viewBeanNames = SpringVaadinApplicationContext.getApplicationContext()
                 .getBeanNamesForAnnotation(SpringView.class);
         for (String beanName : viewBeanNames) {
-            final Class<?> type = applicationContext.getType(beanName);
+            final Class<?> type = SpringVaadinApplicationContext.getApplicationContext().getType(beanName);
             if (View.class.isAssignableFrom(type)) {
-                final SpringView annotation = applicationContext
+                final SpringView annotation = SpringVaadinApplicationContext.getApplicationContext()
                         .findAnnotationOnBean(beanName, SpringView.class);
                 final String viewName = getViewNameFromAnnotation(type,
                         annotation);
                 LOGGER.debug("Found SpringView bean [{}] with view name [{}]",
                         beanName, viewName);
-                if (applicationContext.isSingleton(beanName)) {
+                if (SpringVaadinApplicationContext.getApplicationContext().isSingleton(beanName)) {
                     throw new IllegalStateException("SpringView bean ["
                             + beanName + "] must not be a singleton");
                 }
@@ -218,13 +215,13 @@ public class SpringViewProvider implements ViewProvider {
 
     private boolean isViewBeanNameValidForCurrentUI(String beanName) {
         try {
-            final Class<?> type = applicationContext.getType(beanName);
+            final Class<?> type = SpringVaadinApplicationContext.getApplicationContext().getType(beanName);
 
             Assert.isAssignable(View.class, type,
                     "bean did not implement View interface");
 
             final UI currentUI = UI.getCurrent();
-            final SpringView annotation = applicationContext
+            final SpringView annotation = SpringVaadinApplicationContext.getApplicationContext()
                     .findAnnotationOnBean(beanName, SpringView.class);
 
             Assert.notNull(annotation,
@@ -290,7 +287,7 @@ public class SpringViewProvider implements ViewProvider {
                         viewName);
                 final ViewCache viewCache = ViewScopeImpl
                         .getViewCacheRetrievalStrategy().getViewCache(
-                                applicationContext);
+                                SpringVaadinApplicationContext.getApplicationContext());
                 viewCache.creatingView(viewName);
                 try {
                     view = getViewFromApplicationContextAndCheckAccess(beanName);
@@ -309,7 +306,7 @@ public class SpringViewProvider implements ViewProvider {
     }
 
     private View getViewFromApplicationContextAndCheckAccess(String beanName) {
-        final View view = (View) applicationContext.getBean(beanName);
+        final View view = (View) SpringVaadinApplicationContext.getApplicationContext().getBean(beanName);
         if (isAccessGrantedToViewInstance(beanName, view)) {
             return view;
         } else {
@@ -319,7 +316,7 @@ public class SpringViewProvider implements ViewProvider {
 
     private View getAccessDeniedView() {
         if (accessDeniedViewClass != null) {
-            return applicationContext.getBean(accessDeniedViewClass);
+            return SpringVaadinApplicationContext.getApplicationContext().getBean(accessDeniedViewClass);
         } else {
             return null;
         }
@@ -327,7 +324,7 @@ public class SpringViewProvider implements ViewProvider {
 
     private boolean isAccessGrantedToBeanName(String beanName) {
         final UI currentUI = UI.getCurrent();
-        final Map<String, ViewAccessControl> accessDelegates = applicationContext
+        final Map<String, ViewAccessControl> accessDelegates = SpringVaadinApplicationContext.getApplicationContext()
                 .getBeansOfType(ViewAccessControl.class);
         for (ViewAccessControl accessDelegate : accessDelegates.values()) {
             if (!accessDelegate.isAccessGranted(currentUI, beanName)) {
@@ -342,7 +339,7 @@ public class SpringViewProvider implements ViewProvider {
 
     private boolean isAccessGrantedToViewInstance(String beanName, View view) {
         final UI currentUI = UI.getCurrent();
-        final Map<String, ViewInstanceAccessControl> accessDelegates = applicationContext
+        final Map<String, ViewInstanceAccessControl> accessDelegates = SpringVaadinApplicationContext.getApplicationContext()
                 .getBeansOfType(ViewInstanceAccessControl.class);
         for (ViewInstanceAccessControl accessDelegate : accessDelegates
                 .values()) {

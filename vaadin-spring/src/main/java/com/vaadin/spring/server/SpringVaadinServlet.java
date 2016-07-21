@@ -18,6 +18,7 @@ package com.vaadin.spring.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -53,7 +54,7 @@ import com.vaadin.server.VaadinSession;
  * by Vaadin Spring Boot to make it easier to use Vaadin and Spring MVC
  * applications together in the same global "namespace".
  *
- * @author Petter Holmström (petter@vaadin.com)
+ * @author Petter Holmstr�m (petter@vaadin.com)
  * @author Josh Long (josh@joshlong.com)
  */
 public class SpringVaadinServlet extends VaadinServlet {
@@ -61,6 +62,18 @@ public class SpringVaadinServlet extends VaadinServlet {
     private static final long serialVersionUID = 5371983676318947478L;
 
     private String serviceUrlPath = null;
+
+    @Override
+    public void init(ServletConfig config) throws ServletException
+    {
+        WebApplicationContext webApplicationContext = WebApplicationContextUtils
+                .getWebApplicationContext(config.getServletContext());
+
+        if (SpringVaadinApplicationContext.getApplicationContext() == null)
+            SpringVaadinApplicationContext.setApplicationContext(webApplicationContext);
+
+        super.init(config);
+    }
 
     @Override
     protected void servletInitialized() throws ServletException {
@@ -71,9 +84,6 @@ public class SpringVaadinServlet extends VaadinServlet {
             @Override
             public void sessionInit(SessionInitEvent sessionInitEvent)
                     throws ServiceException {
-                WebApplicationContext webApplicationContext = WebApplicationContextUtils
-                        .getWebApplicationContext(getServletContext());
-
                 // remove DefaultUIProvider instances to avoid mapping
                 // extraneous UIs if e.g. a servlet is declared as a nested
                 // class in a UI class
@@ -90,8 +100,7 @@ public class SpringVaadinServlet extends VaadinServlet {
                 }
 
                 // add Spring UI provider
-                SpringUIProvider uiProvider = new SpringUIProvider(
-                        webApplicationContext);
+                SpringUIProvider uiProvider = new SpringUIProvider();
                 session.addUIProvider(uiProvider);
             }
         });
