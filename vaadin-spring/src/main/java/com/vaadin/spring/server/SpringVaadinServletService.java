@@ -30,6 +30,8 @@ import com.vaadin.server.communication.ServletBootstrapHandler;
  */
 public class SpringVaadinServletService extends VaadinServletService {
 
+    private static final long serialVersionUID = 6632242421666659078L;
+
     private String serviceUrl;
 
     /**
@@ -60,6 +62,8 @@ public class SpringVaadinServletService extends VaadinServletService {
             for (int i = 0; i < handlers.size(); ++i) {
                 if (handlers.get(i) instanceof ServletBootstrapHandler) {
                     handlers.set(i, new ServletBootstrapHandler() {
+                        private static final long serialVersionUID = 4499421150493277853L;
+
                         @Override
                         protected String getServiceUrl(BootstrapContext context) {
                             return context.getRequest().getContextPath()

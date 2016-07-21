@@ -28,6 +28,8 @@ import com.vaadin.server.VaadinServletService;
  */
 public class SpringVaadinServletRequest extends VaadinServletRequest {
 
+    private static final long serialVersionUID = 3175738339402931904L;
+
     private UrlPathHelper urlPathHelper = new UrlPathHelper();
     private boolean clearServletPath;
 

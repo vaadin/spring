@@ -31,6 +31,7 @@ import com.vaadin.spring.internal.VaadinSessionScope;
 import com.vaadin.spring.internal.ViewCache;
 import com.vaadin.spring.internal.ViewScopeImpl;
 import com.vaadin.spring.navigator.SpringViewProvider;
+import com.vaadin.spring.server.SpringVaadinApplicationContext;
 
 /**
  * Spring configuration for registering the custom Vaadin scopes, the
@@ -45,10 +46,8 @@ import com.vaadin.spring.navigator.SpringViewProvider;
  * @author Gert-Jan Timmer (gjr.timmer@gmail.com)
  */
 @Configuration
-public class VaadinConfiguration implements ApplicationContextAware,
-BeanDefinitionRegistryPostProcessor {
+public class VaadinConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
 
-    private ApplicationContext applicationContext;
     private BeanDefinitionRegistry beanDefinitionRegistry;
 
     @Bean
@@ -68,8 +67,7 @@ BeanDefinitionRegistryPostProcessor {
 
     @Bean
     SpringViewProvider viewProvider() {
-        return new SpringViewProvider(applicationContext,
-                beanDefinitionRegistry);
+        return new SpringViewProvider(beanDefinitionRegistry);
     }
 
     @Bean
@@ -81,7 +79,7 @@ BeanDefinitionRegistryPostProcessor {
     @Override
     public void setApplicationContext(ApplicationContext applicationContext)
             throws BeansException {
-        this.applicationContext = applicationContext;
+        SpringVaadinApplicationContext.setApplicationContext(applicationContext);
     }
 
     @Override

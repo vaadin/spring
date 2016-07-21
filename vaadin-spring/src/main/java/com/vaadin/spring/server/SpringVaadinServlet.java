@@ -18,6 +18,7 @@ package com.vaadin.spring.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -63,6 +64,18 @@ public class SpringVaadinServlet extends VaadinServlet {
     private String serviceUrlPath = null;
 
     @Override
+    public void init(ServletConfig config) throws ServletException
+    {
+        WebApplicationContext webApplicationContext = WebApplicationContextUtils
+                .getWebApplicationContext(config.getServletContext());
+
+        if (SpringVaadinApplicationContext.getApplicationContext() == null)
+            SpringVaadinApplicationContext.setApplicationContext(webApplicationContext);
+
+        super.init(config);
+    }
+
+    @Override
     protected void servletInitialized() throws ServletException {
         getService().addSessionInitListener(new SessionInitListener() {
 
@@ -71,9 +84,6 @@ public class SpringVaadinServlet extends VaadinServlet {
             @Override
             public void sessionInit(SessionInitEvent sessionInitEvent)
                     throws ServiceException {
-                WebApplicationContext webApplicationContext = WebApplicationContextUtils
-                        .getWebApplicationContext(getServletContext());
-
                 // remove DefaultUIProvider instances to avoid mapping
                 // extraneous UIs if e.g. a servlet is declared as a nested
                 // class in a UI class
@@ -90,8 +100,7 @@ public class SpringVaadinServlet extends VaadinServlet {
                 }
 
                 // add Spring UI provider
-                SpringUIProvider uiProvider = new SpringUIProvider(
-                        webApplicationContext);
+                SpringUIProvider uiProvider = new SpringUIProvider();
                 session.addUIProvider(uiProvider);
             }
         });
