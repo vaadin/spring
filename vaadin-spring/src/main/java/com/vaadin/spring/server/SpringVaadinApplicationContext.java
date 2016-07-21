@@ -7,7 +7,6 @@ import org.springframework.context.ApplicationContext;
  * NotSerializableException during serialization of {@link com.vaadin.spring.server.SpringUIProvider}
  * and {@link com.vaadin.spring.navigator.SpringViewProvider}.
  *
- * @author Karsten Ludwig Hauser
  */
 public class SpringVaadinApplicationContext {
 

@@ -35,7 +35,7 @@ import com.vaadin.util.CurrentInstance;
  * Spring application context. The UI classes must be annotated with
  * {@link com.vaadin.spring.annotation.SpringUI}.
  *
- * @author Petter Holmstr�m (petter@vaadin.com)
+ * @author Petter Holmström (petter@vaadin.com)
  * @author Henri Sara (hesara@vaadin.com)
  */
 public class SpringUIProvider extends UIProvider {

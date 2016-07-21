@@ -54,7 +54,7 @@ import com.vaadin.server.VaadinSession;
  * by Vaadin Spring Boot to make it easier to use Vaadin and Spring MVC
  * applications together in the same global "namespace".
  *
- * @author Petter Holmstr�m (petter@vaadin.com)
+ * @author Petter Holmström (petter@vaadin.com)
  * @author Josh Long (josh@joshlong.com)
  */
 public class SpringVaadinServlet extends VaadinServlet {
