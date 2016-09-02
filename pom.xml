@@ -85,7 +85,7 @@
         <project.build.source>1.6</project.build.source>
         
         <!-- These are typically overridden with BOMs -->
-        <vaadin.version>7.4.4</vaadin.version>
+        <vaadin.version>7.7.0</vaadin.version>
         <spring.version>4.1.6.RELEASE</spring.version>
         <spring.boot.version>1.2.2.RELEASE</spring.boot.version>
         
