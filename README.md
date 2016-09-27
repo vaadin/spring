@@ -7,13 +7,10 @@ Building the project
 ----
 Execute `mvn clean install` in the root directory to build vaadin-spring and vaadin-spring-boot.
 
-Issue tracking
-----
-Issues for the project are tracked in the Vaadin Trac at http://dev.vaadin.com
-
 Contributions
 ----
-Contributions to the project can be done using the Vaadin Gerrit review system at http://dev.vaadin.com/review. Pull requests cannot be accepted due to Gerrit being used for code review.
+Contributions to the project can be done using pull requests.
+You will be asked to sign a contribution agreement after creating the first one.
 
 
 Copyright 2015 Vaadin Ltd.
@@ -23,7 +20,7 @@ use this file except in compliance with the License. You may obtain a copy of
 the License at
 
 http://www.apache.org/licenses/LICENSE-2.0
- 
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
