@@ -11,7 +11,7 @@
 
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-spring-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>vaadin-spring-parent</name>
@@ -85,7 +85,7 @@
         <project.build.source>1.6</project.build.source>
         
         <!-- These are typically overridden with BOMs -->
-        <vaadin.version>7.7.0</vaadin.version>
+        <vaadin.version>8.0-SNAPSHOT</vaadin.version>
         <spring.version>4.1.6.RELEASE</spring.version>
         <spring.boot.version>1.2.2.RELEASE</spring.boot.version>
         
@@ -200,5 +200,16 @@
         <module>vaadin-spring-boot</module>
         <module>vaadin-spring-boot-starter</module>
     </modules>
-
+    <repositories>
+        <repository>
+            <id>vaadin-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
