@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.vaadin.server.UIClassSelectionEvent;
@@ -111,7 +112,7 @@ public class SpringUIProvider extends UIProvider {
     protected String deriveMappingForUI(String uiBeanName) {
         SpringUI annotation = getWebApplicationContext().findAnnotationOnBean(
                 uiBeanName, SpringUI.class);
-        return annotation.path();
+        return resolvePropertyPlaceholders(annotation.path());
     }
 
     @Override
@@ -185,6 +186,32 @@ public class SpringUIProvider extends UIProvider {
         } finally {
             CurrentInstance.set(key, null);
         }
+    }
+
+    @Override
+    public String getTheme(UICreateEvent event) {
+        String theme = super.getTheme(event);
+        if (theme != null) {
+            theme = resolvePropertyPlaceholders(theme);
+        }
+        return theme;
+    }
+
+    @Override
+    public String getPageTitle(UICreateEvent event) {
+        String pageTitle = super.getPageTitle(event);
+        if (pageTitle != null) {
+            pageTitle = resolvePropertyPlaceholders(pageTitle);
+        }
+        return pageTitle;
+    }
+
+    private String resolvePropertyPlaceholders(String value) {
+        if (StringUtils.hasText(value)) {
+            return getWebApplicationContext().getEnvironment()
+                    .resolvePlaceholders(value);
+        }
+        return value;
     }
 
 }
