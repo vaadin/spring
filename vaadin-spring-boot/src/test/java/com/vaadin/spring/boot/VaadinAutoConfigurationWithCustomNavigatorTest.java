@@ -29,14 +29,15 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.vaadin.spring.navigator.SpringNavigator;
+import com.vaadin.spring.server.AbstractSpringUIProviderTest;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
 // make sure the context is cleaned
 @DirtiesContext
-// TODO this test should have an active UI scope
-public class VaadinAutoConfigurationWithCustomNavigatorTest {
+public class VaadinAutoConfigurationWithCustomNavigatorTest
+        extends AbstractSpringUIProviderTest {
 
     @Autowired
     private WebApplicationContext applicationContext;
