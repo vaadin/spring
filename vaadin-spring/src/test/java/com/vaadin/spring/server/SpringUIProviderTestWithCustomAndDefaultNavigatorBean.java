@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.ui.UI;
@@ -57,6 +58,7 @@ public class SpringUIProviderTestWithCustomAndDefaultNavigatorBean
         // active by default, but explicitly defining a Navigator bean will
         // cause a conflict.
         @Bean
+        @UIScope
         public MyNavigator myNavigator() {
             return new MyNavigator();
         }
@@ -70,7 +72,9 @@ public class SpringUIProviderTestWithCustomAndDefaultNavigatorBean
 
     @Test
     public void testGetNavigator() throws Exception {
-        Assert.isNull(getUiProvider().getNavigator(),
+        // need a UI for the scope of the Navigator
+        TestUI ui = createUi(TestUI.class);
+        Assert.isNull(ui.getNavigator(),
                 "Selected a Navigator bean even though it is ambiguous");
     }
 

@@ -63,8 +63,10 @@ public class SpringUIProviderTestWithUiImplementingViewDisplayAsViewContainer
 
     @Test
     public void testGetNavigator() throws Exception {
-        Assert.notNull(getUiProvider().getNavigator(),
-                "Navigator not available in SpringUIProvider");
+        // need a UI for the scope of the Navigator
+        TestUI ui = createUi(TestUI.class);
+        Assert.notNull(ui.getNavigator(),
+                "Navigator not available from SpringUIProvider");
     }
 
     @Test

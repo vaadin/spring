@@ -35,6 +35,7 @@ import com.vaadin.spring.navigator.SpringNavigator;
 @WebAppConfiguration
 // make sure the context is cleaned
 @DirtiesContext
+// TODO this test should have an active UI scope
 public class VaadinAutoConfigurationWithCustomNavigatorTest {
 
     @Autowired

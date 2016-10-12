@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.navigator.SpringNavigator;
 
 /**
@@ -34,6 +35,7 @@ import com.vaadin.spring.navigator.SpringNavigator;
 public class VaadinNavigatorConfiguration {
 
     @Bean
+    @UIScope
     static SpringNavigator vaadinNavigator() {
         return new SpringNavigator();
     }

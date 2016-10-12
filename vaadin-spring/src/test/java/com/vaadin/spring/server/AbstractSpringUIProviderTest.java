@@ -16,6 +16,8 @@
 package com.vaadin.spring.server;
 
 import java.util.Properties;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -24,19 +26,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletConfig;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.vaadin.server.DefaultDeploymentConfiguration;
+import com.vaadin.server.DeploymentConfiguration;
 import com.vaadin.server.ServiceException;
 import com.vaadin.server.UICreateEvent;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
-import com.vaadin.spring.VaadinConfiguration;
+import com.vaadin.server.WrappedSession;
+import com.vaadin.spring.annotation.EnableVaadin;
 import com.vaadin.ui.UI;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -44,16 +50,24 @@ import com.vaadin.ui.UI;
 @DirtiesContext
 public abstract class AbstractSpringUIProviderTest {
 
-    @Configuration
-    protected static class Config extends VaadinConfiguration {
-        @Bean
-        public VaadinServlet vaadinServlet() {
-            return new SpringVaadinServlet();
+    private static final class MyVaadinSession extends VaadinSession {
+
+        public MyVaadinSession(MySpringVaadinServletService service) {
+            super(service);
         }
+
+        @Override
+        public boolean hasLock() {
+            return true;
+        }
+
     }
 
-    private final class MySpringVaadinServletService
+    // override methods to increase their visibility
+    private static final class MySpringVaadinServletService
             extends SpringVaadinServletService {
+        private Lock sessionLock = new ReentrantLock();
+
         private MySpringVaadinServletService(VaadinServlet servlet)
                 throws ServiceException {
             super(servlet, new DefaultDeploymentConfiguration(
@@ -62,11 +76,47 @@ public abstract class AbstractSpringUIProviderTest {
         }
 
         @Override
-        public VaadinSession createVaadinSession(VaadinRequest request)
+        public MyVaadinSession createVaadinSession(VaadinRequest request)
                 throws com.vaadin.server.ServiceException {
-            return super.createVaadinSession(request);
+            return new MyVaadinSession(this);
         }
 
+        @Override
+        protected Lock getSessionLock(WrappedSession wrappedSession) {
+            return sessionLock;
+        }
+
+        @Override
+        public void lockSession(WrappedSession wrappedSession) {
+            super.lockSession(wrappedSession);
+        }
+    }
+
+    private static final class MyVaadinServlet extends SpringVaadinServlet {
+        @Override
+        public MySpringVaadinServletService getService() {
+            return (MySpringVaadinServletService) super.getService();
+        }
+
+        @Override
+        protected MySpringVaadinServletService createServletService(
+                DeploymentConfiguration deploymentConfiguration)
+                throws ServiceException {
+            // this is needed when using a custom service URL
+            MySpringVaadinServletService service = new MySpringVaadinServletService(
+                    this);
+            service.init();
+            return service;
+        }
+    }
+
+    @Configuration
+    @EnableVaadin
+    protected static class Config {
+        @Bean
+        public MyVaadinServlet vaadinServlet() {
+            return new MyVaadinServlet();
+        }
     }
 
     protected static final int TEST_UIID = 123;
@@ -81,11 +131,14 @@ public abstract class AbstractSpringUIProviderTest {
     private MockHttpServletRequest request;
 
     @Autowired
-    private SpringVaadinServlet servlet;
+    private MockHttpSession session;
+
+    @Autowired
+    private MyVaadinServlet servlet;
 
     private MySpringVaadinServletService service;
     private SpringVaadinServletRequest vaadinServletRequest;
-    private VaadinSession vaadinSession;
+    private MyVaadinSession vaadinSession;
     private SpringUIProvider uiProvider;
 
     @Before
@@ -94,18 +147,26 @@ public abstract class AbstractSpringUIProviderTest {
         // methods are private
         // TODO very ugly - can this be simplified?
         servlet.init(new MockServletConfig(servletContext));
-        setService(new MySpringVaadinServletService(servlet));
-        setVaadinServletRequest(
-                new SpringVaadinServletRequest(request, getService(), true));
-        setVaadinSession(
-                getService().createVaadinSession(getVaadinServletRequest()));
+        service = servlet.getService();
+        vaadinServletRequest = new SpringVaadinServletRequest(request, service,
+                true);
+        vaadinSession = service.createVaadinSession(vaadinServletRequest);
         VaadinSession.setCurrent(vaadinSession);
+        // make sure the lock etc. exist in the session
+        ReflectionTestUtils.setField(vaadinSession, "service", service);
+        ReflectionTestUtils.setField(vaadinSession, "session",
+                vaadinServletRequest.getWrappedSession());
+        ReflectionTestUtils.setField(vaadinSession, "lock",
+                service.sessionLock);
+
+        service.lockSession(vaadinSession.getSession());
 
         uiProvider = new SpringUIProvider(getVaadinSession());
     }
 
     @After
     public void tearDown() {
+        vaadinSession.unlock();
         VaadinSession.setCurrent(null);
     }
 
@@ -126,25 +187,12 @@ public abstract class AbstractSpringUIProviderTest {
         return service;
     }
 
-    private void setService(MySpringVaadinServletService service) {
-        this.service = service;
-    }
-
     public SpringVaadinServletRequest getVaadinServletRequest() {
         return vaadinServletRequest;
     }
 
-    private void setVaadinServletRequest(
-            SpringVaadinServletRequest vaadinServletRequest) {
-        this.vaadinServletRequest = vaadinServletRequest;
-    }
-
     public VaadinSession getVaadinSession() {
         return vaadinSession;
-    }
-
-    private void setVaadinSession(VaadinSession vaadinSession) {
-        this.vaadinSession = vaadinSession;
     }
 
 }
