@@ -37,18 +37,78 @@ public class SpringNavigator extends Navigator {
     @Autowired
     private SpringViewProvider viewProvider;
 
+    /**
+     * Initializes an injected navigator and registers
+     * {@link SpringViewProvider} for it.
+     * <p>
+     * The default navigation state manager (based on URI fragments) is used.
+     * <p>
+     * Navigation is automatically initiated after {@code UI.init()} if a
+     * navigator was created. If at a later point changes are made to the
+     * navigator, {@code navigator.navigateTo(navigator.getState())} may need to
+     * be explicitly called to ensure the current view matches the navigation
+     * state.
+     *
+     * @param ui
+     *            The UI to which this Navigator is attached.
+     * @param container
+     *            The component container used to display the views handled by
+     *            this navigator
+     */
     public void init(UI ui, ComponentContainer container) {
         init(ui, new ComponentContainerViewDisplay(container));
     }
 
+    /**
+     * Initializes an injected navigator and registers
+     * {@link SpringViewProvider} for it.
+     * <p>
+     * The default navigation state manager (based on URI fragments) is used.
+     * <p>
+     * Navigation is automatically initiated after {@code UI.init()} if a
+     * navigator was created. If at a later point changes are made to the
+     * navigator, {@code navigator.navigateTo(navigator.getState())} may need to
+     * be explicitly called to ensure the current view matches the navigation
+     * state.
+     *
+     * @param ui
+     *            The UI to which this Navigator is attached.
+     * @param container
+     *            The single component container used to display the views
+     *            handled by this navigator
+     */
     public void init(UI ui, SingleComponentContainer container) {
         init(ui, new SingleComponentContainerViewDisplay(container));
     }
 
+    /**
+     * Initializes an injected navigator and registers
+     * {@link SpringViewProvider} for it.
+     * <p>
+     * The default navigation state manager (based on URI fragments) is used.
+     * <p>
+     * Navigation is automatically initiated after {@code UI.init()} if a
+     * navigator was created. If at a later point changes are made to the
+     * navigator, {@code navigator.navigateTo(navigator.getState())} may need to
+     * be explicitly called to ensure the current view matches the navigation
+     * state.
+     *
+     * @param ui
+     *            The UI to which this Navigator is attached.
+     * @param display
+     *            The ViewDisplay used to display the views handled by this
+     *            navigator
+     */
     public void init(UI ui, ViewDisplay display) {
         init(ui, new UriFragmentManager(ui.getPage()), display);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * The {@link SpringViewProvider} bean from the context is automatically
+     * registered for the navigator.
+     */
     @Override
     protected void init(UI ui, NavigationStateManager stateManager,
             ViewDisplay display) {

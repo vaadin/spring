@@ -15,11 +15,14 @@
  */
 package com.vaadin.spring.server;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.vaadin.navigator.ViewDisplay;
@@ -196,8 +199,19 @@ public class SpringUIProvider extends UIProvider {
         }
     }
 
+    /**
+     * Configures a UI to use the navigator found by {@link #getNavigator()} if
+     * there is a {@link ViewContainer} annotation.
+     *
+     * @param ui
+     *            the Spring managed UI instance for which to configure
+     *            automatic navigation
+     */
     protected void configureNavigator(UI ui) {
         Object viewContainer = findViewContainer(ui);
+        if (viewContainer == null) {
+            return;
+        }
         SpringNavigator navigator = getNavigator();
         if (navigator == null) {
             return;
@@ -223,18 +237,19 @@ public class SpringUIProvider extends UIProvider {
      * Returns the configured navigator bean or null if no bean defined.
      *
      * @return bean extending {@link SpringNavigator} or null if none defined
+     * @throws BeansException
+     *             if there are multiple navigator beans or other configuration
+     *             problem
      */
     protected SpringNavigator getNavigator() {
-        String[] beanNames = getWebApplicationContext()
-                .getBeanNamesForType(SpringNavigator.class);
-        if (beanNames.length > 0) {
-            if (beanNames.length > 1) {
-                logger.warn("Multiple navigator beans defined");
-            }
-            return (SpringNavigator) getWebApplicationContext()
-                    .getBean(beanNames[0]);
-        } else {
-            logger.info("No navigator bean defined");
+        try {
+            return getWebApplicationContext().getBean(SpringNavigator.class);
+        } catch (NoSuchBeanDefinitionException e) {
+            // While relying on exceptions here is not very nice, using
+            // getBean(Class) takes scopes, qualifiers etc. into account
+            // consistently.
+            // This is somewhat noisy as logged for every UI created.
+            logger.info("No Vaadin navigator bean defined");
             return null;
         }
     }
@@ -242,12 +257,16 @@ public class SpringUIProvider extends UIProvider {
     protected Object findViewContainer(UI ui) {
         final String[] viewContainerBeanNames = getWebApplicationContext()
                 .getBeanNamesForAnnotation(ViewContainer.class);
+        // TODO are all these beans in the correct scope and otherwise
+        // applicable for the UI?
         if (viewContainerBeanNames.length == 0) {
             logger.debug("No view container defined for the UI " + ui.getId());
+            return null;
         }
         if (viewContainerBeanNames.length > 1) {
-            logger.error("Multiple view containers defined for the UI "
-                    + ui.getId());
+            logger.error(
+                    "Multiple view containers defined for the UI " + ui.getId()
+                            + ": " + Arrays.toString(viewContainerBeanNames));
             throw new IllegalStateException(
                     "A UI must only have one view containers, but multiple view containers are defined for UI "
                             + ui.getId());
