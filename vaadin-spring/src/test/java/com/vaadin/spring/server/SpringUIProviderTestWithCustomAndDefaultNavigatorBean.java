@@ -22,38 +22,45 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.Assert;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.ViewContainer;
+import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.ui.UI;
 
 /**
- * Test for normal (full) use cases of SpringUIProvider with automatic
- * navigation configuration on the view and the UI implementing ViewDisplay.
+ * Test SpringUIProvider for the case where the application has a custom
+ * navigator bean as well as the default navigation configuration enabled.
  */
 @ContextConfiguration
 @WebAppConfiguration
-public class SpringUIProviderTestWithUiImplementingViewDisplayAsViewContainer
+public class SpringUIProviderTestWithCustomAndDefaultNavigatorBean
         extends AbstractSpringUIProviderTest {
 
     @SpringUI
     @ViewContainer
-    private static class TestUI extends UI implements ViewDisplay {
+    private static class TestUI extends UI {
         @Override
         protected void init(VaadinRequest request) {
         }
+    }
 
-        @Override
-        public void showView(View view) {
-        }
+    private static class MyNavigator extends SpringNavigator {
     }
 
     @Configuration
     @EnableVaadinNavigation
     static class Config extends AbstractSpringUIProviderTest.Config {
+        // Vaadin Spring Boot has another layer of autoconfiguration that is
+        // tested separately. With plain Vaadin Spring, no auto-configuration is
+        // active by default, but explicitly defining a Navigator bean will
+        // cause a conflict.
+        @Bean
+        public MyNavigator myNavigator() {
+            return new MyNavigator();
+        }
+
         // this gets configured by the UI provider
         @Bean
         public TestUI ui() {
@@ -63,22 +70,8 @@ public class SpringUIProviderTestWithUiImplementingViewDisplayAsViewContainer
 
     @Test
     public void testGetNavigator() throws Exception {
-        Assert.notNull(getUiProvider().getNavigator(),
-                "Navigator not available in SpringUIProvider");
-    }
-
-    @Test
-    public void testConfigureNavigator() {
-        TestUI ui = createUi(TestUI.class);
-        Assert.isTrue(ui.getNavigator().getDisplay() instanceof TestUI,
-                "Navigator is not configured for a custom ViewDisplay");
-    }
-
-    @Test
-    public void testFindViewContainer() throws Exception {
-        TestUI ui = createUi(TestUI.class);
-        Assert.isInstanceOf(TestUI.class, getUiProvider().findViewContainer(ui),
-                "View container is not a TestUI");
+        Assert.isNull(getUiProvider().getNavigator(),
+                "Selected a Navigator bean even though it is ambiguous");
     }
 
 }
