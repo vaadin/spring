@@ -18,6 +18,7 @@ package com.vaadin.spring.boot;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,7 +41,8 @@ public class VaadinAutoConfigurationTest {
     private WebApplicationContext applicationContext;
 
     @Configuration
-    protected static class Config extends VaadinAutoConfiguration {
+    @EnableAutoConfiguration
+    protected static class Config {
     }
 
     @Test

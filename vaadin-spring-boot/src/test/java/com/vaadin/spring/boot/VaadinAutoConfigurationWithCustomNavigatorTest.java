@@ -18,6 +18,7 @@ package com.vaadin.spring.boot;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
@@ -43,7 +44,10 @@ public class VaadinAutoConfigurationWithCustomNavigatorTest {
     }
 
     @Configuration
-    protected static class Config extends VaadinAutoConfiguration {
+    // using this rather than extending a configuration will let us override
+    // defaults
+    @EnableAutoConfiguration
+    protected static class Config {
         @Bean
         public MyNavigator myNavigator() {
             return new MyNavigator();
