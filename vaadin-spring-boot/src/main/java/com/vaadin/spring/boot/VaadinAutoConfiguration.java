@@ -19,9 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Configuration;
 
 import com.vaadin.spring.annotation.EnableVaadin;
+import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.boot.annotation.EnableVaadinServlet;
 
@@ -41,6 +43,17 @@ public class VaadinAutoConfiguration {
     @Configuration
     @EnableVaadin
     static class EnableVaadinConfiguration implements InitializingBean {
+        @Override
+        public void afterPropertiesSet() throws Exception {
+            logger.debug("{} initialized", getClass().getName());
+        }
+    }
+
+    @Configuration
+    @EnableVaadinNavigation
+    @ConditionalOnMissingBean(type = "com.vaadin.spring.navigator.SpringNavigator")
+    static class EnableVaadinNavigatorConfiguration
+            implements InitializingBean {
         @Override
         public void afterPropertiesSet() throws Exception {
             logger.debug("{} initialized", getClass().getName());
