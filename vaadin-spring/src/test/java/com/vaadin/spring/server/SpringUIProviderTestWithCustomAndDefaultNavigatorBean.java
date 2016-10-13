@@ -16,11 +16,11 @@
 package com.vaadin.spring.server;
 
 import org.junit.Test;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.util.Assert;
 
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
@@ -70,12 +70,11 @@ public class SpringUIProviderTestWithCustomAndDefaultNavigatorBean
         }
     }
 
-    @Test
+    @Test(expected = NoUniqueBeanDefinitionException.class)
     public void testGetNavigator() throws Exception {
         // need a UI for the scope of the Navigator
         TestUI ui = createUi(TestUI.class);
-        Assert.isNull(ui.getNavigator(),
-                "Selected a Navigator bean even though it is ambiguous");
+        ui.getNavigator();
     }
 
 }
