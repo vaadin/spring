@@ -292,6 +292,11 @@ public class SpringUIProvider extends UIProvider {
         try {
             return getWebApplicationContext()
                     .getBean(ViewContainerPostProcessor.class);
+        } catch (NoUniqueBeanDefinitionException e) {
+            logger.error(
+                    "Multiple " + ViewContainerPostProcessor.class.getName()
+                            + " beans exist");
+            throw e;
         } catch (NoSuchBeanDefinitionException e) {
             // This is somewhat noisy as potentially logged for every UI
             // created.

@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.BeanDefinitionValidationException;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
@@ -40,8 +41,8 @@ public class ViewContainerPostProcessor implements BeanPostProcessor {
                         viewContainer = field.get(bean);
                         field.setAccessible(false);
                     } else {
-                        throw new IllegalStateException(
-                                "Duplicate definitions of @"
+                        throw new BeanDefinitionValidationException(
+                                "Multiple definitions of @"
                                         + ViewContainer.class.getSimpleName()
                                         + " on fields, including "
                                         + bean.getClass() + "."
