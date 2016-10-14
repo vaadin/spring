@@ -17,6 +17,7 @@ package com.vaadin.spring.server;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -54,6 +55,18 @@ public class SpringUIProviderTestWithViewContainerOnField
         }
     }
 
+    @SpringUI(path = "/next")
+    private static class TestUINext extends UI {
+        @ViewContainer
+        @Autowired
+        private Panel container;
+
+        @Override
+        protected void init(VaadinRequest request) {
+            setContent(container);
+        }
+    }
+
     @Configuration
     @EnableVaadinNavigation
     static class Config extends AbstractSpringUIProviderTest.Config {
@@ -68,6 +81,11 @@ public class SpringUIProviderTestWithViewContainerOnField
         public TestUI ui() {
             return new TestUI();
         }
+
+        @Bean
+        public TestUINext uiNext() {
+            return new TestUINext();
+        }
     }
 
     @Test
@@ -75,6 +93,18 @@ public class SpringUIProviderTestWithViewContainerOnField
         TestUI ui = createUi(TestUI.class);
         Assert.isInstanceOf(SingleComponentContainerViewDisplay.class,
                 ui.getNavigator().getDisplay(),
+                "Navigator is not configured for SingleComponentContainerViewDisplay");
+    }
+
+    @Test
+    public void testConfigureNavigatorTwice() {
+        TestUI testUI = createUi(TestUI.class);
+        Assert.isInstanceOf(SingleComponentContainerViewDisplay.class,
+                testUI.getNavigator().getDisplay(),
+                "Navigator is not configured for SingleComponentContainerViewDisplay");
+        TestUINext testUINext = createUi(TestUINext.class);
+        Assert.isInstanceOf(SingleComponentContainerViewDisplay.class,
+                testUINext.getNavigator().getDisplay(),
                 "Navigator is not configured for SingleComponentContainerViewDisplay");
     }
 
