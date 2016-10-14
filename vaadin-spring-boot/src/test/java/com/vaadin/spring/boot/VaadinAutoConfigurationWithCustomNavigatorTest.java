@@ -28,8 +28,12 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
+import com.vaadin.ui.UI;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
@@ -41,6 +45,14 @@ public class VaadinAutoConfigurationWithCustomNavigatorTest
 
     @Autowired
     private WebApplicationContext applicationContext;
+
+    @SpringUI
+    @ViewContainer
+    private static class TestUI extends UI {
+        @Override
+        protected void init(VaadinRequest request) {
+        }
+    }
 
     private static class MyNavigator extends SpringNavigator {
     }
@@ -54,10 +66,18 @@ public class VaadinAutoConfigurationWithCustomNavigatorTest
         public MyNavigator myNavigator() {
             return new MyNavigator();
         }
+
+        // this gets configured by the UI provider
+        @Bean
+        public TestUI ui() {
+            return new TestUI();
+        }
     }
 
     @Test
     public void testNavigatorCustomized() {
+        // this sets up the UI scope
+        TestUI ui = createUi(TestUI.class);
         Assert.isInstanceOf(MyNavigator.class,
                 applicationContext.getBean(SpringNavigator.class),
                 "Vaadin Navigator is not correctly overridden");
