@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
@@ -27,9 +28,13 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
 import com.vaadin.spring.server.SpringVaadinServlet;
+import com.vaadin.ui.UI;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
@@ -41,13 +46,28 @@ public class VaadinAutoConfigurationTest extends AbstractSpringUIProviderTest {
     @Autowired
     private WebApplicationContext applicationContext;
 
+    @SpringUI
+    @ViewContainer
+    private static class TestUI extends UI {
+        @Override
+        protected void init(VaadinRequest request) {
+        }
+    }
+
     @Configuration
     @EnableAutoConfiguration
     protected static class Config {
+        // this gets configured by the UI provider
+        @Bean
+        public TestUI ui() {
+            return new TestUI();
+        }
     }
 
     @Test
     public void testVaadinServletDefined() {
+        // this sets up the UI scope
+        TestUI ui = createUi(TestUI.class);
         Assert.isInstanceOf(SpringVaadinServlet.class,
                 applicationContext.getBean("vaadinServlet"),
                 "Vaadin servlet is not autoconfigured");
@@ -55,6 +75,8 @@ public class VaadinAutoConfigurationTest extends AbstractSpringUIProviderTest {
 
     @Test
     public void testNavigatorDefined() {
+        // this sets up the UI scope
+        TestUI ui = createUi(TestUI.class);
         Assert.isInstanceOf(SpringNavigator.class,
                 applicationContext.getBean(SpringNavigator.class),
                 "Vaadin Navigator is not autoconfigured");
