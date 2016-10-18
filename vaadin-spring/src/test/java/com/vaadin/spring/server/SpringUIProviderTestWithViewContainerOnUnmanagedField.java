@@ -76,4 +76,11 @@ public class SpringUIProviderTestWithViewContainerOnUnmanagedField
                 "View container is not a Panel");
     }
 
+    @Test
+    public void testFindViewContainerMultipleTimes() throws Exception {
+        testFindViewContainer();
+        testFindViewContainer();
+        testFindViewContainer();
+    }
+
 }

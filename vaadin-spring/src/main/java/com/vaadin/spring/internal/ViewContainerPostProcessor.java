@@ -16,51 +16,86 @@
 package com.vaadin.spring.internal;
 
 import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
 import com.vaadin.spring.annotation.ViewContainer;
 
-public class ViewContainerPostProcessor implements BeanPostProcessor {
-    private Object viewContainer = null;
+public class ViewContainerPostProcessor
+        implements BeanPostProcessor, ApplicationContextAware {
+    private transient Set<Class<?>> classesWithoutViewContainerAnnotation = new HashSet<Class<?>>();
+    private ApplicationContext applicationContext;
+
+    private BeanNameGenerator beanNameGenerator = new DefaultBeanNameGenerator();
 
     @Override
     public Object postProcessAfterInitialization(final Object bean,
             String beanName) throws BeansException {
-        ReflectionUtils.doWithFields(bean.getClass(), new FieldCallback() {
+        final Class<?> clazz = bean.getClass();
+        // TODO optimize not to scan every bean class
+        // TODO do this only for UI scoped beans and smaller
+        if (classesWithoutViewContainerAnnotation.contains(clazz)) {
+            return bean;
+        }
+        final boolean[] found = {
+                clazz.isAnnotationPresent(ViewContainer.class) };
+        // TODO register view container bean?
+        ReflectionUtils.doWithFields(clazz, new FieldCallback() {
             @Override
             public void doWith(Field field)
                     throws IllegalArgumentException, IllegalAccessException {
                 if (field.isAnnotationPresent(ViewContainer.class)) {
-                    if (viewContainer == null) {
-                        field.setAccessible(true);
-                        viewContainer = field.get(bean);
-                        field.setAccessible(false);
-                    } else {
-                        throw new BeanDefinitionValidationException(
-                                "Multiple definitions of @"
-                                        + ViewContainer.class.getSimpleName()
-                                        + " on fields, including "
-                                        + bean.getClass() + "."
-                                        + field.getName());
-                    }
+                    found[0] = true;
+
+                    // add a UI scoped bean definition
+                    registerViewContainerBean(clazz, field);
                 }
             }
         });
+        if (!found[0]) {
+            classesWithoutViewContainerAnnotation.add(clazz);
+        }
+        return bean;
+    }
+
+    private void registerViewContainerBean(Class<?> clazz, Field field) {
+        BeanDefinitionRegistry registry = (BeanDefinitionRegistry) applicationContext;
+        BeanDefinitionBuilder builder = BeanDefinitionBuilder
+                .genericBeanDefinition(ViewContainerRegistrationBean.class);
+
+        // information needed to extract the values from the current UI scoped
+        // beans
+        builder.addPropertyValue("beanClass", clazz);
+        builder.addPropertyValue("field", field);
+
+        builder.setScope(UIScopeImpl.VAADIN_UI_SCOPE_NAME);
+        AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
+        String name = beanNameGenerator.generateBeanName(beanDefinition,
+                registry);
+        registry.registerBeanDefinition(name, beanDefinition);
+    }
+
+    @Override
+    public Object postProcessBeforeInitialization(final Object bean,
+            String beanName) throws BeansException {
         return bean;
     }
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName)
-            throws BeansException {
-        return bean;
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 
-    public Object getViewContainer() {
-        return viewContainer;
-    }
 }
