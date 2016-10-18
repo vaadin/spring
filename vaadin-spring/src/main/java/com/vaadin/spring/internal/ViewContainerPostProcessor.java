@@ -34,7 +34,16 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ReflectionUtils.FieldCallback;
 
 import com.vaadin.spring.annotation.ViewContainer;
+import com.vaadin.spring.server.SpringUIProvider;
 
+/**
+ * Bean post processor that scans for {@link ViewContainer} annotations on UI
+ * scoped bean classes and fields and registers
+ * {@link ViewContainerRegistrationBean} instances for them for
+ * {@link SpringUIProvider}.
+ *
+ * @author Vaadin Ltd
+ */
 public class ViewContainerPostProcessor
         implements BeanPostProcessor, ApplicationContextAware {
     private transient Set<Class<?>> classesWithoutViewContainerAnnotation = new HashSet<Class<?>>();
@@ -83,6 +92,16 @@ public class ViewContainerPostProcessor
         return bean;
     }
 
+    /**
+     * Create a view container registration bean definition to allow accessing
+     * annotated view containers for the current UI scope.
+     *
+     * @param clazz
+     *            bean class having the view container annotation, not null
+     * @param field
+     *            the field that has the annotation or null if the annotation is
+     *            on the class level
+     */
     protected void registerViewContainerBean(Class<?> clazz, Field field) {
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) applicationContext;
         BeanDefinitionBuilder builder = BeanDefinitionBuilder
@@ -96,7 +115,7 @@ public class ViewContainerPostProcessor
         builder.setScope(UIScopeImpl.VAADIN_UI_SCOPE_NAME);
         builder.setRole(BeanDefinition.ROLE_SUPPORT);
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
-        String name = beanNameGenerator.generateBeanName(beanDefinition,
+        String name = getBeanNameGenerator().generateBeanName(beanDefinition,
                 registry);
         registry.registerBeanDefinition(name, beanDefinition);
     }
@@ -110,6 +129,14 @@ public class ViewContainerPostProcessor
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+    }
+
+    public BeanNameGenerator getBeanNameGenerator() {
+        return beanNameGenerator;
+    }
+
+    public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
+        this.beanNameGenerator = beanNameGenerator;
     }
 
 }
