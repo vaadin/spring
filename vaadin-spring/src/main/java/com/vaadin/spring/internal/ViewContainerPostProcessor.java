@@ -20,7 +20,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -45,13 +47,24 @@ public class ViewContainerPostProcessor
             String beanName) throws BeansException {
         final Class<?> clazz = bean.getClass();
         // TODO optimize not to scan every bean class
-        // TODO do this only for UI scoped beans and smaller
         if (classesWithoutViewContainerAnnotation.contains(clazz)) {
             return bean;
         }
+        // if not UI scoped, cannot have a valid @ViewContainer on a field
+        if (applicationContext instanceof ConfigurableListableBeanFactory) {
+            BeanDefinition beanDefinition = ((ConfigurableListableBeanFactory) applicationContext)
+                    .getBeanDefinition(beanName);
+            String scope = beanDefinition.getScope();
+            if (!UIScopeImpl.VAADIN_UI_SCOPE_NAME.equals(scope)) {
+                return bean;
+            }
+        }
         final boolean[] found = {
                 clazz.isAnnotationPresent(ViewContainer.class) };
-        // TODO register view container bean?
+        if (found[0]) {
+            registerViewContainerBean(clazz, null);
+        }
+
         ReflectionUtils.doWithFields(clazz, new FieldCallback() {
             @Override
             public void doWith(Field field)
@@ -70,7 +83,7 @@ public class ViewContainerPostProcessor
         return bean;
     }
 
-    private void registerViewContainerBean(Class<?> clazz, Field field) {
+    protected void registerViewContainerBean(Class<?> clazz, Field field) {
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) applicationContext;
         BeanDefinitionBuilder builder = BeanDefinitionBuilder
                 .genericBeanDefinition(ViewContainerRegistrationBean.class);
@@ -81,6 +94,7 @@ public class ViewContainerPostProcessor
         builder.addPropertyValue("field", field);
 
         builder.setScope(UIScopeImpl.VAADIN_UI_SCOPE_NAME);
+        builder.setRole(BeanDefinition.ROLE_SUPPORT);
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
         String name = beanNameGenerator.generateBeanName(beanDefinition,
                 registry);

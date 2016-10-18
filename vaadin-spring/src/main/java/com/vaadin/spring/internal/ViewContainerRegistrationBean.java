@@ -20,10 +20,13 @@ import java.lang.reflect.Field;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.ReflectionUtils;
 
+import com.vaadin.spring.annotation.ViewContainer;
+
 /**
- * Dynamically registered bean which holds a reference to the current view
+ * Dynamically registered bean which can provide a reference to the current view
  * container instance.
  *
+ * @see ViewContainer
  * @see ViewContainerPostProcessor
  *
  * @author Vaadin Ltd
@@ -40,6 +43,10 @@ public class ViewContainerRegistrationBean {
             return null;
         }
 
+        if (field == null) {
+            return bean;
+        }
+
         // get the value of the field from the bean
         field.setAccessible(true);
         try {
@@ -49,10 +56,25 @@ public class ViewContainerRegistrationBean {
         }
     }
 
+    /**
+     * Set the class of the bean that is used to find the view container. If no
+     * field has been set, the bean itself is used as a view container.
+     * Otherwise, the value of the selected field of the bean is used.
+     *
+     * @param beanClass
+     *            class of the bean that contains the ViewContainer annotation
+     *            or has it directly on the class
+     */
     public void setBeanClass(Class<?> beanClass) {
         this.beanClass = beanClass;
     }
 
+    /**
+     * Set optional field to access the view container inside the bean. If no
+     * field is set, the bean is used directly as the view container instance.
+     *
+     * @param field
+     */
     public void setField(Field field) {
         this.field = field;
     }
