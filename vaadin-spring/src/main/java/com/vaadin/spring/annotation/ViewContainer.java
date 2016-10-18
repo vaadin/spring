@@ -15,7 +15,6 @@
  */
 package com.vaadin.spring.annotation;
 
-import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -43,7 +42,7 @@ import com.vaadin.ui.SingleComponentContainer;
  */
 @Scope(UIScopeImpl.VAADIN_UI_SCOPE_NAME)
 @Retention(RUNTIME)
-@Target({ TYPE, FIELD })
+@Target({ TYPE })
 @Documented
 public @interface ViewContainer {
 }

@@ -303,7 +303,7 @@ public class SpringUIProvider extends UIProvider {
             // This is somewhat noisy as potentially logged for every UI
             // created.
             logger.info(ViewContainerPostProcessor.class.getName()
-                    + " is not active, not checking for @ViewContainer annotations on fields");
+                    + " is not active");
             return null;
         }
     }

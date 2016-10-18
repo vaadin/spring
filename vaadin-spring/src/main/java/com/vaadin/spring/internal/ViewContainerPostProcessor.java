@@ -15,7 +15,6 @@
  */
 package com.vaadin.spring.internal;
 
-import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,15 +29,15 @@ import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.beans.factory.support.DefaultBeanNameGenerator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ReflectionUtils.FieldCallback;
 
+import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.server.SpringUIProvider;
+import com.vaadin.ui.Component;
 
 /**
  * Bean post processor that scans for {@link ViewContainer} annotations on UI
- * scoped bean classes and fields and registers
+ * scoped beans or bean classes and registers
  * {@link ViewContainerRegistrationBean} instances for them for
  * {@link SpringUIProvider}.
  *
@@ -55,11 +54,13 @@ public class ViewContainerPostProcessor
     public Object postProcessAfterInitialization(final Object bean,
             String beanName) throws BeansException {
         final Class<?> clazz = bean.getClass();
-        // TODO optimize not to scan every bean class
-        if (classesWithoutViewContainerAnnotation.contains(clazz)) {
+        // TODO optimize by prescanning to create a whitelist?
+        boolean classOk = Component.class.isAssignableFrom(clazz)
+                || ViewDisplay.class.isAssignableFrom(clazz);
+        if (!classOk || classesWithoutViewContainerAnnotation.contains(clazz)) {
             return bean;
         }
-        // if not UI scoped, cannot have a valid @ViewContainer on a field
+        // if not UI scoped, cannot have a valid @ViewContainer
         if (applicationContext instanceof ConfigurableListableBeanFactory) {
             BeanDefinition beanDefinition = ((ConfigurableListableBeanFactory) applicationContext)
                     .getBeanDefinition(beanName);
@@ -67,26 +68,12 @@ public class ViewContainerPostProcessor
             if (!UIScopeImpl.VAADIN_UI_SCOPE_NAME.equals(scope)) {
                 return bean;
             }
+            // TODO look for annotations on factory methods
         }
-        final boolean[] found = {
-                clazz.isAnnotationPresent(ViewContainer.class) };
-        if (found[0]) {
-            registerViewContainerBean(clazz, null);
-        }
-
-        ReflectionUtils.doWithFields(clazz, new FieldCallback() {
-            @Override
-            public void doWith(Field field)
-                    throws IllegalArgumentException, IllegalAccessException {
-                if (field.isAnnotationPresent(ViewContainer.class)) {
-                    found[0] = true;
-
-                    // add a UI scoped bean definition
-                    registerViewContainerBean(clazz, field);
-                }
-            }
-        });
-        if (!found[0]) {
+        // look for annotations on classes
+        if (clazz.isAnnotationPresent(ViewContainer.class)) {
+            registerViewContainerBean(clazz);
+        } else {
             classesWithoutViewContainerAnnotation.add(clazz);
         }
         return bean;
@@ -98,11 +85,8 @@ public class ViewContainerPostProcessor
      *
      * @param clazz
      *            bean class having the view container annotation, not null
-     * @param field
-     *            the field that has the annotation or null if the annotation is
-     *            on the class level
      */
-    protected void registerViewContainerBean(Class<?> clazz, Field field) {
+    protected void registerViewContainerBean(Class<?> clazz) {
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) applicationContext;
         BeanDefinitionBuilder builder = BeanDefinitionBuilder
                 .genericBeanDefinition(ViewContainerRegistrationBean.class);
@@ -110,7 +94,6 @@ public class ViewContainerPostProcessor
         // information needed to extract the values from the current UI scoped
         // beans
         builder.addPropertyValue("beanClass", clazz);
-        builder.addPropertyValue("field", field);
 
         builder.setScope(UIScopeImpl.VAADIN_UI_SCOPE_NAME);
         builder.setRole(BeanDefinition.ROLE_SUPPORT);
