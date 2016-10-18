@@ -15,10 +15,7 @@
  */
 package com.vaadin.spring.internal;
 
-import java.lang.reflect.Field;
-
 import org.springframework.context.ApplicationContext;
-import org.springframework.util.ReflectionUtils;
 
 import com.vaadin.spring.annotation.ViewContainer;
 
@@ -34,32 +31,14 @@ import com.vaadin.spring.annotation.ViewContainer;
 public class ViewContainerRegistrationBean {
 
     private Class<?> beanClass;
-    private Field field;
 
     public Object getViewContainer(ApplicationContext applicationContext) {
         // get the bean of the correct class from the context
-        Object bean = applicationContext.getBean(beanClass);
-        if (bean == null) {
-            return null;
-        }
-
-        if (field == null) {
-            return bean;
-        }
-
-        // get the value of the field from the bean
-        field.setAccessible(true);
-        try {
-            return ReflectionUtils.getField(field, bean);
-        } finally {
-            field.setAccessible(false);
-        }
+        return applicationContext.getBean(beanClass);
     }
 
     /**
-     * Set the class of the bean that is used to find the view container. If no
-     * field has been set, the bean itself is used as a view container.
-     * Otherwise, the value of the selected field of the bean is used.
+     * Set the class of the bean that is used to find the view container.
      *
      * @param beanClass
      *            class of the bean that contains the ViewContainer annotation
@@ -67,16 +46,6 @@ public class ViewContainerRegistrationBean {
      */
     public void setBeanClass(Class<?> beanClass) {
         this.beanClass = beanClass;
-    }
-
-    /**
-     * Set optional field to access the view container inside the bean. If no
-     * field is set, the bean is used directly as the view container instance.
-     *
-     * @param field
-     */
-    public void setField(Field field) {
-        this.field = field;
     }
 
 }
