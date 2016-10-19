@@ -31,14 +31,20 @@ import com.vaadin.spring.annotation.ViewContainer;
 public class ViewContainerRegistrationBean {
 
     private Class<?> beanClass;
+    private String beanName;
 
     public Object getViewContainer(ApplicationContext applicationContext) {
-        // get the bean of the correct class from the context
-        return applicationContext.getBean(beanClass);
+        if (beanName != null) {
+            return applicationContext.getBean(beanName);
+        } else {
+            // get the bean of the correct class from the context
+            return applicationContext.getBean(beanClass);
+        }
     }
 
     /**
-     * Set the class of the bean that is used to find the view container.
+     * Set the class of the bean that has the view container annotation. Either
+     * this method or {@link #setBeanName(String)} should be called.
      *
      * @param beanClass
      *            class of the bean that contains the ViewContainer annotation
@@ -46,6 +52,17 @@ public class ViewContainerRegistrationBean {
      */
     public void setBeanClass(Class<?> beanClass) {
         this.beanClass = beanClass;
+    }
+
+    /**
+     * Set the name of the bean that has the view container annotation. Either
+     * this method or {@link #setBeanClass(Class)} should be called.
+     *
+     * @param beanName
+     *            name of the bean that has the ViewContainer annotation
+     */
+    public void setBeanName(String beanName) {
+        this.beanName = beanName;
     }
 
 }
