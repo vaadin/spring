@@ -93,6 +93,8 @@
 
         <!-- Additional manifest fields -->
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
+
+        <junit.version>4.12</junit.version>
     </properties>
 
     <build>
@@ -200,13 +202,4 @@
         <module>vaadin-spring-boot</module>
         <module>vaadin-spring-boot-starter</module>
     </modules>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.12</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 </project>
