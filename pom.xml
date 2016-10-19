@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -78,17 +78,17 @@
             <email>petter@vaadin.com</email>
         </developer>
     </developers>
-    
+
     <properties>
         <project.build.encoding>UTF-8</project.build.encoding>
         <project.build.target>1.6</project.build.target>
         <project.build.source>1.6</project.build.source>
-        
+
         <!-- These are typically overridden with BOMs -->
         <vaadin.version>7.7.0</vaadin.version>
-        <spring.version>4.1.6.RELEASE</spring.version>
-        <spring.boot.version>1.2.2.RELEASE</spring.boot.version>
-        
+        <spring.version>4.3.3.RELEASE</spring.version>
+        <spring.boot.version>1.4.1.RELEASE</spring.boot.version>
+
         <slf4j.version>1.7.7</slf4j.version>
 
         <!-- Additional manifest fields -->
@@ -200,5 +200,13 @@
         <module>vaadin-spring-boot</module>
         <module>vaadin-spring-boot-starter</module>
     </modules>
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
