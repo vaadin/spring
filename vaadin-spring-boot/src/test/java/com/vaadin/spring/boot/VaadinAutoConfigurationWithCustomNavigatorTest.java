@@ -15,6 +15,7 @@
  */
 package com.vaadin.spring.boot;
 
+import com.vaadin.spring.annotation.UIScope;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +64,7 @@ public class VaadinAutoConfigurationWithCustomNavigatorTest
     @EnableAutoConfiguration
     protected static class Config {
         @Bean
+        @UIScope
         public MyNavigator myNavigator() {
             return new MyNavigator();
         }
@@ -78,6 +80,7 @@ public class VaadinAutoConfigurationWithCustomNavigatorTest
     public void testNavigatorCustomized() {
         // this sets up the UI scope
         TestUI ui = createUi(TestUI.class);
+        Assert.notNull(ui);
         Assert.isInstanceOf(MyNavigator.class,
                 applicationContext.getBean(SpringNavigator.class),
                 "Vaadin Navigator is not correctly overridden");
