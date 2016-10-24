@@ -25,6 +25,7 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +35,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.vaadin.navigator.NavigationStateManager;
+import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.access.ViewAccessControl;
 import com.vaadin.spring.access.ViewInstanceAccessControl;
@@ -44,6 +48,7 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.annotation.ViewScope;
+import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
 import com.vaadin.ui.UI;
@@ -89,7 +94,10 @@ public class SpringViewProviderAccessControlTest
         static final String VIEW_NAME = "otheruiview";
     }
 
-    private static class MyAccessDeniedView extends DummyView {
+    public static class MyAccessDeniedView extends DummyView {
+    }
+
+    public static class MyErrorView extends DummyView {
     }
 
     protected static class MyViewAccessControl implements ViewAccessControl {
@@ -162,6 +170,39 @@ public class SpringViewProviderAccessControlTest
         public MyViewInstanceAccessControl instanceAccessControl() {
             return new MyViewInstanceAccessControl();
         }
+
+        @Bean
+        @UIScope
+        public SpringNavigator vaadinNavigator() {
+            // customized navigator to bypass most dependencies
+            SpringNavigator navigator = new SpringNavigator() {
+                @Override
+                public void init(UI ui, ViewDisplay display) {
+                    init(ui, new NavigationStateManager() {
+                        private String state;
+
+                        @Override
+                        public void setState(String state) {
+                            this.state = state;
+                        }
+
+                        @Override
+                        public void setNavigator(Navigator navigator) {
+                        }
+
+                        @Override
+                        public String getState() {
+                            return state;
+                        }
+                    }, new ViewDisplay() {
+                        @Override
+                        public void showView(View view) {
+                        }
+                    });
+                }
+            };
+            return navigator;
+        }
     }
 
     @Autowired
@@ -186,6 +227,7 @@ public class SpringViewProviderAccessControlTest
 
     @After
     public void teardownUi() {
+        setErrorViewClass(null);
         ui.setSession(null);
         UI.setCurrent(null);
         CurrentInstance.set(VaadinSession.class, null);
@@ -222,21 +264,19 @@ public class SpringViewProviderAccessControlTest
     public void testGetAllowedView() throws Exception {
         allowViews(TestView1.BEAN_NAME);
         Assert.assertTrue("Could not get allowed view",
-                viewProvider.getView(TestView1.VIEW_NAME) instanceof TestView1);
+                getView(TestView1.VIEW_NAME) instanceof TestView1);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testGetDisallowedView() throws Exception {
-        Assert.assertNull("Got disallowed view",
-                viewProvider.getView(TestView1.VIEW_NAME));
+        getView(TestView1.VIEW_NAME);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testGetDisallowedViewInstance() throws Exception {
         allowViews(TestView1.BEAN_NAME);
         disallowViewInstances(TestView1.BEAN_NAME);
-        Assert.assertNull("Got disallowed view",
-                viewProvider.getView(TestView1.VIEW_NAME));
+        getView(TestView1.VIEW_NAME);
     }
 
     @Test
@@ -244,8 +284,7 @@ public class SpringViewProviderAccessControlTest
         viewProvider.setAccessDeniedViewClass(MyAccessDeniedView.class);
         Assert.assertTrue(
                 "Got disallowed view when should get access denied view",
-                viewProvider.getView(
-                        TestView1.VIEW_NAME) instanceof MyAccessDeniedView);
+                getView(TestView1.VIEW_NAME) instanceof MyAccessDeniedView);
     }
 
     @Test
@@ -256,11 +295,70 @@ public class SpringViewProviderAccessControlTest
         viewProvider.setAccessDeniedViewClass(MyAccessDeniedView.class);
         Assert.assertTrue(
                 "Got disallowed view when should get access denied view",
-                viewProvider.getView(
-                        TestView1.VIEW_NAME) instanceof MyAccessDeniedView);
+                getView(TestView1.VIEW_NAME) instanceof MyAccessDeniedView);
     }
 
-    // TODO add tests for interaction of error and access denied views
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetNonExistentView() throws Exception {
+        allowViews("noview");
+        getView("noview");
+    }
+
+    // TODO enable this when implementing #22
+    @Ignore
+    @Test
+    public void testGetNonExistentViewWithAccessDeniedView() throws Exception {
+        allowViews("noview");
+        viewProvider.setAccessDeniedViewClass(MyAccessDeniedView.class);
+        Assert.assertTrue(
+                "Got something else when should get access denied view for non-existent view name",
+                getView("noview") instanceof MyAccessDeniedView);
+    }
+
+    @Test
+    public void testGetNonExistentViewWithErrorView() throws Exception {
+        allowViews("noview");
+        setErrorViewClass(MyErrorView.class);
+        Assert.assertTrue(
+                "Got something else than the error view for an unregistered view name",
+                getView("noview") instanceof MyErrorView);
+    }
+
+    @Test
+    public void testGetNonExistentViewWithErrorViewButWithoutAccessDeniedView()
+            throws Exception {
+        allowViews("noview");
+        setErrorViewClass(MyErrorView.class);
+        Assert.assertTrue("Got something for a non-existing view",
+                getView("noview") instanceof MyErrorView);
+    }
+
+    @Test
+    public void testGetNonExistentViewWithAccessDeniedViewAndErrorView()
+            throws Exception {
+        allowViews("noview");
+        viewProvider.setAccessDeniedViewClass(MyAccessDeniedView.class);
+        setErrorViewClass(MyErrorView.class);
+        Assert.assertTrue(
+                "Got something else when error view should override access denied view",
+                getView("noview") instanceof MyErrorView);
+    }
+
+    private View getView(String viewName) {
+        // use the navigator instead of the view provider to also get the error
+        // view
+        getNavigator().navigateTo(viewName);
+        return getNavigator().getCurrentView();
+    }
+
+    // note that these is also the option to set an error view instance
+    private void setErrorViewClass(Class<? extends View> errorViewClass) {
+        getNavigator().setErrorView(errorViewClass);
+    }
+
+    private SpringNavigator getNavigator() {
+        return (SpringNavigator) ui.getNavigator();
+    }
 
     private void allowViews(String... viewBeanNames) {
         MyViewAccessControl accessControl = getAccessControl();
