@@ -34,8 +34,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.vaadin.navigator.View;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.access.ViewAccessControl;
+import com.vaadin.spring.access.ViewInstanceAccessControl;
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringView;
@@ -99,6 +101,16 @@ public class SpringViewProviderAccessControlTest
         }
     }
 
+    protected static class MyViewInstanceAccessControl
+            implements ViewInstanceAccessControl {
+        public Set<String> disallowedViewBeans = new HashSet<String>();
+
+        @Override
+        public boolean isAccessGranted(UI ui, String beanName, View view) {
+            return !disallowedViewBeans.contains(beanName);
+        }
+    }
+
     @Configuration
     @EnableVaadinNavigation
     static class Config extends AbstractSpringUIProviderTest.Config {
@@ -144,6 +156,12 @@ public class SpringViewProviderAccessControlTest
         public MyViewAccessControl accessControl() {
             return new MyViewAccessControl();
         }
+
+        @Bean
+        @Scope("singleton")
+        public MyViewInstanceAccessControl instanceAccessControl() {
+            return new MyViewInstanceAccessControl();
+        }
     }
 
     @Autowired
@@ -172,6 +190,7 @@ public class SpringViewProviderAccessControlTest
         UI.setCurrent(null);
         CurrentInstance.set(VaadinSession.class, null);
         getAccessControl().allowedViewBeans.clear();
+        getInstanceAccessControl().disallowedViewBeans.clear();
     }
 
     @Test
@@ -189,6 +208,17 @@ public class SpringViewProviderAccessControlTest
     }
 
     @Test
+    public void testDisallowSomeViewInstances() throws Exception {
+        allowViews(TestView1.BEAN_NAME, TestView2.BEAN_NAME,
+                TestView3.BEAN_NAME);
+        disallowViewInstances(TestView3.BEAN_NAME);
+        // disallow instances does not affect the list as listing is on the
+        // level of view types/beans, not on the instance level
+        checkAvailableViews(TestView1.VIEW_NAME, TestView2.VIEW_NAME,
+                TestView3.VIEW_NAME);
+    }
+
+    @Test
     public void testGetAllowedView() throws Exception {
         allowViews(TestView1.BEAN_NAME);
         Assert.assertTrue("Could not get allowed view",
@@ -202,7 +232,27 @@ public class SpringViewProviderAccessControlTest
     }
 
     @Test
+    public void testGetDisallowedViewInstance() throws Exception {
+        allowViews(TestView1.BEAN_NAME);
+        disallowViewInstances(TestView1.BEAN_NAME);
+        Assert.assertNull("Got disallowed view",
+                viewProvider.getView(TestView1.VIEW_NAME));
+    }
+
+    @Test
     public void testGetDisallowedViewWithAccessDeniedView() throws Exception {
+        viewProvider.setAccessDeniedViewClass(MyAccessDeniedView.class);
+        Assert.assertTrue(
+                "Got disallowed view when should get access denied view",
+                viewProvider.getView(
+                        TestView1.VIEW_NAME) instanceof MyAccessDeniedView);
+    }
+
+    @Test
+    public void testGetDisallowedViewInstanceWithAccessDeniedView()
+            throws Exception {
+        allowViews(TestView1.BEAN_NAME);
+        disallowViewInstances(TestView1.BEAN_NAME);
         viewProvider.setAccessDeniedViewClass(MyAccessDeniedView.class);
         Assert.assertTrue(
                 "Got disallowed view when should get access denied view",
@@ -219,8 +269,19 @@ public class SpringViewProviderAccessControlTest
         }
     }
 
+    private void disallowViewInstances(String... viewBeanNames) {
+        MyViewInstanceAccessControl accessControl = getInstanceAccessControl();
+        for (String viewBeanName : viewBeanNames) {
+            accessControl.disallowedViewBeans.add(viewBeanName);
+        }
+    }
+
     private MyViewAccessControl getAccessControl() {
         return applicationContext.getBean(MyViewAccessControl.class);
+    }
+
+    private MyViewInstanceAccessControl getInstanceAccessControl() {
+        return applicationContext.getBean(MyViewInstanceAccessControl.class);
     }
 
     protected void checkAvailableViews(String... viewNames) {
