@@ -15,7 +15,6 @@
  */
 package com.vaadin.spring.boot;
 
-import com.vaadin.spring.annotation.UIScope;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +28,11 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
-import com.vaadin.ui.UI;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
@@ -49,10 +47,7 @@ public class VaadinAutoConfigurationWithCustomNavigatorTest
 
     @SpringUI
     @ViewContainer
-    private static class TestUI extends UI {
-        @Override
-        protected void init(VaadinRequest request) {
-        }
+    private static class TestUI extends DummyUI {
     }
 
     private static class MyNavigator extends SpringNavigator {
