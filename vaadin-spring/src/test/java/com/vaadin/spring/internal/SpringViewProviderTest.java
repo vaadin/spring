@@ -36,7 +36,6 @@ import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
-import com.vaadin.spring.server.AbstractSpringUIProviderTest.Config;
 import com.vaadin.ui.UI;
 
 /**
@@ -48,10 +47,7 @@ public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
 
     @SpringUI
     @ViewContainer
-    private static class TestUI1 extends UI {
-        @Override
-        protected void init(VaadinRequest request) {
-        }
+    private static class TestUI1 extends DummyUI {
     }
 
     @SpringUI(path = "other")

@@ -28,13 +28,11 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
 import com.vaadin.spring.server.SpringVaadinServlet;
-import com.vaadin.ui.UI;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
@@ -48,10 +46,7 @@ public class VaadinAutoConfigurationTest extends AbstractSpringUIProviderTest {
 
     @SpringUI
     @ViewContainer
-    private static class TestUI extends UI {
-        @Override
-        protected void init(VaadinRequest request) {
-        }
+    private static class TestUI extends DummyUI {
     }
 
     @Configuration
