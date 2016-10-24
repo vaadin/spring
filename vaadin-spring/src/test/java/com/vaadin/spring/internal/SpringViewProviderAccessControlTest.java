@@ -34,18 +34,18 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.access.ViewAccessControl;
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
 import com.vaadin.ui.UI;
+import com.vaadin.util.CurrentInstance;
 
 /**
  * Test SpringViewProvider access control.
@@ -57,51 +57,37 @@ public class SpringViewProviderAccessControlTest
 
     @SpringUI
     @ViewContainer
-    private static class TestUI1 extends UI {
-        @Override
-        protected void init(VaadinRequest request) {
-        }
+    private static class TestUI1 extends DummyUI {
     }
 
     @SpringUI(path = "other")
-    private static class TestUI2 extends UI {
-        @Override
-        protected void init(VaadinRequest request) {
-        }
+    private static class TestUI2 extends DummyUI {
     }
 
-    @SpringView(name = "")
-    private static class TestView1 implements View {
-        @Override
-        public void enter(ViewChangeEvent event) {
-        }
+    @SpringView(name = TestView1.VIEW_NAME)
+    private static class TestView1 extends DummyView {
+        static final String BEAN_NAME = "view1";
+        static final String VIEW_NAME = "";
     }
 
     @SpringView(name = TestView2.VIEW_NAME, ui = TestUI1.class)
-    private static class TestView2 implements View {
+    private static class TestView2 extends DummyView {
+        static final String BEAN_NAME = "view2";
         static final String VIEW_NAME = "view2";
-
-        @Override
-        public void enter(ViewChangeEvent event) {
-        }
     }
 
     @SpringView(name = TestView3.VIEW_NAME, ui = TestUI1.class)
-    private static class TestView3 implements View {
+    private static class TestView3 extends DummyView {
+        static final String BEAN_NAME = "view3";
         static final String VIEW_NAME = "view3";
-
-        @Override
-        public void enter(ViewChangeEvent event) {
-        }
     }
 
     @SpringView(name = TestOtherUiView.VIEW_NAME, ui = TestUI2.class)
-    private static class TestOtherUiView implements View {
+    private static class TestOtherUiView extends DummyView {
         static final String VIEW_NAME = "otheruiview";
+    }
 
-        @Override
-        public void enter(ViewChangeEvent event) {
-        }
+    private static class MyAccessDeniedView extends DummyView {
     }
 
     protected static class MyViewAccessControl implements ViewAccessControl {
@@ -148,6 +134,12 @@ public class SpringViewProviderAccessControlTest
         }
 
         @Bean
+        @UIScope
+        public MyAccessDeniedView accessDeniedView() {
+            return new MyAccessDeniedView();
+        }
+
+        @Bean
         @Scope("singleton")
         public MyViewAccessControl accessControl() {
             return new MyViewAccessControl();
@@ -164,6 +156,10 @@ public class SpringViewProviderAccessControlTest
     public void setupUi() {
         // need a UI to set everything up
         ui = createUi(TestUI1.class);
+
+        VaadinSession session = createVaadinSessionMock();
+        CurrentInstance.set(VaadinSession.class, session);
+        ui.setSession(session);
         UI.setCurrent(ui);
         // SpringViewProvider is UI scoped, so needs to be fetched after
         // createUi()
@@ -172,21 +168,49 @@ public class SpringViewProviderAccessControlTest
 
     @After
     public void teardownUi() {
+        ui.setSession(null);
         UI.setCurrent(null);
+        CurrentInstance.set(VaadinSession.class, null);
         getAccessControl().allowedViewBeans.clear();
     }
 
     @Test
     public void testAllowAllViews() throws Exception {
-        allowViews("view1", "view2", "view3");
-        checkAvailableViews("", TestView2.VIEW_NAME, TestView3.VIEW_NAME);
+        allowViews(TestView1.BEAN_NAME, TestView2.BEAN_NAME,
+                TestView3.BEAN_NAME);
+        checkAvailableViews(TestView1.VIEW_NAME, TestView2.VIEW_NAME,
+                TestView3.VIEW_NAME);
     }
 
     @Test
     public void testAllowSomeViews() throws Exception {
-        allowViews("view1", "view2");
-        checkAvailableViews("", TestView2.VIEW_NAME);
+        allowViews(TestView1.BEAN_NAME, TestView2.BEAN_NAME);
+        checkAvailableViews(TestView1.VIEW_NAME, TestView2.VIEW_NAME);
     }
+
+    @Test
+    public void testGetAllowedView() throws Exception {
+        allowViews(TestView1.BEAN_NAME);
+        Assert.assertTrue("Could not get allowed view",
+                viewProvider.getView(TestView1.VIEW_NAME) instanceof TestView1);
+    }
+
+    @Test
+    public void testGetDisallowedView() throws Exception {
+        Assert.assertNull("Got disallowed view",
+                viewProvider.getView(TestView1.VIEW_NAME));
+    }
+
+    @Test
+    public void testGetDisallowedViewWithAccessDeniedView() throws Exception {
+        viewProvider.setAccessDeniedViewClass(MyAccessDeniedView.class);
+        Assert.assertTrue(
+                "Got disallowed view when should get access denied view",
+                viewProvider.getView(
+                        TestView1.VIEW_NAME) instanceof MyAccessDeniedView);
+    }
+
+    // TODO add tests for interaction of error and access denied views
 
     private void allowViews(String... viewBeanNames) {
         MyViewAccessControl accessControl = getAccessControl();
