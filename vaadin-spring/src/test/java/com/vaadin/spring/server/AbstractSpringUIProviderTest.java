@@ -40,7 +40,7 @@ public abstract class AbstractSpringUIProviderTest {
 
     @Configuration
     @EnableVaadin
-    protected static class Config {
+    public static class Config {
     }
 
     protected static final int TEST_UIID = 123;

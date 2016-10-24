@@ -13,36 +13,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.vaadin.spring.server;
+package com.vaadin.spring.internal;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.spring.access.ViewAccessControl;
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.spring.navigator.SpringViewProvider;
+import com.vaadin.spring.server.AbstractSpringUIProviderTest;
 import com.vaadin.ui.UI;
 
 /**
- * Test SpringViewProvider.
+ * Test SpringViewProvider access control.
  */
 @ContextConfiguration
 @WebAppConfiguration
-public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
+public class SpringViewProviderAccessControlTest
+        extends AbstractSpringUIProviderTest {
 
     @SpringUI
     @ViewContainer
@@ -53,7 +64,6 @@ public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
     }
 
     @SpringUI(path = "other")
-    // TODO @ViewContainer
     private static class TestUI2 extends UI {
         @Override
         protected void init(VaadinRequest request) {
@@ -67,17 +77,39 @@ public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
         }
     }
 
-    @SpringView(name = "view2", ui = TestUI1.class)
+    @SpringView(name = TestView2.VIEW_NAME, ui = TestUI1.class)
     private static class TestView2 implements View {
+        static final String VIEW_NAME = "view2";
+
         @Override
         public void enter(ViewChangeEvent event) {
         }
     }
 
-    @SpringView(name = "view3", ui = TestUI2.class)
+    @SpringView(name = TestView3.VIEW_NAME, ui = TestUI1.class)
     private static class TestView3 implements View {
+        static final String VIEW_NAME = "view3";
+
         @Override
         public void enter(ViewChangeEvent event) {
+        }
+    }
+
+    @SpringView(name = TestOtherUiView.VIEW_NAME, ui = TestUI2.class)
+    private static class TestOtherUiView implements View {
+        static final String VIEW_NAME = "otheruiview";
+
+        @Override
+        public void enter(ViewChangeEvent event) {
+        }
+    }
+
+    protected static class MyViewAccessControl implements ViewAccessControl {
+        public Set<String> allowedViewBeans = new HashSet<String>();
+
+        @Override
+        public boolean isAccessGranted(UI ui, String beanName) {
+            return allowedViewBeans.contains(beanName);
         }
     }
 
@@ -115,27 +147,66 @@ public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
             return new TestView3();
         }
 
+        @Bean
+        @Scope("singleton")
+        public MyViewAccessControl accessControl() {
+            return new MyViewAccessControl();
+        }
     }
 
     @Autowired
     private WebApplicationContext applicationContext;
 
-    @Test
-    public void testListViewsForUI1() throws Exception {
+    private TestUI1 ui;
+    private SpringViewProvider viewProvider;
+
+    @Before
+    public void setupUi() {
         // need a UI to set everything up
-        TestUI1 ui = createUi(TestUI1.class);
+        ui = createUi(TestUI1.class);
         UI.setCurrent(ui);
         // SpringViewProvider is UI scoped, so needs to be fetched after
         // createUi()
-        SpringViewProvider viewProvider = applicationContext
-                .getBean(SpringViewProvider.class);
-        Collection<String> views = viewProvider.getViewNamesForCurrentUI();
-        Assert.isTrue(2 == views.size(), "Wrong number of views returned");
-        Assert.isTrue(views.contains(""),
-                "Root view not returned by SpringViewProvider");
-        Assert.isTrue(views.contains("view2"),
-                "Root view not returned by SpringViewProvider");
-        UI.setCurrent(null);
+        viewProvider = applicationContext.getBean(SpringViewProvider.class);
     }
 
+    @After
+    public void teardownUi() {
+        UI.setCurrent(null);
+        getAccessControl().allowedViewBeans.clear();
+    }
+
+    @Test
+    public void testAllowAllViews() throws Exception {
+        allowViews("view1", "view2", "view3");
+        checkAvailableViews("", TestView2.VIEW_NAME, TestView3.VIEW_NAME);
+    }
+
+    @Test
+    public void testAllowSomeViews() throws Exception {
+        allowViews("view1", "view2");
+        checkAvailableViews("", TestView2.VIEW_NAME);
+    }
+
+    private void allowViews(String... viewBeanNames) {
+        MyViewAccessControl accessControl = getAccessControl();
+        for (String viewBeanName : viewBeanNames) {
+            accessControl.allowedViewBeans.add(viewBeanName);
+        }
+    }
+
+    private MyViewAccessControl getAccessControl() {
+        return applicationContext.getBean(MyViewAccessControl.class);
+    }
+
+    protected void checkAvailableViews(String... viewNames) {
+        List<String> views = new ArrayList<String>(
+                viewProvider.getViewNamesForCurrentUI());
+        Collections.sort(views);
+        List<String> expectedViews = new ArrayList<String>(
+                Arrays.asList(viewNames));
+        Collections.sort(expectedViews);
+        Assert.assertEquals("Incorrect set of views returned", expectedViews,
+                views);
+    }
 }
