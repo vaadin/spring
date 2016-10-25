@@ -173,6 +173,12 @@ public class SpringViewProviderAccessControlTest
 
         @Bean
         @UIScope
+        public MyErrorView errorView() {
+            return new MyErrorView();
+        }
+
+        @Bean
+        @UIScope
         public SpringNavigator vaadinNavigator() {
             // customized navigator to bypass most dependencies
             SpringNavigator navigator = new SpringNavigator() {
