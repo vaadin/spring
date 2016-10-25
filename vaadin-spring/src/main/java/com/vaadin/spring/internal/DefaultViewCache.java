@@ -48,6 +48,9 @@ public class DefaultViewCache implements ViewCache {
     private Map<String, ViewBeanStore> beanStores = new HashMap<String, ViewBeanStore>();
 
     private String viewUnderConstruction = null;
+    // during the re-creation of a view with the same name, keep the old context
+    // in case the creation fails
+    private ViewBeanStore viewBeanStoreBeingReplaced = null;
 
     private String activeView = null;
 
@@ -86,6 +89,11 @@ public class DefaultViewCache implements ViewCache {
     @Override
     public void creatingView(String viewName) {
         LOGGER.trace("Creating view [{}] in cache [{}]", viewName, this);
+        ViewBeanStore oldBeanStore = beanStores.get(viewName);
+        if (oldBeanStore != null && viewName.equals(oldBeanStore.viewName)) {
+            viewBeanStoreBeingReplaced = oldBeanStore;
+            beanStores.remove(viewName);
+        }
         getOrCreateBeanStore(viewName);
         viewUnderConstruction = viewName;
     }
@@ -108,10 +116,12 @@ public class DefaultViewCache implements ViewCache {
         ViewBeanStore beanStore = getOrCreateBeanStore(viewName);
         if (viewInstance == null) {
             LOGGER.trace(
-                    "There was a problem creating the view [{}] in cache [{}], destroying its bean store",
+                    "There was a problem creating the view [{}] in cache [{}], destroying its bean store and restoring the old one (if any)",
                     viewName, this);
             beanStore.destroy();
+            beanStores.put(viewName, viewBeanStoreBeingReplaced);
         }
+        viewBeanStoreBeingReplaced = null;
     }
 
     private void viewActivated(String viewName) {
