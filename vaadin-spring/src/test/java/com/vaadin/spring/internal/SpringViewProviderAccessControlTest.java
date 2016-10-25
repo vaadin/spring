@@ -25,7 +25,6 @@ import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -310,15 +309,13 @@ public class SpringViewProviderAccessControlTest
         getView("noview");
     }
 
-    // TODO enable this when implementing #22
-    @Ignore
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testGetNonExistentViewWithAccessDeniedView() throws Exception {
+        // to support getting an access denied view also in this case in an
+        // application, the user should set the same view as the error view
         allowViews("noview");
         viewProvider.setAccessDeniedViewClass(MyAccessDeniedView.class);
-        Assert.assertTrue(
-                "Got something else when should get access denied view for non-existent view name",
-                getView("noview") instanceof MyAccessDeniedView);
+        getView("noview");
     }
 
     @Test
