@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/vaadin/spring.svg?branch=master)](https://travis-ci.org/vaadin/spring)
+
 Vaadin Spring
 ======================
 
