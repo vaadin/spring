@@ -52,7 +52,7 @@ public class SpringUIProviderTestWithoutViewContainer
     public void testConfigureNavigator() {
         TestUI ui = createUi(TestUI.class);
         Assert.isNull(ui.getNavigator(),
-                "Navigator is configured even though there is no ViewContainer");
+                "Navigator is configured even though there is no SpringViewDisplay");
     }
 
     @Test

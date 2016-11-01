@@ -16,7 +16,7 @@
 package com.vaadin.spring.internal;
 
 import com.vaadin.navigator.ViewDisplay;
-import com.vaadin.spring.annotation.ViewContainer;
+import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.server.SpringUIProvider;
 import com.vaadin.ui.Component;
 import org.springframework.beans.BeansException;
@@ -39,7 +39,7 @@ import org.springframework.core.type.StandardMethodMetadata;
 import java.util.Map;
 
 /**
- * Bean post processor that scans for {@link ViewContainer} annotations on UI
+ * Bean post processor that scans for {@link SpringViewDisplay} annotations on UI
  * scoped beans or bean classes and registers
  * {@link ViewContainerRegistrationBean} instances for them for
  * {@link SpringUIProvider}.
@@ -72,14 +72,14 @@ public class ViewContainerPostProcessor implements BeanPostProcessor,
                 StandardMethodMetadata metadata = (StandardMethodMetadata) beanDefinition
                         .getSource();
                 Map<String, Object> annotationAttributes = metadata
-                        .getAnnotationAttributes(ViewContainer.class.getName());
+                        .getAnnotationAttributes(SpringViewDisplay.class.getName());
                 if (annotationAttributes != null) {
                     registerViewContainerBean(beanName);
                 }
             }
         }
         // look for annotations on classes
-        if (clazz.isAnnotationPresent(ViewContainer.class)) {
+        if (clazz.isAnnotationPresent(SpringViewDisplay.class)) {
             registerViewContainerBean(clazz);
         }
         return bean;

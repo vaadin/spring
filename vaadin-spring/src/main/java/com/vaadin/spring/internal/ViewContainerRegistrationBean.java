@@ -17,13 +17,13 @@ package com.vaadin.spring.internal;
 
 import org.springframework.context.ApplicationContext;
 
-import com.vaadin.spring.annotation.ViewContainer;
+import com.vaadin.spring.annotation.SpringViewDisplay;
 
 /**
  * Dynamically registered bean which can provide a reference to the current view
  * container instance.
  *
- * @see ViewContainer
+ * @see SpringViewDisplay
  * @see ViewContainerPostProcessor
  *
  * @author Vaadin Ltd
@@ -47,7 +47,7 @@ public class ViewContainerRegistrationBean {
      * this method or {@link #setBeanName(String)} should be called.
      *
      * @param beanClass
-     *            class of the bean that contains the ViewContainer annotation
+     *            class of the bean that contains the SpringViewDisplay annotation
      *            or has it directly on the class
      */
     public void setBeanClass(Class<?> beanClass) {
@@ -59,7 +59,7 @@ public class ViewContainerRegistrationBean {
      * this method or {@link #setBeanClass(Class)} should be called.
      *
      * @param beanName
-     *            name of the bean that has the ViewContainer annotation
+     *            name of the bean that has the SpringViewDisplay annotation
      */
     public void setBeanName(String beanName) {
         this.beanName = beanName;

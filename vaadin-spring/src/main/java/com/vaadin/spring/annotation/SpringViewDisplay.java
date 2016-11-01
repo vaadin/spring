@@ -47,5 +47,6 @@ import com.vaadin.ui.SingleComponentContainer;
 @Retention(RUNTIME)
 @Target({ TYPE, METHOD })
 @Documented
-public @interface ViewContainer {
+@SpringComponent
+public @interface SpringViewDisplay {
 }

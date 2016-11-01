@@ -15,6 +15,7 @@
  */
 package com.vaadin.spring.server;
 
+import com.vaadin.spring.annotation.SpringViewDisplay;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +27,6 @@ import com.vaadin.navigator.Navigator.SingleComponentContainerViewDisplay;
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.ui.Panel;
 
 /**
@@ -49,7 +49,7 @@ public class SpringUIProviderTestWithViewContainerAnnotationOnBean
     @Configuration
     @EnableVaadinNavigation
     static class Config extends AbstractSpringUIProviderTest.Config {
-        @ViewContainer
+        @SpringViewDisplay
         @Bean
         public MyPanel myPanel() {
             return new MyPanel();

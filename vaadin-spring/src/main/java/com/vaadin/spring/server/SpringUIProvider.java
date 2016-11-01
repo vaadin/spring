@@ -37,7 +37,7 @@ import com.vaadin.server.UIProvider;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringUI;
-import com.vaadin.spring.annotation.ViewContainer;
+import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.internal.UIID;
 import com.vaadin.spring.internal.ViewContainerPostProcessor;
 import com.vaadin.spring.internal.ViewContainerRegistrationBean;
@@ -256,7 +256,7 @@ public class SpringUIProvider extends UIProvider {
 
     /**
      * Configures a UI to use the navigator found by {@link #getNavigator()} if
-     * there is a {@link ViewContainer} annotation.
+     * there is a {@link SpringViewDisplay} annotation.
      *
      * @param ui
      *            the Spring managed UI instance for which to configure
@@ -324,9 +324,9 @@ public class SpringUIProvider extends UIProvider {
         } catch (NoSuchBeanDefinitionException e) {
             // fallback with getBeanNamesForAnnotation()
             logger.debug(
-                    "Looking for a ViewContainer bean based on bean level annotations");
+                    "Looking for a SpringViewDisplay bean based on bean level annotations");
             final String[] viewContainerBeanNames = getWebApplicationContext()
-                    .getBeanNamesForAnnotation(ViewContainer.class);
+                    .getBeanNamesForAnnotation(SpringViewDisplay.class);
             if (viewContainerBeanNames.length == 0) {
                 logger.debug(
                         "No view container defined for the UI " + ui.getId());
