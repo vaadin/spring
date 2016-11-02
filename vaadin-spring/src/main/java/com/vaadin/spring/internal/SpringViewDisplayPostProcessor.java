@@ -41,12 +41,12 @@ import java.util.Map;
 /**
  * Bean post processor that scans for {@link SpringViewDisplay} annotations on UI
  * scoped beans or bean classes and registers
- * {@link ViewContainerRegistrationBean} instances for them for
+ * {@link SpringViewDisplayRegistrationBean} instances for them for
  * {@link SpringUIProvider}.
  *
  * @author Vaadin Ltd
  */
-public class ViewContainerPostProcessor implements BeanPostProcessor,
+public class SpringViewDisplayPostProcessor implements BeanPostProcessor,
         ApplicationContextAware, BeanFactoryAware {
     private ApplicationContext applicationContext;
     private ConfigurableListableBeanFactory beanFactory;
@@ -74,13 +74,13 @@ public class ViewContainerPostProcessor implements BeanPostProcessor,
                 Map<String, Object> annotationAttributes = metadata
                         .getAnnotationAttributes(SpringViewDisplay.class.getName());
                 if (annotationAttributes != null) {
-                    registerViewContainerBean(beanName);
+                    registerSpringViewDisplayBean(beanName);
                 }
             }
         }
         // look for annotations on classes
         if (clazz.isAnnotationPresent(SpringViewDisplay.class)) {
-            registerViewContainerBean(clazz);
+            registerSpringViewDisplayBean(clazz);
         }
         return bean;
     }
@@ -91,7 +91,7 @@ public class ViewContainerPostProcessor implements BeanPostProcessor,
      *
      * @param clazz bean class having the view container annotation, not null
      */
-    protected void registerViewContainerBean(Class<?> clazz) {
+    protected void registerSpringViewDisplayBean(Class<?> clazz) {
         BeanDefinitionRegistry registry = null;
         if (applicationContext instanceof BeanDefinitionRegistry) {
             registry = (BeanDefinitionRegistry) applicationContext;
@@ -105,7 +105,7 @@ public class ViewContainerPostProcessor implements BeanPostProcessor,
         }
 
         BeanDefinitionBuilder builder = BeanDefinitionBuilder
-                .genericBeanDefinition(ViewContainerRegistrationBean.class);
+                .genericBeanDefinition(SpringViewDisplayRegistrationBean.class);
 
         // information needed to extract the values from the current UI scoped
         // beans
@@ -126,10 +126,10 @@ public class ViewContainerPostProcessor implements BeanPostProcessor,
      * @param beanName name of the bean having the view container annotation, not
      *                 null
      */
-    protected void registerViewContainerBean(String beanName) {
+    protected void registerSpringViewDisplayBean(String beanName) {
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) applicationContext;
         BeanDefinitionBuilder builder = BeanDefinitionBuilder
-                .genericBeanDefinition(ViewContainerRegistrationBean.class);
+                .genericBeanDefinition(SpringViewDisplayRegistrationBean.class);
 
         // information needed to extract the values from the current UI scoped
         // beans

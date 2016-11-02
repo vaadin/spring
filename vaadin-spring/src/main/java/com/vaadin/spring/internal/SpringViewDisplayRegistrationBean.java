@@ -24,16 +24,16 @@ import com.vaadin.spring.annotation.SpringViewDisplay;
  * container instance.
  *
  * @see SpringViewDisplay
- * @see ViewContainerPostProcessor
+ * @see SpringViewDisplayPostProcessor
  *
  * @author Vaadin Ltd
  */
-public class ViewContainerRegistrationBean {
+public class SpringViewDisplayRegistrationBean {
 
     private Class<?> beanClass;
     private String beanName;
 
-    public Object getViewContainer(ApplicationContext applicationContext) {
+    public Object getSpringViewDisplay(ApplicationContext applicationContext) {
         if (beanName != null) {
             return applicationContext.getBean(beanName);
         } else {

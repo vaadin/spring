@@ -34,7 +34,7 @@ import com.vaadin.spring.annotation.SpringViewDisplay;
  */
 @ContextConfiguration
 @WebAppConfiguration
-public class SpringUIProviderTestWithUiImplementingViewDisplayAsViewContainer
+public class SpringUIProviderTestWithUiImplementingViewDisplayAsSpringViewDisplay
         extends AbstractSpringUIProviderTest {
 
     @SpringUI
@@ -71,9 +71,9 @@ public class SpringUIProviderTestWithUiImplementingViewDisplayAsViewContainer
     }
 
     @Test
-    public void testFindViewContainer() throws Exception {
+    public void testFindSpringViewDisplay() throws Exception {
         TestUI ui = createUi(TestUI.class);
-        Assert.isInstanceOf(TestUI.class, getUiProvider().findViewContainer(ui),
+        Assert.isInstanceOf(TestUI.class, getUiProvider().findSpringViewDisplay(ui),
                 "View container is not a TestUI");
     }
 

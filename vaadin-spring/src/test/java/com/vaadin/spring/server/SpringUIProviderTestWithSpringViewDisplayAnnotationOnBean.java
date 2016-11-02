@@ -19,7 +19,6 @@ import com.vaadin.spring.annotation.SpringViewDisplay;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.Assert;
@@ -36,7 +35,7 @@ import com.vaadin.ui.Panel;
  */
 @ContextConfiguration
 @WebAppConfiguration
-public class SpringUIProviderTestWithPanelAsViewContainer
+public class SpringUIProviderTestWithSpringViewDisplayAnnotationOnBean
         extends AbstractSpringUIProviderTest {
 
     @SpringUI
@@ -44,13 +43,13 @@ public class SpringUIProviderTestWithPanelAsViewContainer
     }
 
     @UIScope
-    @SpringViewDisplay
-    private static class MyPanel extends Panel {
+    public static class MyPanel extends Panel {
     }
 
     @Configuration
     @EnableVaadinNavigation
     static class Config extends AbstractSpringUIProviderTest.Config {
+        @SpringViewDisplay
         @Bean
         public MyPanel myPanel() {
             return new MyPanel();
@@ -72,18 +71,18 @@ public class SpringUIProviderTestWithPanelAsViewContainer
     }
 
     @Test
-    public void testFindViewContainer() throws Exception {
+    public void testFindSpringViewDisplay() throws Exception {
         TestUI ui = createUi(TestUI.class);
         Assert.isInstanceOf(MyPanel.class,
-                getUiProvider().findViewContainer(ui),
+                getUiProvider().findSpringViewDisplay(ui),
                 "View container is not a Panel");
     }
 
     @Test
-    public void testFindViewContainerMultipleTimes() throws Exception {
-        testFindViewContainer();
-        testFindViewContainer();
-        testFindViewContainer();
+    public void testFindSpringViewDisplayMultipleTimes() throws Exception {
+        testFindSpringViewDisplay();
+        testFindSpringViewDisplay();
+        testFindSpringViewDisplay();
     }
 
 }

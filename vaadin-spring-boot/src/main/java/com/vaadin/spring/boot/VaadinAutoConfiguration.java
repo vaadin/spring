@@ -27,7 +27,7 @@ import com.vaadin.spring.annotation.EnableVaadin;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.boot.annotation.EnableVaadinServlet;
-import com.vaadin.spring.internal.ViewContainerPostProcessor;
+import com.vaadin.spring.internal.SpringViewDisplayPostProcessor;
 import com.vaadin.spring.navigator.SpringNavigator;
 
 /**
@@ -65,8 +65,8 @@ public class VaadinAutoConfiguration {
         }
 
         @Bean
-        public static ViewContainerPostProcessor viewContainerPostProcessor() {
-            return new ViewContainerPostProcessor();
+        public static SpringViewDisplayPostProcessor springViewDisplayPostProcessor() {
+            return new SpringViewDisplayPostProcessor();
         }
 
         @Override
