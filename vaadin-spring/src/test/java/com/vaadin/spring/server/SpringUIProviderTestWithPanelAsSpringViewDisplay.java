@@ -71,7 +71,7 @@ public class SpringUIProviderTestWithPanelAsSpringViewDisplay
     }
 
     @Test
-    public void testFindSpringViewDisplaySpringViewDisplay() throws Exception {
+    public void testFindSpringViewDisplay() throws Exception {
         TestUI ui = createUi(TestUI.class);
         Assert.isInstanceOf(MyPanel.class,
                 getUiProvider().findSpringViewDisplay(ui),
@@ -80,9 +80,9 @@ public class SpringUIProviderTestWithPanelAsSpringViewDisplay
 
     @Test
     public void testFindSpringViewDisplayMultipleTimes() throws Exception {
-        testFindSpringViewDisplaySpringViewDisplay();
-        testFindSpringViewDisplaySpringViewDisplay();
-        testFindSpringViewDisplaySpringViewDisplay();
+        testFindSpringViewDisplay();
+        testFindSpringViewDisplay();
+        testFindSpringViewDisplay();
     }
 
 }
