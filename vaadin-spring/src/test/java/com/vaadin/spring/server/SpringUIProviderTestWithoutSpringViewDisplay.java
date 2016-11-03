@@ -27,7 +27,7 @@ import com.vaadin.spring.annotation.SpringUI;
 
 /**
  * Test for normal (full) use cases of SpringUIProvider with automatic
- * navigation configuration on the view but no view container defined.
+ * navigation configuration on the view but no view display defined.
  */
 @ContextConfiguration
 @WebAppConfiguration
@@ -59,7 +59,7 @@ public class SpringUIProviderTestWithoutSpringViewDisplay
     public void testFindSpringViewDisplay() throws Exception {
         TestUI ui = createUi(TestUI.class);
         Assert.isNull(getUiProvider().findSpringViewDisplay(ui),
-                "View container is not a Panel");
+                "View display is not a Panel");
     }
 
 }

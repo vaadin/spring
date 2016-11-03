@@ -86,10 +86,10 @@ public class SpringViewDisplayPostProcessor implements BeanPostProcessor,
     }
 
     /**
-     * Create a view container registration bean definition to allow accessing
-     * annotated view containers for the current UI scope.
+     * Create a view display registration bean definition to allow accessing
+     * annotated view displays for the current UI scope.
      *
-     * @param clazz bean class having the view container annotation, not null
+     * @param clazz bean class having the view display annotation, not null
      */
     protected void registerSpringViewDisplayBean(Class<?> clazz) {
         BeanDefinitionRegistry registry = null;
@@ -120,10 +120,10 @@ public class SpringViewDisplayPostProcessor implements BeanPostProcessor,
     }
 
     /**
-     * Create a view container registration bean definition to allow accessing
-     * annotated view containers for the current UI scope.
+     * Create a view display registration bean definition to allow accessing
+     * annotated view displays for the current UI scope.
      *
-     * @param beanName name of the bean having the view container annotation, not
+     * @param beanName name of the bean having the view display annotation, not
      *                 null
      */
     protected void registerSpringViewDisplayBean(String beanName) {

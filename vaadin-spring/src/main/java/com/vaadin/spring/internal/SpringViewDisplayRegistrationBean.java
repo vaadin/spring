@@ -21,7 +21,7 @@ import com.vaadin.spring.annotation.SpringViewDisplay;
 
 /**
  * Dynamically registered bean which can provide a reference to the current view
- * container instance.
+ * display instance.
  *
  * @see SpringViewDisplay
  * @see SpringViewDisplayPostProcessor
@@ -43,7 +43,7 @@ public class SpringViewDisplayRegistrationBean {
     }
 
     /**
-     * Set the class of the bean that has the view container annotation. Either
+     * Set the class of the bean that has the view display annotation. Either
      * this method or {@link #setBeanName(String)} should be called.
      *
      * @param beanClass
@@ -55,7 +55,7 @@ public class SpringViewDisplayRegistrationBean {
     }
 
     /**
-     * Set the name of the bean that has the view container annotation. Either
+     * Set the name of the bean that has the view display annotation. Either
      * this method or {@link #setBeanClass(Class)} should be called.
      *
      * @param beanName

@@ -77,7 +77,7 @@ public class SpringUIProviderTestWithCustomNavigatorBean
     public void testFindSpringViewDisplay() throws Exception {
         TestUI ui = createUi(TestUI.class);
         Assert.isInstanceOf(TestUI.class, getUiProvider().findSpringViewDisplay(ui),
-                "View container is not a TestUI");
+                "View display is not a TestUI");
     }
 
 }

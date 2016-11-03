@@ -282,10 +282,10 @@ public class SpringUIProvider extends UIProvider {
             navigator.init(ui, (ComponentContainer) springViewDisplay);
         } else {
             logger.error(
-                    "View container does not implement ViewDisplay/SingleComponentContainer/ComponentContainer: "
+                    "View display does not implement ViewDisplay/SingleComponentContainer/ComponentContainer: "
                             + springViewDisplay);
             throw new IllegalStateException(
-                    "View container does not implement ViewDisplay/SingleComponentContainer/ComponentContainer: "
+                    "View display does not implement ViewDisplay/SingleComponentContainer/ComponentContainer: "
                             + springViewDisplay);
         }
     }
@@ -329,11 +329,11 @@ public class SpringUIProvider extends UIProvider {
                     .getBeanNamesForAnnotation(SpringViewDisplay.class);
             if (springViewDisplayBeanNames.length == 0) {
                 logger.debug(
-                        "No view container defined for the UI " + ui.getId());
+                        "No view display defined for the UI " + ui.getId());
                 return null;
             }
             if (springViewDisplayBeanNames.length > 1) {
-                logger.error("Multiple view containers defined for the UI "
+                logger.error("Multiple view displays defined for the UI "
                         + ui.getId() + ": "
                         + Arrays.toString(springViewDisplayBeanNames));
                 throw new NoUniqueBeanDefinitionException(Object.class,

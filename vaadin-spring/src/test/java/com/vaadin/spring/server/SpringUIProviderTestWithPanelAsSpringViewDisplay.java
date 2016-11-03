@@ -31,7 +31,7 @@ import com.vaadin.ui.Panel;
 
 /**
  * Test for normal (full) use cases of SpringUIProvider with automatic
- * navigation configuration on the view with a Panel as the view container.
+ * navigation configuration on the view with a Panel as the view display.
  */
 @ContextConfiguration
 @WebAppConfiguration
@@ -75,7 +75,7 @@ public class SpringUIProviderTestWithPanelAsSpringViewDisplay
         TestUI ui = createUi(TestUI.class);
         Assert.isInstanceOf(MyPanel.class,
                 getUiProvider().findSpringViewDisplay(ui),
-                "View container is not a Panel");
+                "View display is not a Panel");
     }
 
     @Test
