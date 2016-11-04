@@ -15,17 +15,6 @@
  */
 package com.vaadin.spring.navigator;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-
 import com.vaadin.navigator.NavigationStateManager;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
@@ -33,10 +22,24 @@ import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.navigator.ViewProvider;
 import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.internal.ViewCache;
+import com.vaadin.spring.internal.ViewScopeImpl;
 import com.vaadin.spring.navigator.ViewActivationListener.ViewActivationEvent;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.SingleComponentContainer;
 import com.vaadin.ui.UI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.ApplicationContext;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A Navigator that automatically uses {@link SpringViewProvider} and allows
@@ -235,31 +238,88 @@ public class SpringNavigator extends Navigator {
      */
     @Override
     public void setErrorView(final Class<? extends View> viewClass) {
-        setErrorProvider(new ViewProvider() {
-            @Override
-            public View getView(String viewName) {
-                try {
-                    return applicationContext.getBean(viewClass);
-                } catch (NoUniqueBeanDefinitionException e) {
-                    throw e;
-                } catch (NoSuchBeanDefinitionException e) {
-                    // fallback mechanism
-                    LOGGER.info(
-                            "Could not find error view bean of class [{}] in application context, creating it with Class.newInstance()",
-                            viewClass.getName());
-                    try {
-                        return viewClass.newInstance();
-                    } catch (Exception e2) {
-                        throw new RuntimeException(e2);
-                    }
-                }
+        String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, viewClass);
+        ViewProvider errorViewProvider;
+        if (beanNames.length == 0) {
+            errorViewProvider = new TrivialErrorViewProvider(viewClass);
+        } else {
+            if (beanNames.length > 1) throw new NoUniqueBeanDefinitionException(viewClass);
+            BeanDefinition beanDefinition = viewProvider.getBeanDefinitionRegistry().getBeanDefinition(beanNames[0]);
+            if (ViewScopeImpl.VAADIN_VIEW_SCOPE_NAME.equals(beanDefinition.getScope())) {
+                errorViewProvider = new ViewScopeErrorViewProvider(viewClass);
+            } else {
+                errorViewProvider = new BeanErrorViewProvider(viewClass);
             }
-
-            @Override
-            public String getViewName(String navigationState) {
-                return navigationState;
-            }
-        });
+        }
+        setErrorProvider(errorViewProvider);
     }
 
+    private class TrivialErrorViewProvider implements ViewProvider {
+        protected final Class<? extends View> viewClass;
+
+        public TrivialErrorViewProvider(Class<? extends View> viewClass) {
+            this.viewClass = viewClass;
+        }
+
+        @Override
+        public View getView(String viewName) {
+            try {
+                return viewClass.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        @Override
+        public String getViewName(String navigationState) {
+            return navigationState;
+        }
+    }
+
+    private class BeanErrorViewProvider extends TrivialErrorViewProvider {
+
+        public BeanErrorViewProvider(Class<? extends View> viewClass) {
+            super(viewClass);
+        }
+
+        @Override
+        public View getView(String viewName) {
+            try {
+                return applicationContext.getBean(viewClass);
+            } catch (NoUniqueBeanDefinitionException e) {
+                throw e;
+            } catch (NoSuchBeanDefinitionException e) {
+                // fallback mechanism
+                LOGGER.info(
+                        "Could not find error view bean of class [{}] in application context, creating it with Class.newInstance()",
+                        viewClass.getName());
+                return super.getView(viewName);
+            }
+        }
+
+    }
+
+    private class ViewScopeErrorViewProvider extends BeanErrorViewProvider {
+        public ViewScopeErrorViewProvider(Class<? extends View> viewClass) {
+            super(viewClass);
+        }
+
+        @Override
+        public View getView(String viewName) {
+            LOGGER.trace("View [{}] is view scoped, activating scope",
+                    viewClass);
+            final ViewCache viewCache = ViewScopeImpl
+                    .getViewCacheRetrievalStrategy()
+                    .getViewCache(applicationContext);
+            View view = null;
+            String synteticViewName = "errorview$" + viewClass.getName();
+            viewCache.creatingView(synteticViewName);
+            try {
+                view = super.getView(synteticViewName);
+            } finally {
+                viewCache.viewCreated(synteticViewName, view);
+            }
+            return view;
+        }
+
+    }
 }
