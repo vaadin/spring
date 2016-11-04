@@ -229,7 +229,7 @@ public class SpringNavigator extends Navigator {
      * backwards compatibility, {@link Class#newInstance()} is used if no such
      * bean is found.
      * <p>
-     * Note that an error view must be UI or prototype scoped.
+     * Note that an error view bean must be UI or prototype scoped.
      *
      * @param viewClass
      *            The View class whose instance should be used as the error
