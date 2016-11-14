@@ -15,6 +15,9 @@
  */
 package com.vaadin.spring.server;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -145,4 +148,28 @@ public class SpringVaadinServlet extends VaadinServlet {
         }
     }
 
+    @Override
+    protected String getStaticFilePath(HttpServletRequest request) {
+        String staticFilePath = super.getStaticFilePath(request);
+        if(staticFilePath == null) {
+
+            try {
+                String decodedRequestURI = URLDecoder.decode(
+                        request.getRequestURI(), StandardCharsets.UTF_8.name());
+                if (decodedRequestURI.startsWith("/VAADIN/")) {
+                    return decodedRequestURI;
+                }
+
+                String decodedContextPath = URLDecoder.decode(
+                        request.getContextPath(), StandardCharsets.UTF_8.name());
+                if (decodedRequestURI.startsWith(decodedContextPath + "/VAADIN/")) {
+                    return decodedRequestURI.substring(decodedContextPath.length());
+                }
+            } catch (UnsupportedEncodingException exception) {
+                // cannot happen since UTF8 is always supported
+                throw new RuntimeException(exception);
+            }
+        }
+        return staticFilePath;
+    }
 }
