@@ -148,6 +148,19 @@ public class SpringVaadinServlet extends VaadinServlet {
         }
     }
 
+    /**
+     * Check if this is a request for a static resource and, if it is, return the
+     * resource path.
+     *
+     * Resource handling in Vaadin 8 was simplified, and that
+     * caused problems for spring applications. This method is a copy of the same functionality
+     * from VaadinServlet.java of version 7.
+     * TODO fix static resource handling for spring application
+     *
+     * @param request http client request
+     * @return static file path or null if the request is not for a static resource.
+     *
+     */
     @Override
     protected String getStaticFilePath(HttpServletRequest request) {
         String staticFilePath = super.getStaticFilePath(request);
