@@ -50,6 +50,7 @@ import com.vaadin.spring.server.AbstractSpringUIProviderTest;
 import com.vaadin.spring.test.util.TestSpringNavigator;
 import com.vaadin.ui.UI;
 import com.vaadin.util.CurrentInstance;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Test SpringViewProvider access control.
@@ -176,8 +177,8 @@ public class SpringViewProviderAccessControlTest
 
         @Bean
         @UIScope
-        public SpringNavigator vaadinNavigator() {
-            return new TestSpringNavigator();
+        public SpringNavigator vaadinNavigator(ApplicationContext applicationContext, SpringViewProvider viewProvider) {
+            return new TestSpringNavigator(applicationContext, viewProvider);
         }
     }
 

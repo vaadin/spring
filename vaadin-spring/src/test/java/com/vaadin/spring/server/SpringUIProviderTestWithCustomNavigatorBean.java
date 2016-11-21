@@ -25,7 +25,10 @@ import org.springframework.util.Assert;
 
 import com.vaadin.navigator.Navigator.SingleComponentContainerViewDisplay;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.navigator.SpringNavigator;
+import com.vaadin.spring.navigator.SpringViewProvider;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Test SpringUIProvider for the case where the application has a custom
@@ -42,13 +45,19 @@ public class SpringUIProviderTestWithCustomNavigatorBean
     }
 
     private static class MyNavigator extends SpringNavigator {
+
+        public MyNavigator(ApplicationContext applicationContext, SpringViewProvider viewProvider) {
+            super(applicationContext, viewProvider);
+        }
     }
 
     @Configuration
     static class Config extends AbstractSpringUIProviderTest.Config {
+
         @Bean
-        public MyNavigator myNavigator() {
-            return new MyNavigator();
+        @UIScope
+        public MyNavigator myNavigator(ApplicationContext applicationContext, SpringViewProvider viewProvider) {
+            return new MyNavigator(applicationContext, viewProvider);
         }
 
         // this gets configured by the UI provider

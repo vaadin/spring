@@ -24,6 +24,7 @@ import com.vaadin.navigator.ViewProvider;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.internal.UIScopeImpl;
 import com.vaadin.spring.navigator.ViewActivationListener.ViewActivationEvent;
+import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.SingleComponentContainer;
 import com.vaadin.ui.UI;
@@ -53,17 +54,17 @@ public class SpringNavigator extends Navigator {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(SpringNavigator.class);
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private transient ApplicationContext applicationContext;
 
-    @Autowired
     private SpringViewProvider viewProvider;
 
     private String currentViewName;
 
     private final List<ViewActivationListener> activationListeners = new LinkedList<ViewActivationListener>();
 
-    public SpringNavigator() {
+    public SpringNavigator(ApplicationContext applicationContext, SpringViewProvider viewProvider) {
+        this.applicationContext = applicationContext;
+        this.viewProvider = viewProvider;
     }
 
     public SpringNavigator(UI ui, ComponentContainer container) {
@@ -151,11 +152,9 @@ public class SpringNavigator extends Navigator {
      * be explicitly called to ensure the current view matches the navigation
      * state.
      *
-     * @param ui
-     *            The UI to which this Navigator is attached.
-     * @param container
-     *            The component container used to display the views handled by
-     *            this navigator
+     * @param ui The UI to which this Navigator is attached.
+     * @param container The component container used to display the views
+     * handled by this navigator
      */
     public void init(UI ui, ComponentContainer container) {
         init(ui, new ComponentContainerViewDisplay(container));
@@ -173,11 +172,9 @@ public class SpringNavigator extends Navigator {
      * be explicitly called to ensure the current view matches the navigation
      * state.
      *
-     * @param ui
-     *            The UI to which this Navigator is attached.
-     * @param container
-     *            The single component container used to display the views
-     *            handled by this navigator
+     * @param ui The UI to which this Navigator is attached.
+     * @param container The single component container used to display the views
+     * handled by this navigator
      */
     public void init(UI ui, SingleComponentContainer container) {
         init(ui, new SingleComponentContainerViewDisplay(container));
@@ -195,11 +192,9 @@ public class SpringNavigator extends Navigator {
      * be explicitly called to ensure the current view matches the navigation
      * state.
      *
-     * @param ui
-     *            The UI to which this Navigator is attached.
-     * @param display
-     *            The ViewDisplay used to display the views handled by this
-     *            navigator
+     * @param ui The UI to which this Navigator is attached.
+     * @param display The ViewDisplay used to display the views handled by this
+     * navigator
      */
     public void init(UI ui, ViewDisplay display) {
         init(ui, new UriFragmentManager(ui.getPage()), display);
@@ -231,27 +226,26 @@ public class SpringNavigator extends Navigator {
      * <p>
      * Note that an error view bean must be UI or prototype scoped.
      *
-     * @param viewClass
-     *            The View class whose instance should be used as the error
-     *            view.
+     * @param viewClass The View class whose instance should be used as the
+     * error view.
      */
     @Override
     public void setErrorView(final Class<? extends View> viewClass) {
-        if(viewClass == null) {
+        if (viewClass == null) {
             setErrorProvider(null);
             return;
         }
-        String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, viewClass);
+        String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(getWebApplicationContext(), viewClass);
         /*
             Beans count==0 here means fallback into direct class instantiation
             No need to check for the scope then
-        */
+         */
         if (beanNames.length > 1) {
             throw new NoUniqueBeanDefinitionException(viewClass);
         } else if (beanNames.length == 1) {
             BeanDefinition beanDefinition = viewProvider.getBeanDefinitionRegistry().getBeanDefinition(beanNames[0]);
             String scope = beanDefinition.getScope();
-            if (!UIScopeImpl.VAADIN_UI_SCOPE_NAME.equals(scope) && ! "prototype".equals(scope)) {
+            if (!UIScopeImpl.VAADIN_UI_SCOPE_NAME.equals(scope) && !"prototype".equals(scope)) {
                 throw new BeanDefinitionValidationException("Error view must have UI or prototype scope");
             }
         }
@@ -260,7 +254,7 @@ public class SpringNavigator extends Navigator {
             @Override
             public View getView(String viewName) {
                 try {
-                    return applicationContext.getBean(viewClass);
+                    return getWebApplicationContext().getBean(viewClass);
                 } catch (NoUniqueBeanDefinitionException e) {
                     throw e;
                 } catch (NoSuchBeanDefinitionException e) {
@@ -281,6 +275,22 @@ public class SpringNavigator extends Navigator {
                 return navigationState;
             }
         });
+    }
+
+    protected ApplicationContext getWebApplicationContext() {
+        if (applicationContext == null) {
+            // Assume we have serialized and deserialized and Navigator is
+            // trying to find a view so UI.getCurrent() is available
+            UI ui = UI.getCurrent();
+            if (ui == null) {
+                throw new IllegalStateException(
+                        "Could not find application context and no current UI is available");
+            }
+            applicationContext = ((SpringVaadinServletService) ui.getSession()
+                    .getService()).getWebApplicationContext();
+        }
+
+        return applicationContext;
     }
 
 }
