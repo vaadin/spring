@@ -201,5 +201,6 @@
         <module>vaadin-spring</module>
         <module>vaadin-spring-boot</module>
         <module>vaadin-spring-boot-starter</module>
+        <module>vaadin-spring-bom</module>
     </modules>
 </project>
