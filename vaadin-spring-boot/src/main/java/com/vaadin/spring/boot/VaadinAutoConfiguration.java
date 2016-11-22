@@ -27,7 +27,7 @@ import com.vaadin.spring.annotation.EnableVaadin;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.boot.annotation.EnableVaadinServlet;
-import com.vaadin.spring.internal.ViewContainerPostProcessor;
+import com.vaadin.spring.internal.SpringViewDisplayPostProcessor;
 import com.vaadin.spring.navigator.SpringNavigator;
 
 /**
@@ -57,16 +57,10 @@ public class VaadinAutoConfiguration {
     // condition
     static class EnableVaadinNavigatorConfiguration
             implements InitializingBean {
-        @ConditionalOnMissingBean(type = "com.vaadin.spring.navigator.SpringNavigator")
-        @Bean
-        @UIScope
-        public SpringNavigator vaadinNavigator() {
-            return new SpringNavigator();
-        }
 
         @Bean
-        public static ViewContainerPostProcessor viewContainerPostProcessor() {
-            return new ViewContainerPostProcessor();
+        public static SpringViewDisplayPostProcessor springViewDisplayPostProcessor() {
+            return new SpringViewDisplayPostProcessor();
         }
 
         @Override
@@ -74,6 +68,25 @@ public class VaadinAutoConfiguration {
             logger.debug("{} initialized", getClass().getName());
         }
     }
+
+	@Configuration
+	@ConditionalOnClass(name = "com.vaadin.spring.navigator.SpringNavigator")
+	static class EnableSpringVaadinNavigatorConfiguration
+			implements InitializingBean {
+
+		@ConditionalOnMissingBean(type = "com.vaadin.spring.navigator.SpringNavigator")
+		@Bean
+		@UIScope
+		public SpringNavigator vaadinNavigator() {
+			return new SpringNavigator();
+		}
+
+		@Override
+		public void afterPropertiesSet() throws Exception {
+			logger.debug("{} initialized", getClass().getName());
+		}
+
+	}
 
     @Configuration
     @EnableVaadinServlet

@@ -15,6 +15,7 @@
  */
 package com.vaadin.spring.boot;
 
+import com.vaadin.spring.annotation.SpringViewDisplay;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,6 @@ import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.vaadin.spring.annotation.SpringUI;
-import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
 import com.vaadin.spring.server.SpringVaadinServlet;
@@ -45,7 +45,7 @@ public class VaadinAutoConfigurationTest extends AbstractSpringUIProviderTest {
     private WebApplicationContext applicationContext;
 
     @SpringUI
-    @ViewContainer
+    @SpringViewDisplay
     private static class TestUI extends DummyUI {
     }
 

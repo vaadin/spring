@@ -17,6 +17,7 @@ package com.vaadin.spring.internal;
 
 import java.util.Collection;
 
+import com.vaadin.spring.annotation.SpringViewDisplay;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -36,7 +38,6 @@ import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.spring.annotation.ViewContainer;
 import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.navigator.SpringViewProvider;
@@ -50,15 +51,16 @@ import com.vaadin.util.CurrentInstance;
  */
 @ContextConfiguration
 @WebAppConfiguration
+@TestPropertySource(properties = "view.name.key=view4")
 public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
 
     @SpringUI
-    @ViewContainer
+    @SpringViewDisplay
     private static class TestUI1 extends DummyUI {
     }
 
     @SpringUI(path = "other")
-    // TODO @ViewContainer
+    // TODO @SpringViewDisplay
     private static class TestUI2 extends UI {
         @Override
         protected void init(VaadinRequest request) {
@@ -85,6 +87,20 @@ public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
         public void enter(ViewChangeEvent event) {
         }
     }
+
+    @SpringView(name = "${view.name.key}", ui = TestUI1.class)
+    private static class TestView4 implements View {
+        @Override
+        public void enter(ViewChangeEvent event) {
+        }
+    }
+    
+    @SpringView(name = "${undefined.view.name.key:default}", ui = TestUI1.class)
+    private static class TestView5 implements View {
+        @Override
+        public void enter(ViewChangeEvent event) {
+        }
+    }    
 
     @Configuration
     @EnableVaadinNavigation
@@ -118,6 +134,18 @@ public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
         @ViewScope
         public TestView3 view3() {
             return new TestView3();
+        }
+
+        @Bean
+        @ViewScope
+        public TestView4 view4() {
+            return new TestView4();
+        }
+
+        @Bean
+        @ViewScope
+        public TestView5 view5() {
+        	return new TestView5();
         }
 
         @Bean
@@ -163,11 +191,15 @@ public class SpringViewProviderTest extends AbstractSpringUIProviderTest {
         SpringViewProvider viewProvider = applicationContext
                 .getBean(SpringViewProvider.class);
         Collection<String> views = viewProvider.getViewNamesForCurrentUI();
-        Assert.assertTrue("Wrong number of views returned", 2 == views.size());
+        Assert.assertTrue("Wrong number of views returned", 4 == views.size());
         Assert.assertTrue("Root view not returned by SpringViewProvider",
                 views.contains(""));
         Assert.assertTrue("Root view not returned by SpringViewProvider",
                 views.contains("view2"));
+        Assert.assertTrue("Root view not returned by SpringViewProvider",
+        		views.contains("view4"));
+        Assert.assertTrue("Root view not returned by SpringViewProvider",
+        		views.contains("default"));
         UI.setCurrent(null);
     }
 
