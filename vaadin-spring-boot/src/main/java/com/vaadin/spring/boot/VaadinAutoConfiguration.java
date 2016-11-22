@@ -29,6 +29,8 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.boot.annotation.EnableVaadinServlet;
 import com.vaadin.spring.internal.SpringViewDisplayPostProcessor;
 import com.vaadin.spring.navigator.SpringNavigator;
+import com.vaadin.spring.navigator.SpringViewProvider;
+import org.springframework.context.ApplicationContext;
 
 /**
  * @author Petter Holmström (petter@vaadin.com)
@@ -77,8 +79,8 @@ public class VaadinAutoConfiguration {
 		@ConditionalOnMissingBean(type = "com.vaadin.spring.navigator.SpringNavigator")
 		@Bean
 		@UIScope
-		public SpringNavigator vaadinNavigator() {
-			return new SpringNavigator();
+		public SpringNavigator vaadinNavigator(ApplicationContext applicationContext, SpringViewProvider viewProvider) {
+			return new SpringNavigator(applicationContext, viewProvider);
 		}
 
 		@Override

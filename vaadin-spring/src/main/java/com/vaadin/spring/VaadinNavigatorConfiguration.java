@@ -22,6 +22,8 @@ import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.internal.SpringViewDisplayPostProcessor;
 import com.vaadin.spring.navigator.SpringNavigator;
+import com.vaadin.spring.navigator.SpringViewProvider;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Spring configuration for automatically configuring a SpringNavigator.
@@ -37,8 +39,8 @@ public class VaadinNavigatorConfiguration {
 
     @Bean
     @UIScope
-    public SpringNavigator vaadinNavigator() {
-        return new SpringNavigator();
+    public SpringNavigator vaadinNavigator(ApplicationContext applicationContext, SpringViewProvider viewProvider) {
+        return new SpringNavigator(applicationContext, viewProvider);
     }
 
     @Bean

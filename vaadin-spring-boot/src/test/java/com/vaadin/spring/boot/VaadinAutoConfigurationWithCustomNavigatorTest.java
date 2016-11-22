@@ -32,7 +32,9 @@ import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.navigator.SpringNavigator;
+import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
+import org.springframework.context.ApplicationContext;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
@@ -51,6 +53,10 @@ public class VaadinAutoConfigurationWithCustomNavigatorTest
     }
 
     private static class MyNavigator extends SpringNavigator {
+
+        public MyNavigator(ApplicationContext applicationContext, SpringViewProvider viewProvider) {
+            super(applicationContext, viewProvider);
+        }
     }
 
     @Configuration
@@ -60,8 +66,8 @@ public class VaadinAutoConfigurationWithCustomNavigatorTest
     protected static class Config {
         @Bean
         @UIScope
-        public MyNavigator myNavigator() {
-            return new MyNavigator();
+        public MyNavigator myNavigator(ApplicationContext applicationContext, SpringViewProvider viewProvider) {
+            return new MyNavigator(applicationContext, viewProvider);
         }
 
         // this gets configured by the UI provider

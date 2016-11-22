@@ -20,10 +20,17 @@ import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.spring.navigator.SpringNavigator;
+import com.vaadin.spring.navigator.SpringViewProvider;
 import com.vaadin.ui.UI;
+import org.springframework.context.ApplicationContext;
 
 // customized navigator to bypass most dependencies
 public final class TestSpringNavigator extends SpringNavigator {
+
+    public TestSpringNavigator(ApplicationContext applicationContext, SpringViewProvider viewProvider) {
+        super(applicationContext, viewProvider);
+    }
+    
     @Override
     public void init(UI ui, ViewDisplay display) {
         init(ui, new NavigationStateManager() {
