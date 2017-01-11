@@ -27,7 +27,6 @@
     • LineLenght (the default value is 80 which is also used in formatter, but
     i.e. member declarations are not wrapped onto next line)
     • RedundantModifier (i.e. using public in interface method declarations)
-    • RedundantThrows (causes unnecessary fails when can't get class information)
     • MethodLength (default maxLength is 150)
     • ParameterNumber (default maxLength is 7)
     • EmptyBlock (if-else statements have some blocks if x -> no action)
@@ -216,9 +215,6 @@
             <property name="severity" value="ignore" />
         </module>
         <module name="MissingSwitchDefault" />
-        <module name="RedundantThrows">
-            <property name="severity" value="warning" />
-        </module>
         <module name="SimplifyBooleanExpression" />
         <module name="SimplifyBooleanReturn" />
 
