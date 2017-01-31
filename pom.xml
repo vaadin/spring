@@ -11,7 +11,7 @@
 
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-spring-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>vaadin-spring-parent</name>
@@ -85,9 +85,9 @@
         <project.build.source>1.6</project.build.source>
 
         <!-- These are typically overridden with BOMs -->
-        <vaadin.version>7.7.3</vaadin.version>
-        <spring.version>4.3.3.RELEASE</spring.version>
-        <spring.boot.version>1.4.1.RELEASE</spring.boot.version>
+        <vaadin.version>7.7.6</vaadin.version>
+        <spring.version>4.3.6.RELEASE</spring.version>
+        <spring.boot.version>1.5.1.RELEASE</spring.boot.version>
 
         <slf4j.version>1.7.7</slf4j.version>
 
