@@ -101,4 +101,5 @@
         </plugins>
     </build>    
 
+    <version>1.2-PATCH</version>
 </project>
