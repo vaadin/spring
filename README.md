@@ -3,7 +3,12 @@
 Vaadin Spring
 ======================
 
-Vaadin Spring is the official Spring integration for Vaadin Framework version 7.
+Vaadin Spring is the official Spring integration for [Vaadin Framework](https://github.com/vaadin/framework).
+
+Download release
+----
+
+Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to https://vaadin.com/addon/vaadin-spring.
 
 Building the project
 ----
