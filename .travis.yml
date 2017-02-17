@@ -5,6 +5,7 @@ dist: trusty
 branches:
   only:
   - master
+  - 1.2
 cache:
   directories:
   - "$HOME/.m2"
