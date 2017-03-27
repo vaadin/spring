@@ -358,11 +358,10 @@ public class SpringViewProvider implements ViewProvider {
                     "bean did not implement View interface");
 
             final UI currentUI = UI.getCurrent();
-            final SpringView annotation = getWebApplicationContext()
-                    .findAnnotationOnBean(beanName, SpringView.class);
+            final SpringView annotation = AnnotatedElementUtils.findMergedAnnotation(type, SpringView.class);
 
             Assert.notNull(annotation,
-                    "class did not have a SpringView annotation");
+                    "class did not have a SpringView annotation or an alias for it");
 
             if (annotation.ui().length == 0) {
                 LOGGER.trace(
