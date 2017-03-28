@@ -20,7 +20,7 @@ Contributions to the project can be done using pull requests.
 You will be asked to sign a contribution agreement after creating the first one.
 
 
-Copyright 2015-2016 Vaadin Ltd.
+Copyright 2015-2017 Vaadin Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
