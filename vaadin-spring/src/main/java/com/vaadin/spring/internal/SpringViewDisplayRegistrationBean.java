@@ -19,6 +19,8 @@ import org.springframework.context.ApplicationContext;
 
 import com.vaadin.spring.annotation.SpringViewDisplay;
 
+import java.io.Serializable;
+
 /**
  * Dynamically registered bean which can provide a reference to the current view
  * display instance.
@@ -28,7 +30,7 @@ import com.vaadin.spring.annotation.SpringViewDisplay;
  *
  * @author Vaadin Ltd
  */
-public class SpringViewDisplayRegistrationBean {
+public class SpringViewDisplayRegistrationBean implements Serializable {
 
     private Class<?> beanClass;
     private String beanName;
