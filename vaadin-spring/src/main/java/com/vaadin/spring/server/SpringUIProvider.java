@@ -36,6 +36,7 @@ import com.vaadin.server.UICreateEvent;
 import com.vaadin.server.UIProvider;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.spring.annotation.TranslatableTitle;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.internal.UIID;
@@ -377,9 +378,9 @@ public class SpringUIProvider extends UIProvider {
     @Override
     public String getPageTitle(UICreateEvent event) {
         String pageTitle = super.getPageTitle(event);
-        if (pageTitle != null) {
-            pageTitle = resolvePropertyPlaceholders(pageTitle);
-        }
+
+        pageTitle = pageTitle != null ? resolvePropertyPlaceholders(pageTitle) : getPageTitleByMessageSource(event);
+
         return pageTitle;
     }
 
@@ -389,6 +390,17 @@ public class SpringUIProvider extends UIProvider {
                     .resolvePlaceholders(value);
         }
         return value;
+    }
+
+    private String getPageTitleByMessageSource(UICreateEvent event) {
+        TranslatableTitle translatableTitleAnnotation = getAnnotationFor(event.getUIClass(), TranslatableTitle.class);
+        if (translatableTitleAnnotation == null) {
+            return null;
+        } else {
+            String messageCode = translatableTitleAnnotation.value();
+            String defaultMessage = "?" + messageCode + "?";
+            return getWebApplicationContext().getMessage(messageCode, null, defaultMessage, event.getRequest().getLocale());
+        }
     }
 
 }
