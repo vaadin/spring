@@ -24,7 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.io.Serializable;
 
-public abstract class SecuredViewAccessControl implements ViewAccessControl, Serializable {
+public abstract class AbstractSecuredViewAccessControl implements ViewAccessControl, Serializable {
 
 	private transient WebApplicationContext webApplicationContext = null;
 
