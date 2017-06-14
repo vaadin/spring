@@ -190,6 +190,7 @@
 
     <modules>
         <module>vaadin-spring</module>
+        <module>vaadin-spring-security</module>
         <module>vaadin-spring-boot</module>
         <module>vaadin-spring-boot-starter</module>
     </modules>
