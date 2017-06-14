@@ -18,6 +18,7 @@ package com.vaadin.spring.access;
 import com.vaadin.navigator.View;
 import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.UI;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.context.WebApplicationContext;
@@ -26,7 +27,8 @@ import java.io.Serializable;
 
 public abstract class AbstractSecuredViewAccessControl implements ViewAccessControl, Serializable {
 
-	private transient WebApplicationContext webApplicationContext = null;
+	@Autowired
+	private WebApplicationContext webApplicationContext;
 
 	@Override
 	public boolean isAccessGranted(UI ui, String beanName) {
@@ -34,21 +36,25 @@ public abstract class AbstractSecuredViewAccessControl implements ViewAccessCont
 		return isAccessGranted(ui, viewSecured);
 	}
 
+	@SuppressWarnings("unused")
 	public boolean isAccessGranted(UI ui, Class<? extends View> viewClass) {
 		Secured viewSecured = AnnotationUtils.findAnnotation(viewClass, Secured.class);
 		return isAccessGranted(ui, viewSecured);
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	protected  boolean isAccessGranted(UI ui, Secured viewSecured) {
 		if (viewSecured == null) {
 			return true;
+		} else {
+			return isAccessGranted(ui,viewSecured.value());
 		}
-
-		return isAccessGranted(ui, viewSecured.value());
 	}
 
+	@SuppressWarnings("WeakerAccess")
 	protected abstract boolean isAccessGranted(UI ui, String securityConfigurationAttributes[]);
 
+	@SuppressWarnings("WeakerAccess")
 	protected WebApplicationContext getWebApplicationContext(UI ui) {
 		if (webApplicationContext == null) {
 			webApplicationContext = ((SpringVaadinServletService) ui.getSession().getService())
