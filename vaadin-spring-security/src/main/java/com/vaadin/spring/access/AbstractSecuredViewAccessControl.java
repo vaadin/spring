@@ -31,8 +31,8 @@ import java.io.Serializable;
  * The implementation of the class should be marked with
  * {@link com.vaadin.spring.annotation.SpringComponent @SpringComponent} annotation and be visible for component scan.
  * <p>
- * If the implementor of the class is used, application {@link View Views} can be protected against unauthorized access with
- * {@link Secured @Secured} annotation.
+ * If the implementation of the class is used, application {@link View Views} can be protected against unauthorized access with
+ * the {@link Secured @Secured} annotation.
  */
 public abstract class AbstractSecuredViewAccessControl implements ViewAccessControl, Serializable {
 
@@ -86,8 +86,10 @@ public abstract class AbstractSecuredViewAccessControl implements ViewAccessCont
     /**
      * Checks the security attributes found for a view for the current user
      *
-     * @param ui                              current UI
-     * @param securityConfigurationAttributes attributes of the view
+     * @param ui
+     *          current UI
+     * @param securityConfigurationAttributes
+     *          attributes of the view
      * @return {@code true} if the access is granted or the view is not secured, {@code false} otherwise
      * @see org.springframework.security.access.annotation.Secured
      */

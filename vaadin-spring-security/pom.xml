@@ -12,12 +12,12 @@
 
     <name>vaadin-spring-security</name>
     <description>
-        Provides Spring integration for Vaadin applications.
+        Provides basic Spring Security support for Vaadin applications.
     </description>
     <url>https://github.com/vaadin/spring</url>
 
     <properties>
-        <Implementation-Title>Vaadin Spring</Implementation-Title>
+        <Implementation-Title>Vaadin Spring Security</Implementation-Title>
     </properties>
 
     <dependencies>
@@ -108,13 +108,6 @@
                         <include>com/**</include>
                     </includes>
                 </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>    

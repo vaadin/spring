@@ -31,7 +31,9 @@ public class SecuredViewAccessControl extends AbstractSecuredViewAccessControl {
     protected boolean isAccessGranted(UI ui, String[] securityConfigurationAttributes) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        if(authentication==null) return false;
+        if (authentication == null) {
+            return false;
+        }
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         for (GrantedAuthority authority : authorities) {
             for (String attribute : securityConfigurationAttributes) {
