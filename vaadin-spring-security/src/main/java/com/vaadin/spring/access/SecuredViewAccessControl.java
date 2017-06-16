@@ -16,28 +16,52 @@
 package com.vaadin.spring.access;
 
 import com.vaadin.navigator.View;
+import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.UI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Abstract class to enable Spring Security support for
- * {@link com.vaadin.spring.navigator.SpringViewProvider SpringViewProvider}.
- * The implementation of the class should be marked with
- * {@link com.vaadin.spring.annotation.SpringComponent @SpringComponent} annotation and be visible for component scan.
+ * Bean to enable Spring Security support for {@link com.vaadin.spring.navigator.SpringViewProvider SpringViewProvider}.
+ * The bean should be visible for component scan.
  * <p>
- * If the implementation of the class is used, application {@link View Views} can be protected against unauthorized access with
+ * If the bean is used, application {@link View Views} can be protected against unauthorized access with
  * the {@link Secured @Secured} annotation.
  */
-public abstract class AbstractSecuredViewAccessControl implements ViewAccessControl, Serializable {
+@SuppressWarnings("WeakerAccess")
+@SpringComponent
+public class SecuredViewAccessControl implements ViewAccessControl, Serializable {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    protected boolean isAccessGranted(UI ui, String[] securityConfigurationAttributes) {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        if (authentication == null) {
+            return false;
+        }
+        Set<String> authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+        for (String attribute : securityConfigurationAttributes) {
+            if (authorities.contains(attribute)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Checks the explicitly given bean of {@code View} class for granted access for the current user
@@ -59,7 +83,7 @@ public abstract class AbstractSecuredViewAccessControl implements ViewAccessCont
      * @param ui        current UI
      * @param viewClass view class
      * @return {@code true} if the access is granted or the view is not secured, {@code false} otherwise
-     * @see org.springframework.security.access.annotation.Secured
+     * @see Secured
      */
     @SuppressWarnings("unused")
     public boolean isAccessGranted(UI ui, Class<? extends View> viewClass) {
@@ -82,18 +106,6 @@ public abstract class AbstractSecuredViewAccessControl implements ViewAccessCont
             return isAccessGranted(ui, viewSecured.value());
         }
     }
-
-    /**
-     * Checks the security attributes found for a view for the current user
-     *
-     * @param ui
-     *          current UI
-     * @param securityConfigurationAttributes
-     *          attributes of the view
-     * @return {@code true} if the access is granted or the view is not secured, {@code false} otherwise
-     * @see org.springframework.security.access.annotation.Secured
-     */
-    protected abstract boolean isAccessGranted(UI ui, String securityConfigurationAttributes[]);
 
     private WebApplicationContext getWebApplicationContext(UI ui) {
         if (webApplicationContext == null) {

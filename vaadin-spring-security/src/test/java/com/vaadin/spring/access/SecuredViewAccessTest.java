@@ -54,7 +54,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 
@@ -129,13 +128,13 @@ public class SecuredViewAccessTest {
     }
 
     @SpringView(name = TestViewSecured.VIEW_NAME, ui = DummyUI.class)
-    @Secured("role_" + TestViewSecured.VIEW_NAME)
+    @Secured("ROLE_SECURED")
     private static class TestViewSecured extends DummyView {
         static final String VIEW_NAME = "secured";
     }
 
     @SpringView(name = TestViewAdminOnly.VIEW_NAME, ui = DummyUI.class)
-    @Secured("role_" + TestViewAdminOnly.VIEW_NAME)
+    @Secured("ROLE_ADMIN")
     private static class TestViewAdminOnly extends DummyView {
         static final String VIEW_NAME = "admin";
     }
@@ -188,29 +187,34 @@ public class SecuredViewAccessTest {
 
     @Test
     public void testUnsecuredNoAuth() {
-        Collection<String> viewNamesForCurrentUI = new HashSet<>(viewProvider.getViewNamesForCurrentUI());
-        Assert.assertEquals(Collections.singleton(TestViewUnsecured.VIEW_NAME), viewNamesForCurrentUI);
+        doTest(TestViewUnsecured.VIEW_NAME);
     }
 
     @Test
     public void testUnsecuredAuth() {
-        SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("p", "c", "nobody"));
-        Collection<String> viewNamesForCurrentUI = new HashSet<>(viewProvider.getViewNamesForCurrentUI());
-        Assert.assertEquals(Collections.singleton(TestViewUnsecured.VIEW_NAME), viewNamesForCurrentUI);
+        setupContext("nobody");
+        doTest(TestViewUnsecured.VIEW_NAME);
+    }
+
+    private void setupContext(String... authorities) {
+        SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("p", "c", authorities));
     }
 
     @Test
     public void testSecuredAuth() {
-        SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("p", "c", "nobody", "role_secured"));
-        Collection<String> viewNamesForCurrentUI = new HashSet<>(viewProvider.getViewNamesForCurrentUI());
-        Assert.assertEquals(new HashSet<>(Arrays.asList(TestViewUnsecured.VIEW_NAME, TestViewSecured.VIEW_NAME)), viewNamesForCurrentUI);
+        setupContext("nobody", "ROLE_SECURED");
+        doTest(TestViewUnsecured.VIEW_NAME, TestViewSecured.VIEW_NAME);
     }
 
     @Test
     public void testAdminAuth() {
-        SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("p", "c", "role_adminOnly"));
+        setupContext("ROLE_ADMIN");
+        doTest(TestViewUnsecured.VIEW_NAME, TestViewAdminOnly.VIEW_NAME);
+    }
+
+    private void doTest(String... allowedViews) {
         Collection<String> viewNamesForCurrentUI = new HashSet<>(viewProvider.getViewNamesForCurrentUI());
-        Assert.assertEquals(new HashSet<>(Arrays.asList(TestViewUnsecured.VIEW_NAME, TestViewAdminOnly.VIEW_NAME)), viewNamesForCurrentUI);
+        Assert.assertEquals(new HashSet<>(Arrays.asList(allowedViews)), viewNamesForCurrentUI);
     }
 }
 
