@@ -31,6 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Bean to enable Spring Security support for {@link com.vaadin.spring.navigator.SpringViewProvider SpringViewProvider}.
@@ -46,7 +47,16 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
     @Autowired
     private WebApplicationContext webApplicationContext;
 
-    protected boolean isAccessGranted(UI ui, String[] securityConfigurationAttributes) {
+    /**
+     * Checks if the current user is granted any explicitly provided security attributes
+     * (usually set with {@code @Secured} annotation).
+     *
+     * @param securityConfigAttributes
+     *          list of security configuration attributes (e.g. ROLE_USER, ROLE_ADMIN).
+     * @return {@code true} if the access is granted or the view is not secured, {@code false} otherwise
+     * @see Secured
+     */
+    protected boolean isAccessGranted(String[] securityConfigAttributes) {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         if (authentication == null) {
@@ -55,12 +65,8 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
         Set<String> authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
-        for (String attribute : securityConfigurationAttributes) {
-            if (authorities.contains(attribute)) {
-                return true;
-            }
-        }
-        return false;
+        return
+                Stream.of(securityConfigAttributes).anyMatch(authorities::contains);
     }
 
     /**
@@ -69,41 +75,39 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
      * @param ui       current UI
      * @param beanName view bean name
      * @return {@code true} if the access is granted or the view is not secured, {@code false} otherwise
-     * @see org.springframework.security.access.annotation.Secured
+     * @see Secured
      */
     @Override
     public boolean isAccessGranted(UI ui, String beanName) {
         final Secured viewSecured = getWebApplicationContext(ui).findAnnotationOnBean(beanName, Secured.class);
-        return isAccessGranted(ui, viewSecured);
+        return isAccessGranted(viewSecured);
     }
 
     /**
      * Checks the explicitly given {@code View} class for granted access for the current user
      *
-     * @param ui        current UI
      * @param viewClass view class
      * @return {@code true} if the access is granted or the view is not secured, {@code false} otherwise
      * @see Secured
      */
     @SuppressWarnings("unused")
-    public boolean isAccessGranted(UI ui, Class<? extends View> viewClass) {
+    public boolean isAccessGranted(Class<? extends View> viewClass) {
         Secured viewSecured = AnnotationUtils.findAnnotation(viewClass, Secured.class);
-        return isAccessGranted(ui, viewSecured);
+        return isAccessGranted(viewSecured);
     }
 
     /**
      * Checks the explicitly given view annotation for granted access for the current user
      *
-     * @param ui          current UI
      * @param viewSecured annotation instance detected on a {@link View}
      * @return {@code true} if the access is granted or the view is not secured, {@code false} otherwise
      */
     @SuppressWarnings("WeakerAccess")
-    protected boolean isAccessGranted(UI ui, Secured viewSecured) {
+    protected boolean isAccessGranted(Secured viewSecured) {
         if (viewSecured == null) {
             return true;
         } else {
-            return isAccessGranted(ui, viewSecured.value());
+            return isAccessGranted(viewSecured.value());
         }
     }
 
