@@ -85,9 +85,10 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         
         <!-- These are typically overridden with BOMs -->
-        <vaadin.version>8.0-SNAPSHOT</vaadin.version>
-        <spring.version>4.3.3.RELEASE</spring.version>
-        <spring.boot.version>1.4.1.RELEASE</spring.boot.version>
+        <vaadin.version>8.0.6</vaadin.version>
+        <spring.version>4.3.9.RELEASE</spring.version>
+        <spring.security.version>4.2.3.RELEASE</spring.security.version>
+        <spring.boot.version>1.4.7.RELEASE</spring.boot.version>
 
         <slf4j.version>1.7.7</slf4j.version>
 
@@ -189,6 +190,7 @@
 
     <modules>
         <module>vaadin-spring</module>
+        <module>vaadin-spring-security</module>
         <module>vaadin-spring-boot</module>
         <module>vaadin-spring-boot-starter</module>
     </modules>
