@@ -30,12 +30,14 @@ import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.vaadin.navigator.PushStateNavigation;
 import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.server.UIClassSelectionEvent;
 import com.vaadin.server.UICreateEvent;
 import com.vaadin.server.UIProvider;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.ApplicationConstants;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.internal.SpringViewDisplayPostProcessor;
@@ -138,18 +140,27 @@ public class SpringUIProvider extends UIProvider {
             UIClassSelectionEvent uiClassSelectionEvent) {
         final String path = extractUIPathFromRequest(
                 uiClassSelectionEvent.getRequest());
-        if (pathToUIMap.containsKey(path)) {
-            return pathToUIMap.get(path);
-        }
+        Class<? extends UI> ui = null;
+        String pathInfo = path;
 
-        for (Map.Entry<String, Class<? extends UI>> entry : wildcardPathToUIMap
-                .entrySet()) {
-            if (path.startsWith(entry.getKey())) {
-                return entry.getValue();
+        if (pathToUIMap.containsKey(path)) {
+            ui = pathToUIMap.get(path);
+        } else {
+            for (Map.Entry<String, Class<? extends UI>> entry : wildcardPathToUIMap
+                    .entrySet()) {
+                if (path.startsWith(entry.getKey())) {
+                    ui = entry.getValue();
+                    pathInfo = entry.getKey();
+                    break;
+                }
             }
         }
 
-        return null;
+        // Pass the path info to the UI through request
+        uiClassSelectionEvent.getRequest()
+                .setAttribute(ApplicationConstants.UI_ROOT_PATH, pathInfo);
+
+        return ui;
     }
 
     private String extractUIPathFromRequest(VaadinRequest request) {
@@ -179,9 +190,17 @@ public class SpringUIProvider extends UIProvider {
     }
 
     protected void mapPathToUI(String path, Class<? extends UI> uiClass) {
-        if (path.endsWith("/*")) {
-            wildcardPathToUIMap.put(path.substring(0, path.length() - 2),
-                    uiClass);
+        boolean pathEndsWithWildcard = path.endsWith("/*");
+        boolean isWildcardPath = pathEndsWithWildcard
+                // UIs that use PushStateNavigation need to be wildcarded.
+                || uiClass.isAnnotationPresent(PushStateNavigation.class);
+
+        if (pathEndsWithWildcard) {
+            path = path.substring(0, path.length() - 2);
+        }
+
+        if (isWildcardPath) {
+            wildcardPathToUIMap.put(path, uiClass);
         } else {
             pathToUIMap.put(path, uiClass);
         }
