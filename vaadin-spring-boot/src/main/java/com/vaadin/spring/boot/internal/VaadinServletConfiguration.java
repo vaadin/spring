@@ -35,6 +35,7 @@ import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.Controller;
 import org.springframework.web.servlet.mvc.ServletForwardingController;
 
+import com.vaadin.navigator.PushStateNavigation;
 import com.vaadin.server.Constants;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.spring.annotation.SpringUI;
@@ -97,9 +98,20 @@ public class VaadinServletConfiguration implements InitializingBean {
             // map every @SpringUI both with and without trailing slash
             for (String path : getUIPaths()) {
                 urlMappings.put("/" + path, vaadinUiForwardingController());
+
                 if (path.length() > 0) {
-                    urlMappings.put("/" + path + "/",
-                            vaadinUiForwardingController());
+                    String altPath = "/";
+
+                    // Map path without ending slash
+                    if (path.endsWith("/*")) {
+                        altPath += path.substring(0, path.length() - 2);
+                    } else if (path.endsWith("/**")) {
+                        altPath += path.substring(0, path.length() - 3);
+                    } else {
+                        // Map path with ending slash
+                        altPath += path + "/";
+                    }
+                    urlMappings.put(altPath, vaadinUiForwardingController());
                 }
             }
 
@@ -119,12 +131,29 @@ public class VaadinServletConfiguration implements InitializingBean {
         final String[] uiBeanNames = applicationContext
                 .getBeanNamesForAnnotation(SpringUI.class);
         for (String uiBeanName : uiBeanNames) {
-            SpringUI annotation = applicationContext.findAnnotationOnBean(
-                    uiBeanName, SpringUI.class);
-            uiMappings.add(this.applicationContext.getEnvironment()
+            SpringUI annotation = applicationContext
+                    .findAnnotationOnBean(uiBeanName, SpringUI.class);
+            String path = applicationContext.getEnvironment()
                     .resolvePlaceholders(annotation.path())
-                    .replaceFirst("^/", ""));
-        } 
+                    .replaceFirst("^/", "");
+
+            // Map PushStateNavigation UIs to wildcard path
+            boolean hasPushStateNavigation = applicationContext
+                    .findAnnotationOnBean(uiBeanName,
+                            PushStateNavigation.class) != null;
+
+            if (hasPushStateNavigation) {
+                if (path.endsWith("/*")) {
+                    path = path + "*";
+                } else if (!path.endsWith("/**")) {
+                    path = path + "/**";
+                }
+                assert path.endsWith(
+                        "/**") : "PushStateNavigation UI Path should end with '/**'";
+            }
+
+            uiMappings.add(path);
+        }
         return uiMappings;
     }
 
