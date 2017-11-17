@@ -190,14 +190,19 @@ public class SpringUIProvider extends UIProvider {
     }
 
     protected void mapPathToUI(String path, Class<? extends UI> uiClass) {
-        boolean pathEndsWithWildcard = path.endsWith("/*");
+        boolean pathEndsWithWildcard = false;
+
+        if (path.endsWith("/*")) {
+            path = path.substring(0, path.length() - 2);
+            pathEndsWithWildcard = true;
+        } else if (path.endsWith("/**")) {
+            path = path.substring(0, path.length() - 3);
+            pathEndsWithWildcard = true;
+        }
+
         boolean isWildcardPath = pathEndsWithWildcard
                 // UIs that use PushStateNavigation need to be wildcarded.
                 || uiClass.isAnnotationPresent(PushStateNavigation.class);
-
-        if (pathEndsWithWildcard) {
-            path = path.substring(0, path.length() - 2);
-        }
 
         if (isWildcardPath) {
             wildcardPathToUIMap.put(path, uiClass);
