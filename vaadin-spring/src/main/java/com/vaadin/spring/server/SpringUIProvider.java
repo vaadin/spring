@@ -17,7 +17,9 @@ package com.vaadin.spring.server;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletContext;
@@ -146,13 +148,18 @@ public class SpringUIProvider extends UIProvider {
         if (pathToUIMap.containsKey(path)) {
             ui = pathToUIMap.get(path);
         } else {
-            for (Map.Entry<String, Class<? extends UI>> entry : wildcardPathToUIMap
-                    .entrySet()) {
-                if (path.startsWith(entry.getKey())) {
-                    ui = entry.getValue();
-                    pathInfo = entry.getKey();
-                    break;
-                }
+            // Find the longest matching UI path
+            Entry<String, Class<? extends UI>> entry = wildcardPathToUIMap
+                    .entrySet().stream()
+                    .filter(e -> path.startsWith(e.getKey()))
+                    .sorted(Comparator.comparing(e -> {
+                        String key = ((Entry<String, ?>) e).getKey();
+                        return key.length();
+                    }).reversed()).findFirst().orElse(null);
+
+            if (entry != null) {
+                ui = entry.getValue();
+                pathInfo = entry.getKey();
             }
         }
 
@@ -162,6 +169,7 @@ public class SpringUIProvider extends UIProvider {
                 (pathInfo.startsWith("/") ? "" : "/") + pathInfo);
 
         return ui;
+
     }
 
     private String extractUIPathFromRequest(VaadinRequest request) {

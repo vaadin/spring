@@ -55,6 +55,11 @@ public class SpringUIProviderTestWithWildcardUIs
     private static class PushState extends DummyUI {
     }
 
+    @SpringUI(path = "pushState/sub")
+    @PushStateNavigation
+    private static class PushStateSub extends DummyUI {
+    }
+
     @Configuration
     @EnableVaadinNavigation
     static class Config extends AbstractSpringUIProviderTest.Config {
@@ -76,6 +81,11 @@ public class SpringUIProviderTestWithWildcardUIs
         @Bean
         public PushState pushState() {
             return new PushState();
+        }
+
+        @Bean
+        public PushStateSub pushStateSub() {
+            return new PushStateSub();
         }
     }
 
@@ -108,6 +118,15 @@ public class SpringUIProviderTestWithWildcardUIs
         verifyUIFromPath(PushState.class, "/pushState/foo");
         verifyUIFromPath(PushState.class, "/pushState/foo/bar");
         verifyUIFromPath(PushState.class, "/pushState/foo/bar/baz");
+    }
+
+    @Test
+    public void testPushStateSubUI() {
+        verifyUIFromPath(PushStateSub.class, "/pushState/sub");
+        verifyUIFromPath(PushStateSub.class, "/pushState/sub/");
+        verifyUIFromPath(PushStateSub.class, "/pushState/sub/foo");
+        verifyUIFromPath(PushStateSub.class, "/pushState/sub/foo/bar");
+        verifyUIFromPath(PushStateSub.class, "/pushState/sub/foo/bar/baz");
     }
 
     private void verifyUIFromPath(Class<? extends UI> cls, String path) {
