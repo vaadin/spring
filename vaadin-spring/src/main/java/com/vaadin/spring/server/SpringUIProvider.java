@@ -157,8 +157,9 @@ public class SpringUIProvider extends UIProvider {
         }
 
         // Pass the path info to the UI through request
-        uiClassSelectionEvent.getRequest()
-                .setAttribute(ApplicationConstants.UI_ROOT_PATH, pathInfo);
+        uiClassSelectionEvent.getRequest().setAttribute(
+                ApplicationConstants.UI_ROOT_PATH,
+                (pathInfo.startsWith("/") ? "" : "/") + pathInfo);
 
         return ui;
     }
