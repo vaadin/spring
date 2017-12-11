@@ -67,9 +67,11 @@ import com.vaadin.spring.server.SpringVaadinServlet;
 @EnableConfigurationProperties(VaadinServletConfigurationProperties.class)
 public class VaadinServletConfiguration implements InitializingBean {
 
+    private static final String PATH_WILDCARD_ALL = "/**";
+    private static final String PATH_WILDCARD_SINGLE = "/*";
     private static final String DEFAULT_SERVLET_URL_BASE = "/vaadinServlet";
     public static final String DEFAULT_SERVLET_URL_MAPPING = DEFAULT_SERVLET_URL_BASE
-            + "/*";
+            + PATH_WILDCARD_SINGLE;
 
     /**
      * Mapping for static resources that is used in case a non-default mapping
@@ -100,18 +102,8 @@ public class VaadinServletConfiguration implements InitializingBean {
                 urlMappings.put("/" + path, vaadinUiForwardingController());
 
                 if (path.length() > 0) {
-                    String altPath = "/";
-
-                    // Map path without ending slash
-                    if (path.endsWith("/*")) {
-                        altPath += path.substring(0, path.length() - 2);
-                    } else if (path.endsWith("/**")) {
-                        altPath += path.substring(0, path.length() - 3);
-                    } else {
-                        // Map path with ending slash
-                        altPath += path + "/";
-                    }
-                    urlMappings.put(altPath, vaadinUiForwardingController());
+                    urlMappings.put(getAlternativePath(path),
+                            vaadinUiForwardingController());
                 }
             }
 
@@ -143,18 +135,59 @@ public class VaadinServletConfiguration implements InitializingBean {
                             PushStateNavigation.class) != null;
 
             if (hasPushStateNavigation) {
-                if (path.endsWith("/*")) {
-                    path = path + "*";
-                } else if (!path.endsWith("/**")) {
-                    path = path + "/**";
-                }
-                assert path.endsWith(
-                        "/**") : "PushStateNavigation UI Path should end with '/**'";
+                path = getWildcardedPath(path);
             }
 
             uiMappings.add(path);
         }
         return uiMappings;
+    }
+
+    /**
+     * Gets the alternative path for given path. Alternative path is the path
+     * with or without a following slash. For example a catch-all subpath of
+     * {@code subpath/**} would return an alternative path {@code subpath}. In
+     * case of a simpler path {@code static} the alternative path would be
+     * {@code static/}.
+     *
+     * @param path
+     *            the path that needs an alternative
+     * @return the alternative path to register
+     */
+    private String getAlternativePath(String path) {
+        StringBuilder builder = new StringBuilder("/");
+
+        // Map path without ending slash
+        if (path.endsWith(PATH_WILDCARD_SINGLE)) {
+            builder.append(path.substring(0,
+                    path.length() - PATH_WILDCARD_SINGLE.length()));
+        } else if (path.endsWith(PATH_WILDCARD_ALL)) {
+            builder.append(path.substring(0,
+                    path.length() - PATH_WILDCARD_ALL.length()));
+        } else {
+            // Map path with ending slash
+            builder.append(path + "/");
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Gets a wildcarded version of the given path. This method makes sure that
+     * the given path ends with {@code /**}.
+     *
+     * @param path
+     *            the path to wildcard
+     * @return the path with wildcard
+     */
+    private String getWildcardedPath(String path) {
+        if (path.endsWith(PATH_WILDCARD_SINGLE)) {
+            path = path + "*";
+        } else if (!path.endsWith(PATH_WILDCARD_ALL)) {
+            path = path + PATH_WILDCARD_ALL;
+        }
+        assert path.endsWith(
+                PATH_WILDCARD_ALL) : "PushStateNavigation UI Path should end with '/**'";
+        return path;
     }
 
     protected Logger getLogger() {
@@ -202,7 +235,8 @@ public class VaadinServletConfiguration implements InitializingBean {
         } else {
             String mapping = configurationProperties.getUrlMapping();
             String baseMapping = mapping.trim().replaceAll("(/\\**)?$", "");
-            return new String[] { baseMapping, baseMapping + "/*",
+            return new String[] { baseMapping,
+                    baseMapping + PATH_WILDCARD_SINGLE,
                     STATIC_RESOURCES_URL_MAPPING };
         }
     }
