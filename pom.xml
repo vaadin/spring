@@ -11,7 +11,7 @@
 
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-spring-parent</artifactId>
-    <version>2.1-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>vaadin-spring-parent</name>
@@ -85,7 +85,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         
         <!-- These are typically overridden with BOMs -->
-        <vaadin.version>8.0.6</vaadin.version>
+        <vaadin.version>8.2.0.beta1</vaadin.version>
         <spring.version>4.3.9.RELEASE</spring.version>
         <spring.security.version>4.2.3.RELEASE</spring.security.version>
         <spring.boot.version>1.4.7.RELEASE</spring.boot.version>
@@ -204,6 +204,11 @@
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+        </repository>
+        <!-- TODO: Remove when going final -->
+        <repository>
+            <id>vaadin-prereleases</id>
+            <url>http://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
     </repositories>
 </project>
