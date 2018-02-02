@@ -74,8 +74,7 @@ public class SpringViewDisplayPostProcessor implements BeanPostProcessor,
                 BeanDefinition beanDefinition = beanFactory
                         .getMergedBeanDefinition(beanName);
                 // ideally would check beanDefinition.getScope() for UI scope,
-                // but
-                // scope is not always available
+                // but scope is not always available
 
                 // look for annotations on factory methods
                 if (beanDefinition
