@@ -85,7 +85,7 @@ public class SpringUIProvider extends UIProvider {
                     "Spring WebApplicationContext not initialized for UI provider. Use e.g. ContextLoaderListener to initialize it.");
         }
         detectUIs();
-        if (pathToUIMap.isEmpty()) {
+        if (pathToUIMap.isEmpty() && wildcardPathToUIMap.isEmpty()) {
             logger.warn("Found no Vaadin UIs in the application context");
         }
     }
