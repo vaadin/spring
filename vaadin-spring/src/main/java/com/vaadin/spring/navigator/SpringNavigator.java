@@ -21,6 +21,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.navigator.ViewDisplay;
 import com.vaadin.navigator.ViewProvider;
+import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.spring.internal.UIScopeImpl;
 import com.vaadin.spring.navigator.ViewActivationListener.ViewActivationEvent;
@@ -49,6 +50,7 @@ import java.util.List;
  * @author Vaadin Ltd
  */
 @UIScope
+@SpringComponent
 public class SpringNavigator extends Navigator {
 
     private static final Logger LOGGER = LoggerFactory
