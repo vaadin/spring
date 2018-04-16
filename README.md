@@ -1,9 +1,7 @@
-[![Build Status](https://travis-ci.org/vaadin/spring.svg?branch=master)](https://travis-ci.org/vaadin/spring)
-
 Vaadin Spring
 ======================
 
-Vaadin Spring is the official Spring integration for [Vaadin Framework](https://github.com/vaadin/framework).
+Vaadin Spring is the official Spring integration for [Vaadin Flow](https://github.com/vaadin/flow).
 
 Download release
 ----
@@ -12,7 +10,7 @@ Official releases of this add-on are available at Vaadin Directory. For Maven in
 
 Building the project
 ----
-Execute `mvn clean install` in the root directory to build vaadin-spring and vaadin-spring-boot.
+Execute `mvn clean install` in the root directory.
 
 Contributions
 ----
