@@ -6,6 +6,7 @@ before_install: "./.travis.before_install.sh"
 branches:
   only:
   - master
+  - 3.0
   - 2.1
   - 1.2
 cache:
