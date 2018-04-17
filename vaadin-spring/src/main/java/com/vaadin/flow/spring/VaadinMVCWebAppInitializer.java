@@ -110,3 +110,4 @@ public abstract class VaadinMVCWebAppInitializer
     protected abstract Collection<Class<?>> getConfigurationClasses();
 
 }
+
