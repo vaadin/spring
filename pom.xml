@@ -46,6 +46,7 @@
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
 
         <junit.version>4.12</junit.version>
+        <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -63,33 +64,51 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
-                <configuration>
-                    <excludeResources>true</excludeResources>
-                </configuration>
+                <groupId>org.commonjava.maven.plugins</groupId>
+                <artifactId>directory-maven-plugin</artifactId>
+                <version>0.1</version>
                 <executions>
                     <execution>
-                        <id>attach-sources</id>
+                        <id>set-root-dir-for-common-lifecycle</id>
                         <goals>
-                            <goal>jar-no-fork</goal>
+                            <goal>highest-basedir</goal>
                         </goals>
+                        <phase>initialize</phase>
+                        <configuration>
+                            <property>project.rootdir</property>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>set-root-dir-for-clean-lifecycle</id>
+                        <goals>
+                            <goal>highest-basedir</goal>
+                        </goals>
+                        <phase>pre-clean</phase>
+                        <configuration>
+                            <property>project.rootdir</property>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>${maven.clean.plugin.version}</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${project.rootdir}/driver</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>${project.rootdir}/driver_zips
+                            </directory>
+                        </fileset>
+                        <fileset>
+                            <directory>error-screenshots</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -131,6 +150,8 @@
 
     <modules>
         <module>vaadin-spring</module>
+        <module>vaadin-spring-boot-starter</module>
+        <module>vaadin-spring-tests</module>
     </modules>
     <repositories>
         <repository>
@@ -152,5 +173,16 @@
             </snapshots>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
 </project>
 
