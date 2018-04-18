@@ -1,7 +1,11 @@
 Vaadin Spring
 ======================
 
-Vaadin Spring is the official Spring integration for [Vaadin Flow](https://github.com/vaadin/flow).
+Vaadin Spring is the official Spring integration for [Vaadin 10](https://github.com/vaadin/flow).
+This branch is Vaadin 10 compatible. See other branches for other framework versions:
+* 1.2 for Vaadin Framework V7 versions 
+* 2.0 and 2.1 for Vaadin Framework V8.0.X versions 
+* 3.0 for Vaadin Framework V8.2 versions
 
 Download release
 ----
