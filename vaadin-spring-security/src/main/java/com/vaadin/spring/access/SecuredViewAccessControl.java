@@ -19,7 +19,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.UI;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.annotation.Secured;
@@ -44,8 +44,7 @@ import java.util.stream.Stream;
 @SpringComponent
 public class SecuredViewAccessControl implements ViewAccessControl, Serializable {
 
-    @Autowired
-    private ApplicationContext applicationContext;
+    private transient ApplicationContext applicationContext;
 
     /**
      * Checks if the current user is granted any explicitly provided security attributes
@@ -79,7 +78,7 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
      */
     @Override
     public boolean isAccessGranted(UI ui, String beanName) {
-        final Secured viewSecured = getWebApplicationContext(ui).findAnnotationOnBean(beanName, Secured.class);
+        final Secured viewSecured = getApplicationContext(ui).findAnnotationOnBean(beanName, Secured.class);
         return isAccessGranted(viewSecured);
     }
 
@@ -111,7 +110,7 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
         }
     }
 
-    private ApplicationContext getWebApplicationContext(UI ui) {
+    private ApplicationContext getApplicationContext(UI ui) {
         if (applicationContext == null) {
             applicationContext = ((SpringVaadinServletService) ui.getSession().getService())
                     .getWebApplicationContext();
