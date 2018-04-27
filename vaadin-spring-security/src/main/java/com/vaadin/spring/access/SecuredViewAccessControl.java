@@ -19,7 +19,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.UI;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.annotation.Secured;
@@ -44,6 +44,7 @@ import java.util.stream.Stream;
 @SpringComponent
 public class SecuredViewAccessControl implements ViewAccessControl, Serializable {
 
+    @Autowired
     private transient ApplicationContext applicationContext;
 
     /**

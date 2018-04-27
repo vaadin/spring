@@ -33,6 +33,7 @@ import com.vaadin.spring.internal.BeanStore;
 import com.vaadin.spring.internal.BeanStoreRetrievalStrategy;
 import com.vaadin.spring.internal.UIScopeImpl;
 import com.vaadin.spring.navigator.SpringViewProvider;
+import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.UI;
 import com.vaadin.util.CurrentInstance;
 import org.junit.After;
