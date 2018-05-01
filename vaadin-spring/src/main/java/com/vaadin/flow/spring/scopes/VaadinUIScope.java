@@ -108,7 +108,7 @@ public class VaadinUIScope extends AbstractScope {
             ConfigurableListableBeanFactory beanFactory) throws BeansException {
         beanFactory.registerScope(VAADIN_UI_SCOPE_NAME, this);
         ObjectFactory<UI> factory = () -> getUI();
-        // beanFactory.registerResolvableDependency(UI.class, factory);
+        beanFactory.registerResolvableDependency(UI.class, factory);
     }
 
     @Override

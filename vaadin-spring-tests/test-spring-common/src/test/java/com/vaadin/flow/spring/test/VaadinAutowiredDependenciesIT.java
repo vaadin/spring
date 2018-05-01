@@ -16,7 +16,6 @@
 package com.vaadin.flow.spring.test;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -31,7 +30,6 @@ public class VaadinAutowiredDependenciesIT extends ChromeBrowserTest {
     }
 
     @Test
-    @Ignore
     public void injectedUI_uiIsTheSameAsCurrent() {
         open();
 
@@ -45,7 +43,6 @@ public class VaadinAutowiredDependenciesIT extends ChromeBrowserTest {
     }
 
     @Test
-    @Ignore
     public void injectedSession_uiIsTheSameAsCurrent() {
         open();
 
