@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.spring.scopes;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 
@@ -71,10 +70,10 @@ public class VaadinSessionScope extends AbstractScope {
 
     @Override
     public void postProcessBeanFactory(
-            ConfigurableListableBeanFactory beanFactory) throws BeansException {
+            ConfigurableListableBeanFactory beanFactory) {
         beanFactory.registerScope(VAADIN_SESSION_SCOPE_NAME, this);
-        ObjectFactory<VaadinSession> factory = () -> getVaadinSession();
-        beanFactory.registerResolvableDependency(VaadinSession.class, factory);
+        beanFactory.registerResolvableDependency(VaadinSession.class,
+                (ObjectFactory<VaadinSession>) this::getVaadinSession);
     }
 
     @Override
