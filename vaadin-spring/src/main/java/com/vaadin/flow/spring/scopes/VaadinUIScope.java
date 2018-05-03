@@ -106,8 +106,8 @@ public class VaadinUIScope extends AbstractScope {
     public void postProcessBeanFactory(
             ConfigurableListableBeanFactory beanFactory) {
         beanFactory.registerScope(VAADIN_UI_SCOPE_NAME, this);
-        beanFactory.registerResolvableDependency(VaadinSession.class,
-                (ObjectFactory<UI>) this::getUI);
+        ObjectFactory<UI> factory = this::getUI;
+        beanFactory.registerResolvableDependency(UI.class, factory);
     }
 
     @Override

@@ -72,8 +72,8 @@ public class VaadinSessionScope extends AbstractScope {
     public void postProcessBeanFactory(
             ConfigurableListableBeanFactory beanFactory) {
         beanFactory.registerScope(VAADIN_SESSION_SCOPE_NAME, this);
-        beanFactory.registerResolvableDependency(VaadinSession.class,
-                (ObjectFactory<VaadinSession>) this::getVaadinSession);
+        ObjectFactory<VaadinSession> factory = this::getVaadinSession;
+        beanFactory.registerResolvableDependency(VaadinSession.class, factory);
     }
 
     @Override
