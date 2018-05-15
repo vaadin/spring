@@ -40,7 +40,7 @@
     </dependencyManagement>
 
     <dependencies>
-
+    
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -62,6 +62,7 @@
             <id>deploy</id>
             <properties>
                 <maven.deploy.skip>false</maven.deploy.skip>
+                <maven.javadoc.skip>false</maven.javadoc.skip>
             </properties>
         </profile>    
     </profiles>
