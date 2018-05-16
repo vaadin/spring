@@ -19,9 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.flow.testutil.ChromeBrowserTest;
-
-public class NPEHandlerIT extends ChromeBrowserTest {
+public class NPEHandlerIT extends AbstractSpringTest {
 
     @Override
     protected String getTestPath() {

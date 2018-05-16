@@ -68,7 +68,8 @@ public abstract class VaadinMVCWebAppInitializer
             dispatcherRegistration.addMapping("/*");
             mapping = VaadinServletConfiguration.VAADIN_SERVLET_MAPPING;
             initParameters.put(Constants.SERVLET_PARAMETER_PUSH_URL,
-                    mapping.replace("*", ""));
+                    SpringBootAutoConfiguration
+                            .makeContextRelative(mapping.replace("*", "")));
         }
         registration.setInitParameters(initParameters);
         registration.addMapping(mapping);
@@ -110,4 +111,3 @@ public abstract class VaadinMVCWebAppInitializer
     protected abstract Collection<Class<?>> getConfigurationClasses();
 
 }
-

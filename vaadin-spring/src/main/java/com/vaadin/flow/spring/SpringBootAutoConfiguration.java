@@ -78,7 +78,7 @@ public class SpringBootAutoConfiguration {
         if (RootMappedCondition.isRootMapping(mapping)) {
             mapping = VaadinServletConfiguration.VAADIN_SERVLET_MAPPING;
             initParameters.put(Constants.SERVLET_PARAMETER_PUSH_URL,
-                    mapping.replace("*", ""));
+                    makeContextRelative(mapping.replace("*", "")));
         }
         ServletRegistrationBean<SpringServlet> registration = new ServletRegistrationBean<>(
                 new SpringServlet(context), mapping);
@@ -88,6 +88,16 @@ public class SpringBootAutoConfiguration {
         registration.setName(
                 ClassUtils.getShortNameAsProperty(SpringServlet.class));
         return registration;
+    }
+
+    static String makeContextRelative(String url) {
+        // / -> context://
+        // foo -> context://foo
+        // /foo -> context://foo
+        if (url.startsWith("/")) {
+            url = url.substring(1);
+        }
+        return "context://" + url;
     }
 
     /**
