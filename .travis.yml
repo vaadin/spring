@@ -1,5 +1,5 @@
 language: java
-jdk: oraclejdk7
+jdk: openjdk7
 sudo: required
 dist: trusty
 branches:
