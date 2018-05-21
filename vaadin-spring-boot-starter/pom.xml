@@ -15,6 +15,23 @@
         Spring Boot Starter for Vaadin Flow applications.
     </description>
 
+    <repositories>
+        <repository>
+            <id>vaadin-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+        </repository>
+    </repositories>
+
     <properties>
         <skipTests>true</skipTests>
         <vaadin.platform.version>10.0-SNAPSHOT</vaadin.platform.version>
@@ -40,7 +57,6 @@
     </dependencyManagement>
 
     <dependencies>
-
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
