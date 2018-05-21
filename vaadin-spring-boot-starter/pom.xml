@@ -10,6 +10,7 @@
 
     <artifactId>vaadin-spring-boot-starter</artifactId>
     <name>Spring Boot Starter</name>
+    <version>10.0-SNAPSHOT</version>
     <description>
         Spring Boot Starter for Vaadin Flow applications.
     </description>
@@ -39,7 +40,7 @@
     </dependencyManagement>
 
     <dependencies>
-    
+
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -48,7 +49,7 @@
         <!-- End Spring -->
 
     </dependencies>
-    
+
     <profiles>
         <profile>
             <id>validation</id>
@@ -56,7 +57,7 @@
                 <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
         </profile>
-        
+
         <profile>
             <id>deploy</id>
             <properties>
