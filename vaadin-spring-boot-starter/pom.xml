@@ -7,17 +7,16 @@
         <artifactId>vaadin-spring-parent</artifactId>
         <version>10.0-SNAPSHOT</version>
     </parent>
-    
+
     <artifactId>vaadin-spring-boot-starter</artifactId>
     <name>Spring Boot Starter</name>
-    <version>10.0-SNAPSHOT</version>
     <description>
         Spring Boot Starter for Vaadin Flow applications.
     </description>
 
     <properties>
         <skipTests>true</skipTests>
-        <vaadin.platform.version>10.0.0.beta10</vaadin.platform.version>
+        <vaadin.platform.version>10.0-SNAPSHOT</vaadin.platform.version>
     </properties>
 
     <dependencyManagement>
