@@ -85,7 +85,7 @@ public class SpringUIProvider extends UIProvider {
                     "Spring WebApplicationContext not initialized for UI provider. Use e.g. ContextLoaderListener to initialize it.");
         }
         detectUIs();
-        if (pathToUIMap.isEmpty()) {
+        if (pathToUIMap.isEmpty() && wildcardPathToUIMap.isEmpty()) {
             logger.warn("Found no Vaadin UIs in the application context");
         }
     }
@@ -163,10 +163,15 @@ public class SpringUIProvider extends UIProvider {
             }
         }
 
+        // Sometimes pathInfo does not contain leading slash
+        if (!pathInfo.isEmpty() && !pathInfo.startsWith("/")) {
+            pathInfo = "/" + pathInfo;
+        }
+
         // Pass the path info to the UI through request
         uiClassSelectionEvent.getRequest().setAttribute(
                 ApplicationConstants.UI_ROOT_PATH,
-                (pathInfo.startsWith("/") ? "" : "/") + pathInfo);
+                uiClassSelectionEvent.getRequest().getContextPath() + pathInfo);
 
         return ui;
 
