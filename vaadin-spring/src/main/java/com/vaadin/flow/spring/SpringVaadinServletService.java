@@ -44,7 +44,7 @@ import com.vaadin.flow.theme.AbstractTheme;
  */
 public class SpringVaadinServletService extends VaadinServletService {
 
-    private transient final ApplicationContext context;
+    private final transient ApplicationContext context;
 
     private final Registration serviceDestroyRegistration;
 
@@ -126,7 +126,8 @@ public class SpringVaadinServletService extends VaadinServletService {
             AbstractTheme theme) {
         URL resource = super.getResource(path, browser, theme);
         if (resource == null) {
-            resource = getResourceURL(getThemeResolvedPath(path, browser, theme));
+            resource = getResourceURL(
+                    getThemeResolvedPath(path, browser, theme));
         }
         return resource;
     }
@@ -138,8 +139,7 @@ public class SpringVaadinServletService extends VaadinServletService {
         for (String prefix : context.getBean(
                 org.springframework.boot.autoconfigure.web.ResourceProperties.class)
                 .getStaticLocations()) {
-            String location = (prefix + path).replaceAll("//", "/");
-            Resource resource = context.getResource(location);
+            Resource resource = context.getResource(getFullPath(path, prefix));
             if (resource != null) {
                 try {
                     return resource.getURL();
@@ -151,15 +151,18 @@ public class SpringVaadinServletService extends VaadinServletService {
         return null;
     }
 
+    private String getFullPath(String path, String prefix) {
+        if (prefix.endsWith("/") && path.startsWith("/")) {
+            return prefix + path.substring(1);
+        }
+        return prefix + path;
+    }
+
     private boolean isSpringBootConfigured() {
         String resourcePropertiesFQN = "org.springframework.boot.autoconfigure.web.ResourceProperties";
         if (isClassnameAvailable(resourcePropertiesFQN)) {
-            String configurationPrefix = org.springframework.boot.autoconfigure.web.ResourceProperties.class
-                    .getAnnotation(
-                            org.springframework.boot.context.properties.ConfigurationProperties.class)
-                    .prefix();
-            return context.containsBean(
-                    configurationPrefix + "-" + resourcePropertiesFQN);
+            return context.getBeanNamesForType(
+                    org.springframework.boot.autoconfigure.web.ResourceProperties.class).length != 0;
         }
         return false;
     }
@@ -192,7 +195,6 @@ public class SpringVaadinServletService extends VaadinServletService {
         }
         return resourceAsStream;
     }
-
 
     private String getThemeResolvedPath(String url, WebBrowser browser,
             AbstractTheme theme) {
