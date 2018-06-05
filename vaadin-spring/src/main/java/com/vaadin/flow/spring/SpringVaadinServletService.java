@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.spring;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,13 +31,14 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.WebBrowser;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.theme.AbstractTheme;
 
 /**
  * Spring application context aware Vaadin servlet service implementation.
  *
  * @author Vaadin Ltd
- *
  */
 public class SpringVaadinServletService extends VaadinServletService {
 
@@ -43,16 +46,19 @@ public class SpringVaadinServletService extends VaadinServletService {
 
     private final Registration serviceDestroyRegistration;
 
+    private static final String[] CLASSPATH_RESOURCE_LOCATIONS = new String[] {
+            "/META-INF/resources", "/resources", "/static", "/public" };
+
     /**
      * Creates an instance connected to the given servlet and using the given
      * configuration with provided application {@code context}.
      *
      * @param servlet
-     *            the servlet which receives requests
+     *         the servlet which receives requests
      * @param deploymentConfiguration
-     *            the configuration to use
+     *         the configuration to use
      * @param context
-     *            the Spring application context
+     *         the Spring application context
      */
     public SpringVaadinServletService(VaadinServlet servlet,
             DeploymentConfiguration deploymentConfiguration,
@@ -105,5 +111,67 @@ public class SpringVaadinServletService extends VaadinServletService {
     private void serviceDestroyed(Registration registration) {
         registration.remove();
         serviceDestroyRegistration.remove();
+    }
+
+    @Override
+    public URL getStaticResource(String path) {
+        URL resource = super.getStaticResource(path);
+        if (resource == null) {
+            resource = getResourceURL(path);
+        }
+        return resource;
+    }
+
+    @Override
+    public URL getResource(String path, WebBrowser browser,
+            AbstractTheme theme) {
+        URL resource = super.getResource(path, browser, theme);
+        if (resource == null) {
+            path = getThemedOrRawPath(path, browser, theme);
+            resource = getResourceURL(path);
+        }
+        return resource;
+    }
+
+    private URL getResourceURL(String path) {
+        URL resource = null;
+        for (String pathPrefix : CLASSPATH_RESOURCE_LOCATIONS) {
+            resource = getClass().getResource(pathPrefix + path);
+            if (resource != null) {
+                break;
+            }
+        }
+        return resource;
+    }
+
+    @Override
+    public InputStream getResourceAsStream(String path, WebBrowser browser,
+            AbstractTheme theme) {
+        InputStream resourceAsStream = super
+                .getResourceAsStream(path, browser, theme);
+        if (resourceAsStream == null) {
+            path = getThemedOrRawPath(path, browser, theme);
+            for (String pathPrefix : CLASSPATH_RESOURCE_LOCATIONS) {
+                resourceAsStream = getClass()
+                        .getResourceAsStream(pathPrefix + path);
+                if (resourceAsStream != null) {
+                    break;
+                }
+            }
+        }
+        return resourceAsStream;
+    }
+
+    private String getThemedOrRawPath(String url, WebBrowser browser,
+            AbstractTheme theme) {
+        String resourceUrl = resolveResource(url, browser);
+        if (theme != null) {
+            String themeUrl = theme.translateUrl(resourceUrl);
+            if (!resourceUrl.equals(themeUrl)
+                    && getResourceURL(themeUrl) != null) {
+                return themeUrl;
+            }
+        }
+        return resourceUrl;
     }
 }
