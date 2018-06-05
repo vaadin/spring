@@ -15,13 +15,16 @@
  */
 package com.vaadin.flow.spring;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.io.Resource;
 
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.DeploymentConfiguration;
@@ -46,8 +49,15 @@ public class SpringVaadinServletService extends VaadinServletService {
 
     private final Registration serviceDestroyRegistration;
 
-    private static final String[] CLASSPATH_RESOURCE_LOCATIONS = new String[] {
-            "/META-INF/resources", "/resources", "/static", "/public" };
+    public static boolean isClassnameAvailable(String clazzName) {
+        try {
+            Class.forName(clazzName, false,
+                    SpringVaadinServletService.class.getClassLoader());
+        } catch (LinkageError | ClassNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Creates an instance connected to the given servlet and using the given
@@ -127,21 +137,41 @@ public class SpringVaadinServletService extends VaadinServletService {
             AbstractTheme theme) {
         URL resource = super.getResource(path, browser, theme);
         if (resource == null) {
-            path = getThemedOrRawPath(path, browser, theme);
-            resource = getResourceURL(path);
+            resource = getResourceURL(getThemedOrRawPath(path, browser, theme));
         }
         return resource;
     }
 
     private URL getResourceURL(String path) {
-        URL resource = null;
-        for (String pathPrefix : CLASSPATH_RESOURCE_LOCATIONS) {
-            resource = getClass().getResource(pathPrefix + path);
-            if (resource != null) {
-                break;
+        if (isSpringBootConfigured()) {
+            for (String prefix : context.getBean(
+                    org.springframework.boot.autoconfigure.web.ResourceProperties.class)
+                    .getStaticLocations()) {
+                String location = (prefix + path).replaceAll("//", "/");
+                Resource resource = context.getResource(location);
+                if (resource != null) {
+                    try {
+                        return resource.getURL();
+                    } catch (IOException e) {
+                        // NO-OP file was not found.
+                    }
+                }
             }
         }
-        return resource;
+        return null;
+    }
+
+    private boolean isSpringBootConfigured() {
+        String resourcePropertiesFQN = "org.springframework.boot.autoconfigure.web.ResourceProperties";
+        if (isClassnameAvailable(resourcePropertiesFQN)) {
+            String configurationPrefix = org.springframework.boot.autoconfigure.web.ResourceProperties.class
+                    .getAnnotation(
+                            org.springframework.boot.context.properties.ConfigurationProperties.class)
+                    .prefix();
+            return context.containsBean(
+                    configurationPrefix + "-" + resourcePropertiesFQN);
+        }
+        return false;
     }
 
     @Override
@@ -150,12 +180,13 @@ public class SpringVaadinServletService extends VaadinServletService {
         InputStream resourceAsStream = super
                 .getResourceAsStream(path, browser, theme);
         if (resourceAsStream == null) {
-            path = getThemedOrRawPath(path, browser, theme);
-            for (String pathPrefix : CLASSPATH_RESOURCE_LOCATIONS) {
-                resourceAsStream = getClass()
-                        .getResourceAsStream(pathPrefix + path);
-                if (resourceAsStream != null) {
-                    break;
+            URL resourceURL = getResourceURL(
+                    getThemedOrRawPath(path, browser, theme));
+            if (resourceURL != null) {
+                try {
+                    resourceAsStream = resourceURL.openStream();
+                } catch (IOException e) {
+                    // NO-OP return null stream
                 }
             }
         }
