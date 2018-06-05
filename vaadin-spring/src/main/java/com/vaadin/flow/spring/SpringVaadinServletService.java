@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
 
@@ -45,19 +44,9 @@ import com.vaadin.flow.theme.AbstractTheme;
  */
 public class SpringVaadinServletService extends VaadinServletService {
 
-    private final ApplicationContext context;
+    private transient final ApplicationContext context;
 
     private final Registration serviceDestroyRegistration;
-
-    public static boolean isClassnameAvailable(String clazzName) {
-        try {
-            Class.forName(clazzName, false,
-                    SpringVaadinServletService.class.getClassLoader());
-        } catch (LinkageError | ClassNotFoundException e) {
-            return false;
-        }
-        return true;
-    }
 
     /**
      * Creates an instance connected to the given servlet and using the given
@@ -137,24 +126,25 @@ public class SpringVaadinServletService extends VaadinServletService {
             AbstractTheme theme) {
         URL resource = super.getResource(path, browser, theme);
         if (resource == null) {
-            resource = getResourceURL(getThemedOrRawPath(path, browser, theme));
+            resource = getResourceURL(getThemeResolvedPath(path, browser, theme));
         }
         return resource;
     }
 
     private URL getResourceURL(String path) {
-        if (isSpringBootConfigured()) {
-            for (String prefix : context.getBean(
-                    org.springframework.boot.autoconfigure.web.ResourceProperties.class)
-                    .getStaticLocations()) {
-                String location = (prefix + path).replaceAll("//", "/");
-                Resource resource = context.getResource(location);
-                if (resource != null) {
-                    try {
-                        return resource.getURL();
-                    } catch (IOException e) {
-                        // NO-OP file was not found.
-                    }
+        if (!isSpringBootConfigured()) {
+            return null;
+        }
+        for (String prefix : context.getBean(
+                org.springframework.boot.autoconfigure.web.ResourceProperties.class)
+                .getStaticLocations()) {
+            String location = (prefix + path).replaceAll("//", "/");
+            Resource resource = context.getResource(location);
+            if (resource != null) {
+                try {
+                    return resource.getURL();
+                } catch (IOException e) {
+                    // NO-OP file was not found.
                 }
             }
         }
@@ -174,6 +164,16 @@ public class SpringVaadinServletService extends VaadinServletService {
         return false;
     }
 
+    private static boolean isClassnameAvailable(String clazzName) {
+        try {
+            Class.forName(clazzName, false,
+                    SpringVaadinServletService.class.getClassLoader());
+        } catch (LinkageError | ClassNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public InputStream getResourceAsStream(String path, WebBrowser browser,
             AbstractTheme theme) {
@@ -181,7 +181,7 @@ public class SpringVaadinServletService extends VaadinServletService {
                 .getResourceAsStream(path, browser, theme);
         if (resourceAsStream == null) {
             URL resourceURL = getResourceURL(
-                    getThemedOrRawPath(path, browser, theme));
+                    getThemeResolvedPath(path, browser, theme));
             if (resourceURL != null) {
                 try {
                     resourceAsStream = resourceURL.openStream();
@@ -193,7 +193,8 @@ public class SpringVaadinServletService extends VaadinServletService {
         return resourceAsStream;
     }
 
-    private String getThemedOrRawPath(String url, WebBrowser browser,
+
+    private String getThemeResolvedPath(String url, WebBrowser browser,
             AbstractTheme theme) {
         String resourceUrl = resolveResource(url, browser);
         if (theme != null) {
