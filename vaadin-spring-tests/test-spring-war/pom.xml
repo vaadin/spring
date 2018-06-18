@@ -61,12 +61,6 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow</artifactId>
-            <type>pom</type>
-        </dependency>
-
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
