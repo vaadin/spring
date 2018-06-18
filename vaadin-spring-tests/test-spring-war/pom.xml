@@ -62,6 +62,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow</artifactId>
+            <type>pom</type>
         </dependency>
 
         <dependency>
