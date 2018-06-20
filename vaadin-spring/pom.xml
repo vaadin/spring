@@ -119,12 +119,5 @@
             </plugin>
         </plugins>
     </build>
-<profiles>
-    <profile>
-      <id>prerelease</id>
-      <activation>
-      </activation>
-    </profile>
-</profiles>
 </project>
 
