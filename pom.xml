@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-parent</artifactId>
@@ -182,12 +182,22 @@
                 <maven.javadoc.skip>false</maven.javadoc.skip>
             </properties>
         </profile>
+        <profile>
+            <id>default</id>
+            <activation>
+                <property>
+                    <name>!release</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-spring-boot-starter</module>
+                <module>vaadin-spring-tests</module>
+            </modules>
+        </profile>
     </profiles>
 
     <modules>
         <module>vaadin-spring</module>
-        <module>vaadin-spring-boot-starter</module>
-        <module>vaadin-spring-tests</module>
     </modules>
     <repositories>
         <repository>
