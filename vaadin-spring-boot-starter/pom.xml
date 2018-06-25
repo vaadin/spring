@@ -88,6 +88,23 @@
                 <maven.deploy.skip>true</maven.deploy.skip>
             </properties>
         </profile>
+        
+        <profile>
+            <id>bootRelease</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.sonatype.plugins</groupId>
+                            <artifactId>nexus-staging-maven-plugin</artifactId>
+                            <configuration>
+                                <skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
 
         <profile>
             <id>deploy</id>
