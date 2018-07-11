@@ -20,13 +20,13 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.UI;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -45,7 +45,7 @@ import java.util.stream.Stream;
 public class SecuredViewAccessControl implements ViewAccessControl, Serializable {
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private transient ApplicationContext applicationContext;
 
     /**
      * Checks if the current user is granted any explicitly provided security attributes
@@ -79,7 +79,7 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
      */
     @Override
     public boolean isAccessGranted(UI ui, String beanName) {
-        final Secured viewSecured = getWebApplicationContext(ui).findAnnotationOnBean(beanName, Secured.class);
+        final Secured viewSecured = getApplicationContext(ui).findAnnotationOnBean(beanName, Secured.class);
         return isAccessGranted(viewSecured);
     }
 
@@ -111,12 +111,12 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
         }
     }
 
-    private WebApplicationContext getWebApplicationContext(UI ui) {
-        if (webApplicationContext == null) {
-            webApplicationContext = ((SpringVaadinServletService) ui.getSession().getService())
+    private ApplicationContext getApplicationContext(UI ui) {
+        if (applicationContext == null) {
+            applicationContext = ((SpringVaadinServletService) ui.getSession().getService())
                     .getWebApplicationContext();
         }
 
-        return webApplicationContext;
+        return applicationContext;
     }
 }
