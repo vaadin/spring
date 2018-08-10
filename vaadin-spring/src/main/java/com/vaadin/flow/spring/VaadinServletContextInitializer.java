@@ -91,6 +91,9 @@ public class VaadinServletContextInitializer
                                 RouteAlias.class));
 
                 registry.setNavigationTargets(navigationTargets);
+                registry.setPwaConfigurationClass(
+                        validatePwaClass(findByAnnotation(getRoutePackages(),
+                                Route.class, RouteAlias.class)));
             } catch (InvalidRouteConfigurationException e) {
                 throw new IllegalStateException(e);
             }
