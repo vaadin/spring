@@ -37,7 +37,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 @Configuration
 @Conditional(RootMappedCondition.class)
-@ConditionalOnClass(name = "org.springframework.boot.autoconfigure.web.servlet.DispatcherServletRegistrationBean")
+@ConditionalOnClass(DispatcherServletRegistrationBean.class)
 public class DispatcherServletRegistrationBeanConfig {
 
     @Autowired

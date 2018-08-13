@@ -48,7 +48,8 @@ import com.vaadin.flow.server.Constants;
 @AutoConfigureBefore(WebMvcAutoConfiguration.class)
 @ConditionalOnClass(ServletContextInitializer.class)
 @EnableConfigurationProperties(VaadinConfigurationProperties.class)
-@Import({ VaadinServletConfiguration.class, DispatcherServletRegistrationBeanConfig.class })
+@Import({ VaadinServletConfiguration.class,
+        DispatcherServletRegistrationBeanConfig.class })
 public class SpringBootAutoConfiguration {
 
     @Autowired
@@ -100,6 +101,12 @@ public class SpringBootAutoConfiguration {
      * This is needed for correct servlet path (and path info) values available
      * in Vaadin servlet because it works via forwarding controller which is not
      * properly mapped without this registration.
+     * <p>
+     * In the modern versions of Spring Boot this is done via extra
+     * {@link DispatcherServletRegistrationBeanConfig} configuration because
+     * {@link DispatcherServletRegistrationBean} bean should be used instead of
+     * {@code ServletRegistrationBean<DispatcherServlet>}. So this method works
+     * only if there is no {@link DispatcherServletRegistrationBean} class.
      *
      * @return a custom DispatcherServletRegistrationBean instance for
      *         dispatcher servlet
