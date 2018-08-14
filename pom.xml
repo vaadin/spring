@@ -190,6 +190,7 @@
                 </property>
             </activation>
             <modules>
+                <module>vaadin-spring-boot-starter</module>
                 <module>vaadin-spring-tests</module>
             </modules>
         </profile>
