@@ -15,8 +15,12 @@
  */
 package com.vaadin.flow.spring.scopes;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
@@ -32,16 +36,16 @@ import com.vaadin.flow.server.VaadinSession;
  * @author Vaadin Ltd
  *
  */
-class BeanStore {
+class BeanStore implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(BeanStore.class.getName());
 
     private final VaadinSession session;
 
-    private final Map<String, Object> objects = new HashMap<>();
+    private transient Map<String, Object> objects = new HashMap<>();
 
-    private final Map<String, Runnable> destructionCallbacks = new HashMap<>();
+    private transient Map<String, Runnable> destructionCallbacks = new HashMap<>();
 
     /**
      * Creates a new instance for the given {@code session}.
@@ -55,7 +59,7 @@ class BeanStore {
     }
 
     /**
-     * Return the object with the given name from the underlying scop.,
+     * Return the object with the given name from the underlying scope,
      *
      * @param name
      *            the name of the object to retrieve
@@ -107,8 +111,7 @@ class BeanStore {
             try {
                 destructionCallback.run();
             } catch (Exception e) {
-                LOGGER.error(
-                        "BeanStore destruction callback failed", e);
+                LOGGER.error("BeanStore destruction callback failed", e);
             }
         }
         destructionCallbacks.clear();
@@ -143,4 +146,32 @@ class BeanStore {
         }
     }
 
+    private void writeObject(java.io.ObjectOutputStream out)
+            throws IOException {
+        out.defaultWriteObject();
+        out.writeObject(filterMap(objects));
+        out.writeObject(filterMap(destructionCallbacks));
+    }
+
+    private HashMap<String, Serializable> filterMap(Map<String, ?> map) {
+        HashMap<String, Serializable> objectsToWrite = new HashMap<>();
+        for (Entry<String, ?> entry : map.entrySet()) {
+            if (entry.getValue() instanceof Serializable) {
+                objectsToWrite.put(entry.getKey(),
+                        (Serializable) entry.getValue());
+            } else {
+                LoggerFactory.getLogger(BeanStore.class).warn(
+                        "Object '{}' stored by key '{}' is not serializable",
+                        entry.getKey(), entry.getValue());
+            }
+        }
+        return objectsToWrite;
+    }
+
+    private void readObject(ObjectInputStream input)
+            throws ClassNotFoundException, IOException {
+        input.defaultReadObject();
+        objects = (Map) input.readObject();
+        destructionCallbacks = (Map) input.readObject();
+    }
 }
