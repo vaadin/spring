@@ -15,12 +15,9 @@
  */
 package com.vaadin.flow.spring.scopes;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
@@ -43,9 +40,9 @@ class BeanStore implements Serializable {
 
     private final VaadinSession session;
 
-    private transient Map<String, Object> objects = new HashMap<>();
+    private final Map<String, Object> objects = new HashMap<>();
 
-    private transient Map<String, Runnable> destructionCallbacks = new HashMap<>();
+    private final Map<String, Runnable> destructionCallbacks = new HashMap<>();
 
     /**
      * Creates a new instance for the given {@code session}.
@@ -146,32 +143,4 @@ class BeanStore implements Serializable {
         }
     }
 
-    private void writeObject(java.io.ObjectOutputStream out)
-            throws IOException {
-        out.defaultWriteObject();
-        out.writeObject(filterMap(objects));
-        out.writeObject(filterMap(destructionCallbacks));
-    }
-
-    private HashMap<String, Serializable> filterMap(Map<String, ?> map) {
-        HashMap<String, Serializable> objectsToWrite = new HashMap<>();
-        for (Entry<String, ?> entry : map.entrySet()) {
-            if (entry.getValue() instanceof Serializable) {
-                objectsToWrite.put(entry.getKey(),
-                        (Serializable) entry.getValue());
-            } else {
-                LoggerFactory.getLogger(BeanStore.class).warn(
-                        "Object '{}' stored by key '{}' is not serializable",
-                        entry.getKey(), entry.getValue());
-            }
-        }
-        return objectsToWrite;
-    }
-
-    private void readObject(ObjectInputStream input)
-            throws ClassNotFoundException, IOException {
-        input.defaultReadObject();
-        objects = (Map) input.readObject();
-        destructionCallbacks = (Map) input.readObject();
-    }
 }
