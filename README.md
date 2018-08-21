@@ -7,10 +7,12 @@ This branch is Vaadin 10 compatible. See other branches for other framework vers
 * 2.0 and 2.1 for Vaadin Framework V8.0.X versions 
 * 3.0 for Vaadin Framework V8.2 versions
 
-Download release
+Getting started
 ----
 
-Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to https://vaadin.com/addon/vaadin-spring.
+This version is part of the Vaadin platform ([github](https://github.com/vaadin/platform)).
+The easiest way to get started is to use the [Project Base for Vaadin 10 and Spring](https://vaadin.com/start/v10-project-base-spring).
+For help on getting started, see the [tutorial](https://github.com/vaadin/spring-tutorial).
 
 Building the project
 ----
