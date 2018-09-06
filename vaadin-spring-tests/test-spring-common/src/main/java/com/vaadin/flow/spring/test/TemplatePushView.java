@@ -60,16 +60,13 @@ public class TemplatePushView extends PolymerTemplate<TemplateModel> {
 
         @Override
         public void run() {
-            sleep();
-            ui.access(() -> execute(ui));
-        }
-
-        private void sleep() {
             // We can acquire the lock after the request started this thread is processed
             // Needed to make sure that this is sent as a push message
             Lock lockInstance = ui.getSession().getLockInstance();
             lockInstance.lock();
             lockInstance.unlock();
+
+            ui.access(() -> execute(ui));
         }
 
         protected abstract void execute(UI ui);
