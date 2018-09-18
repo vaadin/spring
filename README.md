@@ -1,3 +1,10 @@
+[![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-Spring-00b4f0.svg)](https://vaadin.com/directory/component/vaadin-spring)
+[![Stars on Vaadin Directory](https://img.shields.io/vaadin-directory/star/vaadin-spring.svg)](https://vaadin.com/directory/component/vaadin-spring)  
+
+[![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-Spring%20Boot-00b4f0.svg)](https://vaadin.com/directory/component/vaadin-spring-boot)
+[![Stars on Vaadin Directory](https://img.shields.io/vaadin-directory/star/vaadin-spring-boot.svg)](https://vaadin.com/directory/component/vaadin-spring-boot)
+
+
 Vaadin Spring
 ======================
 
