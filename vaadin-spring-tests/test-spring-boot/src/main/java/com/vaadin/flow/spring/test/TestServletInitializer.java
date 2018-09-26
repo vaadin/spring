@@ -24,11 +24,13 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.A
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @SpringBootApplication
 @EnableAuthorizationServer
 @Configuration
 @EnableWebSecurity
+@EnableWebMvc
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {

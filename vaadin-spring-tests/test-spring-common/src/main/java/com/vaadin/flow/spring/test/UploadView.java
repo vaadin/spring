@@ -33,13 +33,13 @@ public class UploadView extends Div {
     public UploadView() {
         MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
         Upload upload = new Upload(buffer);
+        upload.setId("upload");
 
         upload.addSucceededListener(event -> {
             Component component = createComponent(event.getMIMEType(),
                     event.getFileName(),
                     buffer.getInputStream(event.getFileName()));
             add(component);
-            int a = 0;
         });
 
         add(upload);
