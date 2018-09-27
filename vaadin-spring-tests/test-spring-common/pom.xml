@@ -36,8 +36,8 @@
 
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-upload-flow</artifactId>
-            <version>${vaadin.flow.version}</version>
+            <artifactId>vaadin-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
     </dependencies>
