@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 
 import com.vaadin.flow.di.DefaultInstantiator;
@@ -81,10 +82,11 @@ public class SpringInstantiator extends DefaultInstantiator {
 
     @Override
     public <T> T getOrCreate(Class<T> type) {
-        if (context.getBeanNamesForType(type).length == 1) {
+        try {
             return context.getBean(type);
-        }
 
-        return context.getAutowireCapableBeanFactory().createBean(type);
+        } catch (NoSuchBeanDefinitionException e) {
+            return context.getAutowireCapableBeanFactory().createBean(type);
+        }
     }
 }
