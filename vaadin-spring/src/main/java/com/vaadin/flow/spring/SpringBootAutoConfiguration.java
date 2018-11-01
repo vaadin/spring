@@ -42,14 +42,13 @@ import com.vaadin.flow.server.Constants;
  * Spring boot auto-configuration class for Flow.
  *
  * @author Vaadin Ltd
- *
  */
 @Configuration
 @AutoConfigureBefore(WebMvcAutoConfiguration.class)
 @ConditionalOnClass(ServletContextInitializer.class)
 @EnableConfigurationProperties(VaadinConfigurationProperties.class)
 @Import({ VaadinServletConfiguration.class,
-        DispatcherServletRegistrationBeanConfig.class })
+        ServletRegistrationPostProcessor.class })
 public class SpringBootAutoConfiguration {
 
     @Autowired
@@ -103,7 +102,7 @@ public class SpringBootAutoConfiguration {
      * properly mapped without this registration.
      * <p>
      * In the modern versions of Spring Boot this is done via extra
-     * {@link DispatcherServletRegistrationBeanConfig} configuration because
+     * {@link ServletRegistrationPostProcessor} configuration because
      * {@link DispatcherServletRegistrationBean} bean should be used instead of
      * {@code ServletRegistrationBean<DispatcherServlet>}. So this method works
      * only if there is no {@link DispatcherServletRegistrationBean} class.

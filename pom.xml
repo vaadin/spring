@@ -10,7 +10,6 @@
         <version>2.0.0</version>
     </parent>
 
-    <groupId>com.vaadin</groupId>
     <artifactId>vaadin-spring-parent</artifactId>
     <version>10.1-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -45,8 +44,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- These are typically overridden with BOMs -->
-        <vaadin.flow.version>1.1-SNAPSHOT</vaadin.flow.version>
-        <spring-boot.version>2.0.4.RELEASE</spring-boot.version>
+        <vaadin.flow.version>1.2-SNAPSHOT</vaadin.flow.version>
+        <spring-boot.version>2.1.0.RELEASE</spring-boot.version>
 
         <!-- Additional manifest fields -->
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
@@ -139,7 +138,7 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse 
+                <!--This plugin's configuration is used to store Eclipse
                     m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>

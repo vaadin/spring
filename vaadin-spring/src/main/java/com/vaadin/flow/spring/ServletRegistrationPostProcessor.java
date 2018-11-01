@@ -15,12 +15,15 @@
  */
 package com.vaadin.flow.spring;
 
+import java.io.Serializable;
+
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletRegistrationBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -30,22 +33,22 @@ import org.springframework.web.servlet.DispatcherServlet;
  * <p>
  * This is a workaround for spring boot 2.0.4 compatibility (see spring#331).
  *
- * @see #dispatcherServletRegistration()
+ * @see #postProcessBeforeInitialization(Object, String)
  *
  * @author Vaadin Ltd
  *
  */
-@Configuration
+@Component
 @Conditional(RootMappedCondition.class)
 @ConditionalOnClass(DispatcherServletRegistrationBean.class)
-public class DispatcherServletRegistrationBeanConfig {
-
+public class ServletRegistrationPostProcessor
+        implements BeanPostProcessor, Serializable {
     @Autowired
     private WebApplicationContext context;
 
     /**
-     * Creates a {@link DispatcherServletRegistrationBean} instance for a
-     * dispatcher servlet in case Vaadin servlet is mapped to the root.
+     * Replaces a default {@link DispatcherServletRegistrationBean} instance for
+     * a dispatcher servlet in case Vaadin servlet is mapped to the root.
      * <p>
      * This is needed for correct servlet path (and path info) values available
      * in Vaadin servlet because it works via forwarding controller which is not
@@ -54,12 +57,18 @@ public class DispatcherServletRegistrationBeanConfig {
      * @return a custom DispatcherServletRegistrationBean instance for
      *         dispatcher servlet
      */
-    @Bean
-    public DispatcherServletRegistrationBean dispatcherServletRegistration() {
-        DispatcherServlet servlet = context.getBean(DispatcherServlet.class);
-        DispatcherServletRegistrationBean registration = new DispatcherServletRegistrationBean(
-                servlet, "/*");
-        registration.setName("dispatcher");
-        return registration;
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName)
+            throws BeansException {
+        if (bean instanceof DispatcherServletRegistrationBean) {
+            DispatcherServletRegistrationBean oldBean = (DispatcherServletRegistrationBean) bean;
+            if ("/".equals(oldBean.getPath())) {
+                DispatcherServletRegistrationBean registration = new DispatcherServletRegistrationBean(
+                        context.getBean(DispatcherServlet.class), "/*");
+                registration.setName("dispatcher");
+                return registration;
+            }
+        }
+        return bean;
     }
 }
