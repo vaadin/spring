@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.spring;
 
-import java.io.Serializable;
-
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -42,7 +39,7 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Conditional(RootMappedCondition.class)
 @ConditionalOnClass(DispatcherServletRegistrationBean.class)
 public class ServletRegistrationPostProcessor
-        implements BeanPostProcessor, Serializable {
+        implements BeanPostProcessor {
     @Autowired
     private WebApplicationContext context;
 
@@ -58,8 +55,7 @@ public class ServletRegistrationPostProcessor
      *         dispatcher servlet
      */
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName)
-            throws BeansException {
+    public Object postProcessBeforeInitialization(Object bean, String beanName) {
         if (bean instanceof DispatcherServletRegistrationBean) {
             DispatcherServletRegistrationBean oldBean = (DispatcherServletRegistrationBean) bean;
             if ("/".equals(oldBean.getPath())) {
