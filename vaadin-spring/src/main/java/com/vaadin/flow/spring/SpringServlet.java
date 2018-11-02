@@ -81,6 +81,11 @@ public class SpringServlet extends VaadinServlet {
 
     private HttpServletRequest wrapRequest(HttpServletRequest request) {
         if (forwardingEnforced && request.getPathInfo() == null) {
+            /*
+             * We need to apply a workaround in case of forwarding
+             *
+             * see https://jira.spring.io/browse/SPR-17457
+             */
             return new ForwardingRequestWrapper(request);
         }
         return request;

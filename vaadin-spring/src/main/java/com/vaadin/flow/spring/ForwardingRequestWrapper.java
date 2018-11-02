@@ -27,6 +27,8 @@ import com.vaadin.flow.server.VaadinServlet;
  * appropriate {@code servletPath} and {@code pathInfo} (which are expected by
  * {@link VaadinServlet}) in case forwarding is enforced.
  *
+ * @see https://jira.spring.io/browse/SPR-17457
+ *
  * @author Vaadin Ltd
  *
  */
