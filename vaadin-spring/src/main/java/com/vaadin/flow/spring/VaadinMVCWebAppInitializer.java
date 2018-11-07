@@ -63,7 +63,7 @@ public abstract class VaadinMVCWebAppInitializer
 
         Dynamic registration = servletContext.addServlet(
                 ClassUtils.getShortNameAsProperty(SpringServlet.class),
-                new SpringServlet(context, rootMapping));
+                new SpringServlet(context));
 
         Map<String, String> initParameters = new HashMap<>();
         if (rootMapping) {
