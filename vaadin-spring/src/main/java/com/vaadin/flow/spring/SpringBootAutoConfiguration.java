@@ -81,7 +81,7 @@ public class SpringBootAutoConfiguration {
                             .makeContextRelative(mapping.replace("*", "")));
         }
         ServletRegistrationBean<SpringServlet> registration = new ServletRegistrationBean<>(
-                new SpringServlet(context, rootMapping), mapping);
+                new SpringServlet(context), mapping);
         registration.setInitParameters(initParameters);
         registration
                 .setAsyncSupported(configurationProperties.isAsyncSupported());

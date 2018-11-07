@@ -49,7 +49,11 @@ public class SpringServlet extends VaadinServlet {
      * @param context
      *            the Spring application context
      */
-    public SpringServlet(ApplicationContext context,
+    public SpringServlet(ApplicationContext context) {
+        this(context, isForwardingEnforced(context));
+    }
+
+    private SpringServlet(ApplicationContext context,
             boolean forwardingEnforced) {
         this.context = context;
         this.forwardingEnforced = forwardingEnforced;
@@ -126,4 +130,11 @@ public class SpringServlet extends VaadinServlet {
         }
     }
 
+    private static boolean isForwardingEnforced(ApplicationContext context) {
+        Environment env = context.getBean(Environment.class);
+        String mapping = env
+                .getProperty(RootMappedCondition.URL_MAPPING_PROPERTY, "/*");
+
+        return RootMappedCondition.isRootMapping(mapping);
+    }
 }
