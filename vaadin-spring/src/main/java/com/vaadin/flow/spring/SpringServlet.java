@@ -52,12 +52,10 @@ public class SpringServlet extends VaadinServlet {
             Constants.SERVLET_PARAMETER_SYNC_ID_CHECK,
             Constants.SERVLET_PARAMETER_PUSH_SUSPEND_TIMEOUT_LONGPOLLING,
             Constants.SERVLET_PARAMETER_REQUEST_TIMING,
-            Constants.DISABLE_WEBJARS, Constants.SERVLET_PARAMETER_BROTLI,
-            Constants.LOAD_ES5_ADAPTERS,
+            Constants.DISABLE_WEBJARS, Constants.LOAD_ES5_ADAPTERS,
             Constants.USE_ORIGINAL_FRONTEND_RESOURCES,
             Constants.FRONTEND_URL_ES5, Constants.FRONTEND_URL_ES6,
-            Constants.I18N_PROVIDER,
-            Constants.DISABLE_AUTOMATIC_SERVLET_REGISTRATION);
+            Constants.I18N_PROVIDER);
 
     private final ApplicationContext context;
     private final boolean forwardingEnforced;
