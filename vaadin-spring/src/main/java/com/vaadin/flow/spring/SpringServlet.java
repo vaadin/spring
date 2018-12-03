@@ -112,10 +112,10 @@ public class SpringServlet extends VaadinServlet {
     }
 
     private void config(Properties properties) {
-        setProeprties(PROPERTY_NAMES, properties);
+        setProperties(PROPERTY_NAMES, properties);
     }
 
-    private void setProeprties(List<String> propertyNames,
+    private void setProperties(List<String> propertyNames,
             Properties properties) {
         propertyNames.stream()
                 .forEach(property -> setProperty(property, properties));
