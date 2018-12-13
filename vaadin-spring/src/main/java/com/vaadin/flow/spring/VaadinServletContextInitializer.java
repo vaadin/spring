@@ -84,19 +84,19 @@ public class VaadinServletContextInitializer
             ApplicationRouteRegistry registry = ApplicationRouteRegistry
                     .getInstance(event.getServletContext());
 
-            try {
-                List<Class<?>> routeClasses =
-                        findByAnnotation(getRoutePackages(), Route.class,
-                                RouteAlias.class).collect(Collectors.toList());
+            if (registry.getRegisteredRoutes().isEmpty()) {
+                try {
+                    List<Class<?>> routeClasses = findByAnnotation(
+                            getRoutePackages(), Route.class, RouteAlias.class).collect(Collectors.toList());
 
-                Set<Class<? extends Component>> navigationTargets =
-                        validateRouteClasses(routeClasses.stream());
+                    Set<Class<? extends Component>> navigationTargets = validateRouteClasses(
+                            routeClasses.stream());
 
-                RouteUtil.setNavigationTargets(navigationTargets, registry);
-                registry.setPwaConfigurationClass(
-                        validatePwaClass(routeClasses.stream()));
-            } catch (InvalidRouteConfigurationException e) {
-                throw new IllegalStateException(e);
+                    RouteUtil.setNavigationTargets(navigationTargets, registry);
+                    registry.setPwaConfigurationClass(validatePwaClass(routeClasses.stream()));
+                } catch (InvalidRouteConfigurationException e) {
+                    throw new IllegalStateException(e);
+                }
             }
         }
 
