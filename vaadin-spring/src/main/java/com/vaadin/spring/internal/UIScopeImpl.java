@@ -243,8 +243,10 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
 
         void destroy() {
             LOGGER.trace("Destroying [{}]", this);
-            session.setAttribute(UIStore.class, null);
-            session.getService().removeServiceDestroyListener(this);
+            session.accessSynchronously(() -> {
+                session.setAttribute(UIStore.class, null);
+                session.getService().removeServiceDestroyListener(this);
+            });
             for (BeanStore beanStore : new HashSet<BeanStore>(
                     beanStoreMap.values())) {
                 beanStore.destroy();
