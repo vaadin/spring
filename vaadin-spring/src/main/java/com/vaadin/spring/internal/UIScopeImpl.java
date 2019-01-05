@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.vaadin.shared.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -200,18 +201,20 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         private final Map<UIID, BeanStore> beanStoreMap = new ConcurrentHashMap<UIID, BeanStore>();
         private final VaadinSession session;
         private final String sessionId;
+        private final Registration serviceDestroyRegistration;
 
         // for testing only
         UIStore() {
             // just to keep the compiler happy when the UIStore is mocked
             sessionId = null;
             session = null;
+            serviceDestroyRegistration = null;
         }
 
         UIStore(VaadinSession session) {
             sessionId = session.getSession().getId();
             this.session = session;
-            this.session.getService().addServiceDestroyListener(this);
+            serviceDestroyRegistration = this.session.getService().addServiceDestroyListener(this);
             this.session.setAttribute(UIStore.class, this);
         }
 
@@ -245,7 +248,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
             LOGGER.trace("Destroying [{}]", this);
             session.accessSynchronously(() -> {
                 session.setAttribute(UIStore.class, null);
-                session.getService().removeServiceDestroyListener(this);
+                serviceDestroyRegistration.remove();
             });
             for (BeanStore beanStore : new HashSet<BeanStore>(
                     beanStoreMap.values())) {
