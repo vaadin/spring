@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.vaadin.shared.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -105,9 +104,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
     }
 
     @Override
-    public void postProcessBeanFactory(
-            ConfigurableListableBeanFactory configurableListableBeanFactory)
-            throws BeansException {
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) {
         LOGGER.debug("Registering Vaadin UI scope with bean factory [{}]",
                 configurableListableBeanFactory);
         configurableListableBeanFactory.registerScope(VAADIN_UI_SCOPE_NAME,
@@ -198,7 +195,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         private static final Logger LOGGER = LoggerFactory
                 .getLogger(UIStore.class);
 
-        private final Map<UIID, BeanStore> beanStoreMap = new ConcurrentHashMap<UIID, BeanStore>();
+        private final Map<UIID, BeanStore> beanStoreMap = new ConcurrentHashMap<>();
         private final VaadinSession session;
         private final String sessionId;
         private final Registration serviceDestroyRegistration;
@@ -250,8 +247,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
                 session.setAttribute(UIStore.class, null);
                 serviceDestroyRegistration.remove();
             });
-            for (BeanStore beanStore : new HashSet<BeanStore>(
-                    beanStoreMap.values())) {
+            for (BeanStore beanStore : new HashSet<>(beanStoreMap.values())) {
                 beanStore.destroy();
             }
             Assert.isTrue(beanStoreMap.isEmpty(),
