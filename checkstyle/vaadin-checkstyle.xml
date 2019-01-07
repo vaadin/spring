@@ -59,10 +59,6 @@
     <module name="NewlineAtEndOfFile">
         <property name="severity" value="warning" />
     </module>
-    <module name="RegexpMultiline">
-        <property name="message" value="File contains carriage return (Windows newlines)" />
-        <property name="format" value="\r"/>
-    </module>
     
 
     <!-- Checks that property files contain the same keys. -->
