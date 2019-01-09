@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -42,10 +43,12 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.WebComponent;
 import com.vaadin.flow.router.HasErrorParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.server.InvalidCustomElementNameException;
 import com.vaadin.flow.server.InvalidRouteConfigurationException;
 import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.startup.AbstractAnnotationValidator;
@@ -53,6 +56,8 @@ import com.vaadin.flow.server.startup.AbstractRouteRegistryInitializer;
 import com.vaadin.flow.server.startup.AnnotationValidator;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.server.startup.ServletVerifier;
+import com.vaadin.flow.server.startup.WebComponentRegistryInitializer;
+import com.vaadin.flow.server.webcomponent.WebComponentRegistry;
 import com.vaadin.flow.spring.VaadinScanPackagesRegistrar.VaadinScanPackages;
 
 /**
@@ -157,6 +162,45 @@ public class VaadinServletContextInitializer
 
     }
 
+    private class WebComponentServletContextListener
+            extends WebComponentRegistryInitializer
+            implements ServletContextListener {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public void contextInitialized(ServletContextEvent event) {
+            WebComponentRegistry registry = WebComponentRegistry
+                    .getInstance(event.getServletContext());
+
+            if (registry.getWebComponents().isEmpty()) {
+                try {
+                    Set<Class<? extends Component>> webComponents = findByAnnotation(
+                            getWebComponentPackages(), WebComponent.class)
+                            .map(c -> (Class<? extends Component>) c)
+                            .collect(Collectors.toSet());
+
+                    validateDistinct(webComponents);
+                    validateComponentName(webComponents);
+
+                    Map<String, Class<? extends Component>> webComponentMap = webComponents
+                            .stream().collect(Collectors
+                                    .toMap(this::getWebComponentName, c -> c));
+
+                    registry.setWebComponents(webComponentMap);
+
+                } catch (IllegalArgumentException | InvalidCustomElementNameException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }
+
+        @Override
+        public void contextDestroyed(ServletContextEvent sce) {
+            // no need to do anything
+        }
+
+    }
+
     /**
      * Creates a new {@link ServletContextInitializer} instance with application
      * {@code context} provided.
@@ -195,6 +239,13 @@ public class VaadinServletContextInitializer
 
         servletContext
                 .addListener(new AnnotationValidatorServletContextListener());
+
+        // Skip custom web component search if registry already initialized
+        if (WebComponentRegistry.getInstance(servletContext).getWebComponents()
+                .isEmpty()) {
+            servletContext
+                    .addListener(new WebComponentServletContextListener());
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -252,6 +303,10 @@ public class VaadinServletContextInitializer
     }
 
     private Collection<String> getVerifiableAnnotationPackages() {
+        return getDefaultPackages();
+    }
+
+    private Collection<String> getWebComponentPackages() {
         return getDefaultPackages();
     }
 
