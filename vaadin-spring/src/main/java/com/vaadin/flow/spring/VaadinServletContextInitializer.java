@@ -172,7 +172,7 @@ public class VaadinServletContextInitializer
             WebComponentRegistry registry = WebComponentRegistry
                     .getInstance(event.getServletContext());
 
-            if (registry.getWebComponents().isEmpty()) {
+            if (registry.getWebComponents() == null || registry.getWebComponents().isEmpty()) {
                 try {
                     Set<Class<? extends Component>> webComponents = findByAnnotation(
                             getWebComponentPackages(), WebComponent.class)
@@ -241,8 +241,9 @@ public class VaadinServletContextInitializer
                 .addListener(new AnnotationValidatorServletContextListener());
 
         // Skip custom web component search if registry already initialized
-        if (WebComponentRegistry.getInstance(servletContext).getWebComponents()
-                .isEmpty()) {
+        Map<String, Class<? extends Component>> webComponents = WebComponentRegistry
+                .getInstance(servletContext).getWebComponents();
+        if (webComponents == null || webComponents.isEmpty()) {
             servletContext
                     .addListener(new WebComponentServletContextListener());
         }
