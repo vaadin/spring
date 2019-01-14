@@ -172,25 +172,21 @@ public class VaadinServletContextInitializer
             WebComponentRegistry registry = WebComponentRegistry
                     .getInstance(event.getServletContext());
 
-            if (registry.getWebComponents() == null || registry.getWebComponents().isEmpty()) {
-                try {
-                    Set<Class<? extends Component>> webComponents = findByAnnotation(
-                            getWebComponentPackages(), WebComponent.class)
-                            .map(c -> (Class<? extends Component>) c)
-                            .collect(Collectors.toSet());
+            if (registry.getWebComponents() == null || registry
+                    .getWebComponents().isEmpty()) {
+                Set<Class<? extends Component>> webComponents = findByAnnotation(
+                        getWebComponentPackages(), WebComponent.class)
+                        .map(c -> (Class<? extends Component>) c)
+                        .collect(Collectors.toSet());
 
-                    validateDistinct(webComponents);
-                    validateComponentName(webComponents);
+                validateDistinct(webComponents);
+                validateComponentName(webComponents);
 
-                    Map<String, Class<? extends Component>> webComponentMap = webComponents
-                            .stream().collect(Collectors
-                                    .toMap(this::getWebComponentName, c -> c));
+                Map<String, Class<? extends Component>> webComponentMap = webComponents
+                        .stream().collect(Collectors
+                                .toMap(this::getWebComponentName, c -> c));
 
-                    registry.setWebComponents(webComponentMap);
-
-                } catch (IllegalArgumentException | InvalidCustomElementNameException e) {
-                    throw new IllegalStateException(e);
-                }
+                registry.setWebComponents(webComponentMap);
             }
         }
 
