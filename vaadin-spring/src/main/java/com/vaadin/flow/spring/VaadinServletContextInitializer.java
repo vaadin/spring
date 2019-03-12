@@ -41,11 +41,13 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 
+import com.googlecode.gentyref.GenericTypeReflector;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.HasErrorParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.server.AmbiguousRouteConfigurationException;
 import com.vaadin.flow.server.InvalidRouteConfigurationException;
 import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.startup.AbstractAnnotationValidator;
@@ -87,18 +89,19 @@ public class VaadinServletContextInitializer
             if (registry.getRegisteredRoutes().isEmpty()) {
                 try {
                     List<Class<?>> routeClasses = findByAnnotation(
-                            getRoutePackages(), Route.class, RouteAlias.class).collect(Collectors.toList());
+                            getRoutePackages(), Route.class, RouteAlias.class)
+                                    .collect(Collectors.toList());
 
                     Set<Class<? extends Component>> navigationTargets = validateRouteClasses(
                             routeClasses.stream());
 
                     RouteConfiguration routeConfiguration = RouteConfiguration
                             .forRegistry(registry);
-                    routeConfiguration.update(() -> {
-                       routeConfiguration.getHandledRegistry().clean();
-                        navigationTargets.forEach(routeConfiguration::setAnnotatedRoute);
-                    });
-                    registry.setPwaConfigurationClass(validatePwaClass(routeClasses.stream()));
+                    routeConfiguration
+                            .update(() -> setAnnotatedRoutes(routeConfiguration,
+                                    navigationTargets));
+                    registry.setPwaConfigurationClass(
+                            validatePwaClass(routeClasses.stream()));
                 } catch (InvalidRouteConfigurationException e) {
                     throw new IllegalStateException(e);
                 }
@@ -108,6 +111,38 @@ public class VaadinServletContextInitializer
         @Override
         public void contextDestroyed(ServletContextEvent sce) {
             // no need to do anything
+        }
+
+        private void setAnnotatedRoutes(RouteConfiguration routeConfiguration,
+                Set<Class<? extends Component>> routes) {
+            routeConfiguration.getHandledRegistry().clean();
+            for (Class<? extends Component> navigationTarget : routes) {
+                try {
+                    routeConfiguration.setAnnotatedRoute(navigationTarget);
+                } catch (AmbiguousRouteConfigurationException exception) {
+                    if (!handleAmbiguousRoute(routeConfiguration,
+                            exception.getConfiguredNavigationTarget(),
+                            navigationTarget)) {
+                        throw exception;
+                    }
+                }
+            }
+        }
+
+        private boolean handleAmbiguousRoute(
+                RouteConfiguration routeConfiguration,
+                Class<? extends Component> configuredNavigationTarget,
+                Class<? extends Component> navigationTarget) {
+            if (GenericTypeReflector.isSuperType(navigationTarget,
+                    configuredNavigationTarget)) {
+                return true;
+            } else if (GenericTypeReflector.isSuperType(
+                    configuredNavigationTarget, navigationTarget)) {
+                routeConfiguration.removeRoute(configuredNavigationTarget);
+                routeConfiguration.setAnnotatedRoute(navigationTarget);
+                return true;
+            }
+            return false;
         }
 
     }
