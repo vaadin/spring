@@ -26,6 +26,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import com.vaadin.flow.spring.SpringInstantiator;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -173,5 +174,14 @@ public class SpringInstantiatorTest {
     public static Instantiator getInstantiator(ApplicationContext context)
             throws ServletException {
         return getService(context, null).getInstantiator();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void getOrCreateBean_multipleBeansGiven_throwsException() {
+        ApplicationContext context = Mockito.mock(ApplicationContext.class);
+        Mockito.when(context.getBeanNamesForType(String.class)).thenReturn(new String[]{"one", "two"});
+        SpringInstantiator instantiator = new SpringInstantiator(null, context);
+
+        instantiator.getOrCreate(String.class);
     }
 }
