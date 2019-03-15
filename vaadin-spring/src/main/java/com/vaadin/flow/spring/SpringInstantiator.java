@@ -83,8 +83,11 @@ public class SpringInstantiator extends DefaultInstantiator {
     public <T> T getOrCreate(Class<T> type) {
         if (context.getBeanNamesForType(type).length == 1) {
             return context.getBean(type);
+        } else if (context.getBeanNamesForType(type).length > 1) {
+            throw new IllegalStateException("Unable to autowire existing beans, there are more " +
+                    "than 1 autowiring candidates");
         }
-
+        // If there is no bean, try to instantiate one
         return context.getAutowireCapableBeanFactory().createBean(type);
     }
 }
