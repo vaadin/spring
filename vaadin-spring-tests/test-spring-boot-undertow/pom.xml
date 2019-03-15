@@ -23,14 +23,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-testbench-bom</artifactId>
-                <type>pom</type>
-                <scope>import</scope>
-                <version>6.0.1</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
