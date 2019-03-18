@@ -272,9 +272,8 @@ public class VaadinServletContextInitializer
                 .addListener(new AnnotationValidatorServletContextListener());
 
         // Skip custom web component builders search if registry already initialized
-        Set<WebComponentConfiguration<? extends Component>> webComponents = WebComponentConfigurationRegistry
-                .getInstance(servletContext).getConfigurations();
-        if (webComponents == null || webComponents.isEmpty()) {
+        if (!WebComponentConfigurationRegistry.getInstance(servletContext)
+                .hasExporters()) {
             servletContext
                     .addListener(new WebComponentServletContextListener());
         }
