@@ -220,7 +220,11 @@ public class VaadinServletContextInitializer
                 try {
                     initializer.onStartup(webComponentExporters, event.getServletContext());
                 } catch (ServletException e) {
-                    e.printStackTrace();
+                    throw new RuntimeException(String.format("Failed to " +
+                            "initialize %s",
+                            WebComponentConfigurationRegistry.class
+                                    .getSimpleName()),
+                            e);
                 }
             }
         }
