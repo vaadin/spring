@@ -102,8 +102,9 @@ public class SpringInstantiator extends DefaultInstantiator {
             try {
                 return context.getAutowireCapableBeanFactory().createBean(type);
             } catch (BeanInstantiationException e) {
-                throw new BeanInstantiationException(e.getBeanClass(), e.getMessage() +
-                        " [HINT] this could be caused by more than one suitable beans for autowiring in the context.");
+                throw new BeanInstantiationException(e.getBeanClass(),
+                        "[HINT] This could be caused by more than one suitable beans for autowiring in the context.",
+                        e);
             }
         } else {
             // If there is no bean, try to instantiate one
