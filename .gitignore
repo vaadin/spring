@@ -5,3 +5,5 @@ bin/
 .settings/
 .idea
 *.iml
+driver/
+driver_zips/
