@@ -78,7 +78,8 @@ public class SpringInstantiator extends DefaultInstantiator {
     }
 
     /**
-     * Hands over an existing bean or tries to instantiate one with the following rules:
+     * Hands over an existing bean of a type (not including subclasses) or tries to instantiate one with the following
+     * rules:
      * <ul>
      * <li>
      * If exactly one bean is present in the context, it returns this bean.
@@ -96,9 +97,16 @@ public class SpringInstantiator extends DefaultInstantiator {
      */
     @Override
     public <T> T getOrCreate(Class<T> type) {
-        if (context.getBeanNamesForType(type).length == 1) {
+        int beansCount = 0;
+        for (String beanName : context.getBeanNamesForType(type)) {
+            if (context.getType(beanName).equals(type)) {
+                beansCount++;
+            }
+        }
+
+        if (beansCount == 1) {
             return context.getBean(type);
-        } else if (context.getBeanNamesForType(type).length > 1) {
+        } else if (beansCount > 1) {
             try {
                 return context.getAutowireCapableBeanFactory().createBean(type);
             } catch (BeanInstantiationException e) {
