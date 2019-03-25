@@ -199,6 +199,9 @@ public class SpringInstantiatorTest {
     public void getOrCreateBean_multipleBeansGivenCannotInstantiate_throwsExceptionWithHint() {
         ApplicationContext context = Mockito.mock(ApplicationContext.class, Mockito.RETURNS_DEEP_STUBS);
         Mockito.when(context.getBeanNamesForType(Number.class)).thenReturn(new String[]{"one", "two"});
+        Class numberClass = Number.class;
+        Mockito.when(context.getType("one")).thenReturn(numberClass);
+        Mockito.when(context.getType("two")).thenReturn(numberClass);
         Mockito.when(context.getAutowireCapableBeanFactory().createBean(Number.class)).thenThrow(new BeanInstantiationException(Number.class, "This is an abstract class"));
         SpringInstantiator instantiator = new SpringInstantiator(null, context);
 
@@ -216,7 +219,9 @@ public class SpringInstantiatorTest {
     public void getOrCreateBean_oneBeanGiven_noException() {
         ApplicationContext context = Mockito.mock(ApplicationContext.class);
         Mockito.when(context.getBeanNamesForType(Number.class)).thenReturn(new String[]{"one"});
-        Mockito.when(context.getBean(Number.class)).thenReturn(0);
+        Class numberClass = Number.class;
+        Mockito.when(context.getType("one")).thenReturn(numberClass);
+        Mockito.when(context.getBean("one", Number.class)).thenReturn(0);
         SpringInstantiator instantiator = new SpringInstantiator(null, context);
 
         Number bean = instantiator.getOrCreate(Number.class);
@@ -228,6 +233,9 @@ public class SpringInstantiatorTest {
     public void getOrCreateBean_multipleBeansGivenButCanInstantiate_noException() {
         ApplicationContext context = Mockito.mock(ApplicationContext.class, Mockito.RETURNS_DEEP_STUBS);
         Mockito.when(context.getBeanNamesForType(String.class)).thenReturn(new String[]{"one", "two"});
+        Class numberClass = Number.class;
+        Mockito.when(context.getType("one")).thenReturn(numberClass);
+        Mockito.when(context.getType("two")).thenReturn(numberClass);
         Mockito.when(context.getAutowireCapableBeanFactory().createBean(String.class)).thenReturn("string");
         SpringInstantiator instantiator = new SpringInstantiator(null, context);
 
