@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.spring;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
@@ -97,16 +98,16 @@ public class SpringInstantiator extends DefaultInstantiator {
      */
     @Override
     public <T> T getOrCreate(Class<T> type) {
-        int beansCount = 0;
+        ArrayList<String> qualifyingBeanNames = new ArrayList<>();
         for (String beanName : context.getBeanNamesForType(type)) {
             if (context.getType(beanName).equals(type)) {
-                beansCount++;
+                qualifyingBeanNames.add(beanName);
             }
         }
 
-        if (beansCount == 1) {
-            return context.getBean(type);
-        } else if (beansCount > 1) {
+        if (qualifyingBeanNames.size() == 1) {
+            return context.getBean(qualifyingBeanNames.get(0), type);
+        } else if (qualifyingBeanNames.size() > 1) {
             try {
                 return context.getAutowireCapableBeanFactory().createBean(type);
             } catch (BeanInstantiationException e) {
