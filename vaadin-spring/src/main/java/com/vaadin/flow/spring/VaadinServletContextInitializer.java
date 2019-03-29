@@ -183,8 +183,8 @@ public class VaadinServletContextInitializer
                     annotationValidator.getAnnotations());
 
             WebComponentExporterAwareValidator extraValidator = new WebComponentExporterAwareValidator();
-            validateAnnotations(new WebComponentExporterAwareValidator(),
-                    event.getServletContext(), extraValidator.getAnnotations());
+            validateAnnotations(extraValidator, event.getServletContext(),
+                    extraValidator.getAnnotations());
         }
 
         @Override
@@ -234,7 +234,7 @@ public class VaadinServletContextInitializer
                             event.getServletContext());
                 } catch (ServletException e) {
                     throw new RuntimeException(
-                            String.format("Failed to " + "initialize %s",
+                            String.format("Failed to initialize %s",
                                     WebComponentConfigurationRegistry.class
                                             .getSimpleName()),
                             e);
