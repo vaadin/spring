@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.context.ApplicationContext;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.di.DefaultInstantiator;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.internal.UsageStatistics;
@@ -59,6 +60,12 @@ public class SpringInstantiator extends DefaultInstantiator {
                 .getBeansOfType(VaadinServiceInitListener.class).values()
                 .stream();
         return Stream.concat(super.getServiceInitListeners(), springListeners);
+    }
+
+    @Override
+    public <T extends Component> T createComponent(Class<T> componentClass) {
+        return context.getAutowireCapableBeanFactory()
+                .createBean(componentClass);
     }
 
     @Override
