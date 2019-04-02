@@ -132,6 +132,19 @@ public class SpringInstantiatorTest {
     }
 
     @Test
+    public void createComponent_componentIsCreatedOnEveryCall()
+            throws ServletException {
+        Instantiator instantiator = getInstantiator(context);
+        RouteTarget2 component = instantiator
+                .createComponent(RouteTarget2.class);
+        Assert.assertNotNull(component);
+
+        RouteTarget2 anotherComponent = instantiator
+                .createComponent(RouteTarget2.class);
+        Assert.assertNotEquals(component, anotherComponent);
+    }
+
+    @Test
     public void getI18NProvider_i18nProviderIsABean_i18nProviderIsAvailable()
             throws ServletException {
         Instantiator instantiator = getInstantiator(context);
