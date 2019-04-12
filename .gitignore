@@ -7,3 +7,4 @@ bin/
 *.iml
 driver/
 driver_zips/
+**/error-screenshots/
