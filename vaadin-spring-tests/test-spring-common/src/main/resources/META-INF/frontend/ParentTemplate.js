@@ -5,7 +5,6 @@ import {html} from '@polymer/polymer/lib/utils/html-tag.js';
 class ParentTemplate extends PolymerElement {
   static get template() {
     return html`
-      <template>
         <div>Parent Template</div>
 
         <div id="div"></div>
@@ -16,8 +15,7 @@ class ParentTemplate extends PolymerElement {
                 width: 100%;
             }
         </style>
-    </template>
-`;
+     `;
   }
 
   static get is() {

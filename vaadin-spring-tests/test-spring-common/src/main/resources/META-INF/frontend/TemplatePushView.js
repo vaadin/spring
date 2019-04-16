@@ -4,15 +4,13 @@ import {html} from '@polymer/polymer/lib/utils/html-tag.js';
 class TemplatePushViewElement extends PolymerElement {
   static get template() {
     return html`
-      <template>
           <div>
               Hello <label id="label"></label>
               <button id="elementTest">Element API</button>
               <button id="execJsTest">Exec JS</button>
               <button id="callFunctionTest">Element.callFunction</button>
           </div>
-      </template>
-`;
+     `;
   }
 
   static get is() {
