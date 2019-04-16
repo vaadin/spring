@@ -13,3 +13,4 @@ package.json
 node_modules/
 **/frontend/main.js
 webpack.config.js
+vaadin-spring-tests/test-spring-boot/frontend*

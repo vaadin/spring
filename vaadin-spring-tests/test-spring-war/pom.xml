@@ -115,6 +115,22 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-maven-plugin</artifactId>
+                <version>${vaadin.flow.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>copy-frontend-files</goal>
+                            <goal>validate</goal>
+                            <goal>update-npm-dependencies</goal>
+                            <goal>update-imports</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
