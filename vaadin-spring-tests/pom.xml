@@ -9,9 +9,6 @@
     </parent>
     <artifactId>vaadin-spring-tests</artifactId>
     <name>Vaadin Spring tests</name>
-    <description>Test modules for Spring integration</description>
-    <packaging>pom</packaging>
-
     <modules>
         <module>test-spring-boot</module>
         <!--
@@ -19,14 +16,17 @@
         <module>test-spring-boot-undertow</module>
         -->
         <module>test-spring-boot-scan</module>
-        <!-- Skipping war module as it behaves strangely right now -->
-        <!--<module>test-spring-war</module>-->
-        <module>test-spring</module>
+        <!-- Skipping deployable module as it behaves strangely right now -->
+<!--        <module>test-spring-war</module>-->
+        <!--        <module>test-spring</module>-->
         <module>test-spring-common</module>
         <module>test-spring-boot-contextpath</module>
         <!-- nexus-staging-maven-plugin requires the last module to be not skipped for deployment -->
         <module>dummy-module</module>
     </modules>
+    <description>Test modules for Spring integration</description>
+
+    <packaging>pom</packaging>
 
     <properties>
         <!-- Don't care about coding style or licenses for tests -->
