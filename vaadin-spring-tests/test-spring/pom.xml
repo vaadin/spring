@@ -81,8 +81,7 @@
                     <execution>
                         <goals>
                             <goal>validate</goal>
-                            <goal>update-npm-dependencies</goal>
-                            <goal>update-imports</goal>
+                            <goal>build-frontend</goal>
                         </goals>
                     </execution>
                 </executions>
