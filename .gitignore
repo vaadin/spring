@@ -7,3 +7,9 @@ bin/
 *.iml
 driver/
 driver_zips/
+**/error-screenshots/
+
+package.json
+node_modules/
+**/frontend/main.js
+webpack.config.js
