@@ -9,7 +9,6 @@ driver/
 driver_zips/
 **/error-screenshots/
 
-package.json
 node_modules/
-**/frontend/main.js
+package*.json
 webpack.config.js

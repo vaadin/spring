@@ -132,6 +132,16 @@
                         <fileset>
                             <directory>error-screenshots</directory>
                         </fileset>
+                        <fileset>
+                            <directory>${project.basedir}</directory>
+                            <includes>
+                                <include>package*.json</include>
+                                <include>webpack.config.js</include>
+                            </includes>
+                        </fileset>
+                        <fileset>
+                            <directory>node_modules</directory>
+                        </fileset>
                     </filesets>
                 </configuration>
             </plugin>
