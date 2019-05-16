@@ -21,12 +21,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
-import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,8 +56,6 @@ import com.vaadin.flow.server.DeploymentConfigurationFactory;
 import com.vaadin.flow.server.DevModeHandler;
 import com.vaadin.flow.server.InvalidRouteConfigurationException;
 import com.vaadin.flow.server.RouteRegistry;
-import com.vaadin.flow.server.frontend.ClassFinder;
-import com.vaadin.flow.server.frontend.NodeTasks;
 import com.vaadin.flow.server.startup.AbstractRouteRegistryInitializer;
 import com.vaadin.flow.server.startup.AnnotationValidator;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
@@ -69,13 +65,6 @@ import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializ
 import com.vaadin.flow.server.startup.WebComponentExporterAwareValidator;
 import com.vaadin.flow.server.webcomponent.WebComponentConfigurationRegistry;
 import com.vaadin.flow.spring.VaadinScanPackagesRegistrar.VaadinScanPackages;
-
-import static com.vaadin.flow.server.Constants.PACKAGE_JSON;
-import static com.vaadin.flow.server.Constants.SERVLET_PARAMETER_DEVMODE_SKIP_UPDATE_IMPORTS;
-import static com.vaadin.flow.server.Constants.SERVLET_PARAMETER_DEVMODE_SKIP_UPDATE_NPM;
-import static com.vaadin.flow.server.Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_RUNNING_PORT;
-import static com.vaadin.flow.server.frontend.FrontendUtils.WEBPACK_CONFIG;
-import static com.vaadin.flow.server.frontend.FrontendUtils.getBaseDir;
 
 /**
  * Servlet context initializer for Spring Boot Application.
@@ -236,13 +225,19 @@ public class VaadinServletContextInitializer
 
         @Override
         public void contextInitialized(ServletContextEvent event) {
+            // If we have already initialized the devmodehandler we will not do extra work
+            if (DevModeHandler.getDevModeHandler() != null) {
+                return;
+            }
+
             ServletRegistrationBean servletRegistrationBean = appContext
                     .getBean("servletRegistrationBean",
                             ServletRegistrationBean.class);
 
             if (servletRegistrationBean == null) {
                 LoggerFactory.getLogger(VaadinServletContextInitializer.class)
-                        .warn("No servlet registration found. DevServer will not be started!");
+                       .warn("No servlet registration found. DevServer will not be started!");
+                return;
             }
 
             DeploymentConfiguration config = StubServletConfig
@@ -447,7 +442,7 @@ public class VaadinServletContextInitializer
     /**
      * Default ServletConfig implementation.
      */
-    public static class StubServletConfig implements ServletConfig {
+    private static class StubServletConfig implements ServletConfig {
         private final ServletContext context;
         private final ServletRegistrationBean registration;
 
@@ -459,7 +454,7 @@ public class VaadinServletContextInitializer
          * @param registration
          *         the ServletRegistration for this ServletConfig instance
          */
-        public StubServletConfig(ServletContext context,
+        private StubServletConfig(ServletContext context,
                 ServletRegistrationBean registration) {
             this.context = context;
             this.registration = registration;
