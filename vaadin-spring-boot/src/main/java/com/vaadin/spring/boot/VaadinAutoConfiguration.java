@@ -22,6 +22,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 import com.vaadin.spring.annotation.EnableVaadin;
 import com.vaadin.spring.annotation.SpringUI;
@@ -97,4 +98,13 @@ public class VaadinAutoConfiguration {
         }
     }
 
+    /**
+     * Deploys JSR-356 websocket endpoints when Atmosphere is available.
+     *
+     * @return the server endpoint exporter which does the actual work.
+     */
+    @Bean
+    public ServerEndpointExporter websocketEndpointDeployer() {
+        return new VaadinWebsocketEndpointExporter();
+    }    
 }

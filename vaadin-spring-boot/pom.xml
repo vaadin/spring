@@ -36,10 +36,21 @@
             <artifactId>spring-boot-autoconfigure</artifactId>
             <version>${spring.boot.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>provided</scope>
+        </dependency>        
         <!-- ServletForwardingController used for interoperation with Spring MVC -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-websocket</artifactId>
             <version>${spring.version}</version>
         </dependency>
         <!-- @ConfigurationProperties annotation processing (metadata for IDEs) -->
