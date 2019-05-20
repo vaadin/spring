@@ -20,7 +20,6 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @Push(transport = Transport.WEBSOCKET)
 @JsModule("TemplatePushView.js")
 @HtmlImport("TemplatePushView.html")
-@HtmlImport("TemplatePushView.html")
 @Tag("template-push-view")
 public class TemplatePushView extends PolymerTemplate<TemplateModel> {
 
