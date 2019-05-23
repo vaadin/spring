@@ -240,6 +240,10 @@ public class VaadinServletContextInitializer
                     .createDeploymentConfiguration(event.getServletContext(),
                             servletRegistrationBean, SpringServlet.class);
 
+            if (config.isBowerMode()) {
+                return;
+            }
+
             // Handle classes Route.class, NpmPackage.class, WebComponentExporter.class
             Set<Class<?>> classes = findByAnnotation(getNpmPackages(),
                     Route.class, NpmPackage.class).collect(Collectors.toSet());
