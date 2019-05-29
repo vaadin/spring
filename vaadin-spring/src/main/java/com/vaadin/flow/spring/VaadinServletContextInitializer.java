@@ -397,8 +397,8 @@ public class VaadinServletContextInitializer
 
     private Collection<String> getNpmPackages() {
         List<String> npmPackages = new ArrayList(getDefaultPackages());
-        // By default we should always check the com.vaadin.flow packages for npm
-        npmPackages.add("com.vaadin.flow.component");
+        // By default we should always check the com.vaadin.flow.component package for npm
+        npmPackages.add(Component.class.getPackage().getName());
         return npmPackages;
     }
 
