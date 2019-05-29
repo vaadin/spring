@@ -21,12 +21,12 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +34,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.gentyref.GenericTypeReflector;
+import org.reflections.Reflections;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -245,15 +248,21 @@ public class VaadinServletContextInitializer
                 return;
             }
 
-            // Handle classes Route.class, NpmPackage.class, WebComponentExporter.class
-            Collection<String> npmPackages = getNpmPackages();
-            Set<Class<?>> classes = findByAnnotation(npmPackages,
-                    Route.class, NpmPackage.class).collect(Collectors.toSet());
+            Set<Class<?>> classes = new HashSet();
 
-            classes.addAll(findBySuperType(npmPackages,
-                    WebComponentExporter.class).collect(Collectors.toSet()));
+            Reflections reflections = new Reflections(new ConfigurationBuilder()
+                    .addClassLoader(appContext.getClassLoader())
+                    .setExpandSuperTypes(false)
+                    .addUrls(ClasspathHelper.forClassLoader(appContext.getClassLoader())));
 
-            DevModeInitializer.initDevModeHandler(classes, event.getServletContext(), config);
+            classes.addAll(
+                    reflections.getSubTypesOf(WebComponentExporter.class));
+            classes.addAll(reflections.getTypesAnnotatedWith(NpmPackage.class));
+            classes.addAll(reflections.getTypesAnnotatedWith(Route.class));
+
+            DevModeInitializer
+                    .initDevModeHandler(classes, event.getServletContext(),
+                            config);
         }
 
         @Override
@@ -393,13 +402,6 @@ public class VaadinServletContextInitializer
             }
         }
         return beanClass;
-    }
-
-    private Collection<String> getNpmPackages() {
-        List<String> npmPackages = new ArrayList(getDefaultPackages());
-        // By default we should always check the com.vaadin.flow packages for npm
-        npmPackages.add("com.vaadin.flow.component");
-        return npmPackages;
     }
 
     private Collection<String> getRoutePackages() {
