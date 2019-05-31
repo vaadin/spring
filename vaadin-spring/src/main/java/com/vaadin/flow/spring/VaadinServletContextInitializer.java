@@ -21,22 +21,20 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.gentyref.GenericTypeReflector;
-import org.reflections.Reflections;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -45,6 +43,9 @@ import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 
@@ -226,6 +227,14 @@ public class VaadinServletContextInitializer
     private class DevModeServletContextListener
             implements ServletContextListener {
 
+        /**
+         * Blacklisted packages that shouldn't be scanned for when scanning all packages.
+         */
+        private List<String> blackListed = Stream
+                .of("com/vaadin/external/atmosphere", "org.springframework",
+                        "javax.servlet", "java.io", "java.lang",
+                        "java.util").collect(Collectors.toList());
+
         @SuppressWarnings({ "unchecked", "rawtypes" })
         @Override
         public void contextInitialized(ServletContextEvent event) {
@@ -248,21 +257,35 @@ public class VaadinServletContextInitializer
                 return;
             }
 
-            Set<Class<?>> classes = new HashSet();
+            // For NPM we scan all packages and due to problems with atmosphere
+            // we need to skip those from our resources.
+            ResourceLoader customLoader = new PathMatchingResourcePatternResolver(
+                    appContext) {
+                @Override
+                public Resource[] getResources(String locationPattern)
+                        throws IOException {
+                    List<Resource> resources = new ArrayList<>();
+                    for (Resource resource : super
+                            .getResources(locationPattern)) {
+                        String path = resource.getURL().getPath();
+                        Optional<String> blacklisted = blackListed.stream()
+                                .filter(pkg -> path.contains(pkg)).findAny();
+                        if (!blacklisted.isPresent()) {
+                            resources.add(resource);
+                        }
+                    }
+                    return resources.toArray(new Resource[0]);
+                }
+            };
 
-            Reflections reflections = new Reflections(new ConfigurationBuilder()
-                    .addClassLoader(appContext.getClassLoader())
-                    .setExpandSuperTypes(false)
-                    .addUrls(ClasspathHelper.forClassLoader(appContext.getClassLoader())));
+            // Handle classes Route.class, NpmPackage.class, WebComponentExporter.class
+            Set<Class<?>> classes = findByAnnotation(Collections.singleton(""), customLoader,
+                    Route.class, NpmPackage.class).collect(Collectors.toSet());
 
-            classes.addAll(
-                    reflections.getSubTypesOf(WebComponentExporter.class));
-            classes.addAll(reflections.getTypesAnnotatedWith(NpmPackage.class));
-            classes.addAll(reflections.getTypesAnnotatedWith(Route.class));
+            classes.addAll(findBySuperType(Collections.singleton(""), customLoader,
+                    WebComponentExporter.class).collect(Collectors.toSet()));
 
-            DevModeInitializer
-                    .initDevModeHandler(classes, event.getServletContext(),
-                            config);
+            DevModeInitializer.initDevModeHandler(classes, event.getServletContext(), config);
         }
 
         @Override
@@ -358,19 +381,18 @@ public class VaadinServletContextInitializer
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Stream<Class<?>> findByAnnotation(Collection<String> packages,
             Class<? extends Annotation>... annotations) {
-        return findByAnnotation(packages, Stream.of(annotations));
+        return findByAnnotation(packages, appContext, annotations);
     }
 
-    private Stream<Class<?>> findByAnnotation(Collection<String> packages,
-            Stream<Class<? extends Annotation>> annotations) {
+    private Stream<Class<?>> findByAnnotation(Collection<String> packages, ResourceLoader loader,
+            Class<? extends Annotation>... annotations) {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(
                 false);
-        scanner.setResourceLoader(appContext);
 
-        annotations.forEach(annotation -> scanner
+        scanner.setResourceLoader(loader);
+        Stream.of(annotations).forEach(annotation -> scanner
                 .addIncludeFilter(new AnnotationTypeFilter(annotation)));
 
         return packages.stream().map(scanner::findCandidateComponents)
@@ -379,9 +401,14 @@ public class VaadinServletContextInitializer
 
     private Stream<Class<?>> findBySuperType(Collection<String> packages,
             Class<?> type) {
+        return findBySuperType(packages, appContext, type);
+    }
+
+    private Stream<Class<?>> findBySuperType(Collection<String> packages, ResourceLoader loader,
+            Class<?> type) {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(
                 false);
-        scanner.setResourceLoader(appContext);
+        scanner.setResourceLoader(loader);
         scanner.addIncludeFilter(new AssignableTypeFilter(type));
 
         return packages.stream().map(scanner::findCandidateComponents)
