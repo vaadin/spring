@@ -27,10 +27,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -82,14 +84,12 @@ import com.vaadin.flow.spring.VaadinScanPackagesRegistrar.VaadinScanPackages;
  *
  * @see ServletContainerInitializer
  * @see RouteRegistry
- *
- * @author Vaadin Ltd
- *
  */
 public class VaadinServletContextInitializer
         implements ServletContextInitializer {
 
     private ApplicationContext appContext;
+    private ResourceLoader customLoader;
 
     private class RouteServletContextListener extends
             AbstractRouteRegistryInitializer implements ServletContextListener {
@@ -227,14 +227,6 @@ public class VaadinServletContextInitializer
     private class DevModeServletContextListener
             implements ServletContextListener {
 
-        /**
-         * Blacklisted packages that shouldn't be scanned for when scanning all packages.
-         */
-        private List<String> blackListed = Stream
-                .of("com/vaadin/external/atmosphere", "org.springframework",
-                        "javax.servlet", "java.io", "java.lang",
-                        "java.util").collect(Collectors.toList());
-
         @SuppressWarnings({ "unchecked", "rawtypes" })
         @Override
         public void contextInitialized(ServletContextEvent event) {
@@ -245,7 +237,7 @@ public class VaadinServletContextInitializer
 
             if (servletRegistrationBean == null) {
                 LoggerFactory.getLogger(VaadinServletContextInitializer.class)
-                       .warn("No servlet registration found. DevServer will not be started!");
+                        .warn("No servlet registration found. DevServer will not be started!");
                 return;
             }
 
@@ -253,39 +245,23 @@ public class VaadinServletContextInitializer
                     .createDeploymentConfiguration(event.getServletContext(),
                             servletRegistrationBean, SpringServlet.class);
 
-            if (config.isBowerMode()) {
+            if (config.isBowerMode() || config.isProductionMode()) {
                 return;
             }
 
-            // For NPM we scan all packages and due to problems with atmosphere
-            // we need to skip those from our resources.
-            ResourceLoader customLoader = new PathMatchingResourcePatternResolver(
-                    appContext) {
-                @Override
-                public Resource[] getResources(String locationPattern)
-                        throws IOException {
-                    List<Resource> resources = new ArrayList<>();
-                    for (Resource resource : super
-                            .getResources(locationPattern)) {
-                        String path = resource.getURL().getPath();
-                        Optional<String> blacklisted = blackListed.stream()
-                                .filter(pkg -> path.contains(pkg)).findAny();
-                        if (!blacklisted.isPresent()) {
-                            resources.add(resource);
-                        }
-                    }
-                    return resources.toArray(new Resource[0]);
-                }
-            };
-
             // Handle classes Route.class, NpmPackage.class, WebComponentExporter.class
-            Set<Class<?>> classes = findByAnnotation(Collections.singleton(""), customLoader,
-                    Route.class, NpmPackage.class).collect(Collectors.toSet());
+            Set<Class<?>> classes = findByAnnotation(Collections.singleton(""),
+                    customLoader, Route.class, NpmPackage.class)
+                    .collect(Collectors.toSet());
 
-            classes.addAll(findBySuperType(Collections.singleton(""), customLoader,
-                    WebComponentExporter.class).collect(Collectors.toSet()));
+            classes.addAll(
+                    findBySuperType(Collections.singleton(""), customLoader,
+                            WebComponentExporter.class)
+                            .collect(Collectors.toSet()));
 
-            DevModeInitializer.initDevModeHandler(classes, event.getServletContext(), config);
+            DevModeInitializer
+                    .initDevModeHandler(classes, event.getServletContext(),
+                            config);
         }
 
         @Override
@@ -339,6 +315,7 @@ public class VaadinServletContextInitializer
      */
     public VaadinServletContextInitializer(ApplicationContext context) {
         appContext = context;
+        customLoader = initCustomLoader(appContext);
     }
 
     @Override
@@ -472,6 +449,76 @@ public class VaadinServletContextInitializer
             packagesList = AutoConfigurationPackages.get(appContext);
         }
         return packagesList;
+    }
+
+    /**
+     * For NPM we scan all packages. For performance reasons and due to
+     * problems with atmosphere we skip known packaged from our resources
+     * collection.
+     */
+    private ResourceLoader initCustomLoader(ResourceLoader loader) {
+        return new PathMatchingResourcePatternResolver(appContext) {
+
+            /**
+             * Blacklisted packages that shouldn't be scanned for
+             * when scanning all
+             * packages.
+             */
+            private List<String> blackListed = Stream
+                    .of("antlr", "cglib", "ch/quos/logback", "commons-codec",
+                            "commons-fileupload", "commons-io",
+                            "commons-logging", "com/fasterxml", "com/google",
+                            "com/h2database", "com/helger",
+                            "com/vaadin/external/atmosphere",
+                            "com/vaadin/webjar", "javax/", "junit",
+                            "net/bytebuddy", "org/apache", "org/aspectj",
+                            "org/dom4j", "org/easymock", "org/hamcrest",
+                            "org/hibernate", "org/javassist", "org/jboss",
+                            "org/jsoup", "org/seleniumhq", "org/slf4j",
+                            "org/springframework", "org/webjars/bowergithub",
+                            "org/yaml").collect(Collectors.toList());
+
+            /**
+             * Lock used to ensure there's only one update going on
+             * at once.
+             * <p>
+             * The lock is configured to always guarantee a fair
+             * ordering.
+             */
+            private final ReentrantLock lock = new ReentrantLock(true);
+
+            private Map<String, Resource[]> cache = new HashMap<>();
+
+            @Override
+            public Resource[] getResources(String locationPattern)
+                    throws IOException {
+                lock.lock();
+                try {
+                    if (cache.containsKey(locationPattern)) {
+                        return cache.get(locationPattern);
+                    }
+                    Resource[] resources = collectResources(locationPattern);
+                    cache.put(locationPattern, resources);
+                    return resources;
+                } finally {
+                    lock.unlock();
+                }
+            }
+
+            private Resource[] collectResources(String locationPattern)
+                    throws IOException {
+                List<Resource> resourcesList = new ArrayList<>();
+                for (Resource resource : super.getResources(locationPattern)) {
+                    String path = resource.getURL().getPath();
+                    Optional<String> blacklisted = blackListed.stream()
+                            .filter(pkg -> path.contains(pkg)).findAny();
+                    if (!blacklisted.isPresent()) {
+                        resourcesList.add(resource);
+                    }
+                }
+                return resourcesList.toArray(new Resource[0]);
+            }
+        };
     }
 
     /**
