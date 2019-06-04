@@ -315,7 +315,7 @@ public class VaadinServletContextInitializer
      */
     public VaadinServletContextInitializer(ApplicationContext context) {
         appContext = context;
-        customLoader = initCustomLoader(appContext);
+        customLoader = new CustomResourceLoader(appContext);
     }
 
     @Override
@@ -456,69 +456,71 @@ public class VaadinServletContextInitializer
      * problems with atmosphere we skip known packaged from our resources
      * collection.
      */
-    private ResourceLoader initCustomLoader(ResourceLoader loader) {
-        return new PathMatchingResourcePatternResolver(appContext) {
+    private static class CustomResourceLoader extends PathMatchingResourcePatternResolver {
 
-            /**
-             * Blacklisted packages that shouldn't be scanned for
-             * when scanning all
-             * packages.
-             */
-            private List<String> blackListed = Stream
-                    .of("antlr", "cglib", "ch/quos/logback", "commons-codec",
-                            "commons-fileupload", "commons-io",
-                            "commons-logging", "com/fasterxml", "com/google",
-                            "com/h2database", "com/helger",
-                            "com/vaadin/external/atmosphere",
-                            "com/vaadin/webjar", "javax/", "junit",
-                            "net/bytebuddy", "org/apache", "org/aspectj",
-                            "org/dom4j", "org/easymock", "org/hamcrest",
-                            "org/hibernate", "org/javassist", "org/jboss",
-                            "org/jsoup", "org/seleniumhq", "org/slf4j",
-                            "org/springframework", "org/webjars/bowergithub",
-                            "org/yaml").collect(Collectors.toList());
+        /**
+         * Blacklisted packages that shouldn't be scanned for
+         * when scanning all
+         * packages.
+         */
+        private List<String> blackListed = Stream
+                .of("antlr", "cglib", "ch/quos/logback", "commons-codec",
+                        "commons-fileupload", "commons-io",
+                        "commons-logging", "com/fasterxml", "com/google",
+                        "com/h2database", "com/helger",
+                        "com/vaadin/external/atmosphere",
+                        "com/vaadin/webjar", "javax/", "junit",
+                        "net/bytebuddy", "org/apache", "org/aspectj",
+                        "org/dom4j", "org/easymock", "org/hamcrest",
+                        "org/hibernate", "org/javassist", "org/jboss",
+                        "org/jsoup", "org/seleniumhq", "org/slf4j",
+                        "org/springframework", "org/webjars/bowergithub",
+                        "org/yaml").collect(Collectors.toList());
 
-            /**
-             * Lock used to ensure there's only one update going on
-             * at once.
-             * <p>
-             * The lock is configured to always guarantee a fair
-             * ordering.
-             */
-            private final ReentrantLock lock = new ReentrantLock(true);
+        public CustomResourceLoader(ResourceLoader resourceLoader) {
+            super(resourceLoader);
+        }
 
-            private Map<String, Resource[]> cache = new HashMap<>();
+        /**
+         * Lock used to ensure there's only one update going on
+         * at once.
+         * <p>
+         * The lock is configured to always guarantee a fair
+         * ordering.
+         */
+        private final ReentrantLock lock = new ReentrantLock(true);
 
-            @Override
-            public Resource[] getResources(String locationPattern)
-                    throws IOException {
-                lock.lock();
-                try {
-                    if (cache.containsKey(locationPattern)) {
-                        return cache.get(locationPattern);
-                    }
-                    Resource[] resources = collectResources(locationPattern);
-                    cache.put(locationPattern, resources);
-                    return resources;
-                } finally {
-                    lock.unlock();
+        private Map<String, Resource[]> cache = new HashMap<>();
+
+        @Override
+        public Resource[] getResources(String locationPattern)
+                throws IOException {
+            lock.lock();
+            try {
+                if (cache.containsKey(locationPattern)) {
+                    return cache.get(locationPattern);
+                }
+                Resource[] resources = collectResources(locationPattern);
+                cache.put(locationPattern, resources);
+                return resources;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        private Resource[] collectResources(String locationPattern)
+                throws IOException {
+            List<Resource> resourcesList = new ArrayList<>();
+            for (Resource resource : super.getResources(locationPattern)) {
+                String path = resource.getURL().getPath();
+                Optional<String> blacklisted = blackListed.stream()
+                        .filter(path::contains).findAny();
+                if (!blacklisted.isPresent()) {
+                    resourcesList.add(resource);
                 }
             }
-
-            private Resource[] collectResources(String locationPattern)
-                    throws IOException {
-                List<Resource> resourcesList = new ArrayList<>();
-                for (Resource resource : super.getResources(locationPattern)) {
-                    String path = resource.getURL().getPath();
-                    Optional<String> blacklisted = blackListed.stream()
-                            .filter(pkg -> path.contains(pkg)).findAny();
-                    if (!blacklisted.isPresent()) {
-                        resourcesList.add(resource);
-                    }
-                }
-                return resourcesList.toArray(new Resource[0]);
-            }
-        };
+            return resourcesList.toArray(new Resource[0]);
+        }
     }
 
     /**
