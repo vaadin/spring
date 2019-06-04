@@ -70,7 +70,7 @@
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot.version}</version>
                     <configuration>
-                        <maxAttempts>20</maxAttempts>
+                        <maxAttempts>30</maxAttempts>
                         <wait>2500</wait>
                     </configuration>
                 </plugin>
