@@ -63,6 +63,7 @@ import com.vaadin.flow.server.AmbiguousRouteConfigurationException;
 import com.vaadin.flow.server.DeploymentConfigurationFactory;
 import com.vaadin.flow.server.InvalidRouteConfigurationException;
 import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.startup.AbstractRouteRegistryInitializer;
 import com.vaadin.flow.server.startup.AnnotationValidator;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
@@ -250,12 +251,13 @@ public class VaadinServletContextInitializer
             }
 
             // Handle classes Route.class, NpmPackage.class, WebComponentExporter.class
-            Set<Class<?>> classes = findByAnnotation(Collections.singleton(""),
+            Set<String> allClasses = Collections.singleton("");
+            Set<Class<?>> classes = findByAnnotation(allClasses,
                     customLoader, Route.class, NpmPackage.class)
                     .collect(Collectors.toSet());
 
             classes.addAll(
-                    findBySuperType(Collections.singleton(""), customLoader,
+                    findBySuperType(allClasses, customLoader,
                             WebComponentExporter.class)
                             .collect(Collectors.toSet()));
 
@@ -276,7 +278,8 @@ public class VaadinServletContextInitializer
         @Override
         public void contextInitialized(ServletContextEvent event) {
             WebComponentConfigurationRegistry registry = WebComponentConfigurationRegistry
-                    .getInstance(event.getServletContext());
+                    .getInstance(new VaadinServletContext(
+                            event.getServletContext()));
 
             if (registry.getConfigurations() == null
                     || registry.getConfigurations().isEmpty()) {
@@ -351,7 +354,8 @@ public class VaadinServletContextInitializer
 
         // Skip custom web component builders search if registry already
         // initialized
-        if (!WebComponentConfigurationRegistry.getInstance(servletContext)
+        if (!WebComponentConfigurationRegistry
+                .getInstance(new VaadinServletContext(servletContext))
                 .hasConfigurations()) {
             servletContext
                     .addListener(new WebComponentServletContextListener());
@@ -535,9 +539,9 @@ public class VaadinServletContextInitializer
          * Constructor.
          *
          * @param context
-         *         the ServletContext
+         *            the ServletContext
          * @param registration
-         *         the ServletRegistration for this ServletConfig instance
+         *            the ServletRegistration for this ServletConfig instance
          */
         private StubServletConfig(ServletContext context,
                 ServletRegistrationBean registration) {
@@ -573,11 +577,11 @@ public class VaadinServletContextInitializer
          * Creates a DeploymentConfiguration.
          *
          * @param context
-         *         the ServletContext
+         *            the ServletContext
          * @param registration
-         *         the ServletRegistrationBean to get servlet parameters from
+         *            the ServletRegistrationBean to get servlet parameters from
          * @param servletClass
-         *         the class to look for properties defined with annotations
+         *            the class to look for properties defined with annotations
          * @return a DeploymentConfiguration instance
          */
         public static DeploymentConfiguration createDeploymentConfiguration(
