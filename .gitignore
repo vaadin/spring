@@ -12,3 +12,4 @@ driver_zips/
 node_modules/
 package*.json
 webpack.config.js
+webpack.generated.js
