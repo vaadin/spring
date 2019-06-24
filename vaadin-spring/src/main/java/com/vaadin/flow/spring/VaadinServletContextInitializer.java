@@ -320,12 +320,13 @@ public class VaadinServletContextInitializer
     public VaadinServletContextInitializer(ApplicationContext context) {
         appContext = context;
         String property = appContext.getEnvironment()
-                .getProperty("blacklisted.packages");
+                .getProperty("vaadin.blacklisted-packages");
         List<String> blacklist;
         if (property == null) {
             blacklist = Collections.EMPTY_LIST;
         } else {
-            blacklist = Arrays.asList(property.split(","));
+            blacklist = Arrays.stream(property.split(",")).map(String::trim)
+                    .collect(Collectors.toList());
         }
         customLoader = new CustomResourceLoader(appContext, blacklist);
     }
