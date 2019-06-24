@@ -323,7 +323,7 @@ public class VaadinServletContextInitializer
                 .getProperty("vaadin.blacklisted-packages");
         List<String> blacklist;
         if (property == null) {
-            blacklist = Collections.EMPTY_LIST;
+            blacklist = Collections.emptyList();
         } else {
             blacklist = Arrays.stream(property.split(",")).map(String::trim)
                     .collect(Collectors.toList());
