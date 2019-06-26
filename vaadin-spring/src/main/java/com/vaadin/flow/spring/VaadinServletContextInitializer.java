@@ -136,7 +136,12 @@ public class VaadinServletContextInitializer
                 } catch (InvalidRouteConfigurationException e) {
                     throw new IllegalStateException(e);
                 }
+            } else {
+                getLogger().debug(
+                        "Skipped discovery as there was {} routes already in registry",
+                        registry.getRegisteredRoutes().size());
             }
+
         }
 
         @Override
