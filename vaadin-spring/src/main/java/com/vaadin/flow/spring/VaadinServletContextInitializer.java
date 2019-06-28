@@ -48,6 +48,7 @@ import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -265,7 +266,7 @@ public class VaadinServletContextInitializer
 
             DeploymentConfiguration config = StubServletConfig
                     .createDeploymentConfiguration(event.getServletContext(),
-                            servletRegistrationBean, SpringServlet.class);
+                            servletRegistrationBean, SpringServlet.class, appContext);
 
             if (config.isCompatibilityMode() || config.isProductionMode()
                     || !config.enableDevServer()) {
@@ -555,6 +556,7 @@ public class VaadinServletContextInitializer
     private static class StubServletConfig implements ServletConfig {
         private final ServletContext context;
         private final ServletRegistrationBean registration;
+        private final ApplicationContext appContext;
 
         /**
          * Constructor.
@@ -565,9 +567,10 @@ public class VaadinServletContextInitializer
          *            the ServletRegistration for this ServletConfig instance
          */
         private StubServletConfig(ServletContext context,
-                ServletRegistrationBean registration) {
+                ServletRegistrationBean registration, ApplicationContext appContext) {
             this.context = context;
             this.registration = registration;
+            this.appContext = appContext;
         }
 
         @Override
@@ -583,6 +586,12 @@ public class VaadinServletContextInitializer
         @SuppressWarnings("unchecked")
         @Override
         public String getInitParameter(String name) {
+            Environment env = appContext.getBean(Environment.class);
+            String propertyValue = env.getProperty("vaadin." + name);
+            if (propertyValue != null) {
+                return propertyValue;
+            }
+
             return ((Map<String, String>) registration.getInitParameters())
                     .get(name);
         }
@@ -590,8 +599,13 @@ public class VaadinServletContextInitializer
         @SuppressWarnings("unchecked")
         @Override
         public Enumeration<String> getInitParameterNames() {
-            return Collections
-                    .enumeration(registration.getInitParameters().keySet());
+            Environment env = appContext.getBean(Environment.class);
+            // Collect any vaadin.XZY properties from application.properties
+            List<String> initParameters = SpringServlet.PROPERTY_NAMES.stream()
+                    .filter(name -> env.getProperty("vaadin." + name) != null)
+                    .collect(Collectors.toList());
+            initParameters.addAll(registration.getInitParameters().keySet());
+            return Collections.enumeration(initParameters);
         }
 
         /**
@@ -607,13 +621,15 @@ public class VaadinServletContextInitializer
          */
         public static DeploymentConfiguration createDeploymentConfiguration(
                 ServletContext context, ServletRegistrationBean registration,
-                Class<?> servletClass) {
+                Class<?> servletClass, ApplicationContext appContext) {
             try {
                 ServletConfig servletConfig = new StubServletConfig(context,
-                        registration);
-                return DeploymentConfigurationFactory
+                        registration, appContext);
+                DeploymentConfiguration propertyDeploymentConfiguration = DeploymentConfigurationFactory
                         .createPropertyDeploymentConfiguration(servletClass,
                                 servletConfig);
+
+                return propertyDeploymentConfiguration;
             } catch (ServletException e) {
                 throw new IllegalStateException(String.format(
                         "Failed to get deployment configuration data for servlet with name '%s' and class '%s'",
