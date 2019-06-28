@@ -625,11 +625,9 @@ public class VaadinServletContextInitializer
             try {
                 ServletConfig servletConfig = new StubServletConfig(context,
                         registration, appContext);
-                DeploymentConfiguration propertyDeploymentConfiguration = DeploymentConfigurationFactory
+                return DeploymentConfigurationFactory
                         .createPropertyDeploymentConfiguration(servletClass,
                                 servletConfig);
-
-                return propertyDeploymentConfiguration;
             } catch (ServletException e) {
                 throw new IllegalStateException(String.format(
                         "Failed to get deployment configuration data for servlet with name '%s' and class '%s'",
