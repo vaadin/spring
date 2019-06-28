@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 /**
  * Test for checking that styb servlet configuration collects expected values.
  */
-public class StubServletConfigTest {
+public class SpringStubServletConfigTest {
 
     @Mock
     private ApplicationContext applicationContext;
@@ -50,7 +50,7 @@ public class StubServletConfigTest {
 
     @Test
     public void vaadinProductionMode_isReadFromEnvironmentVarables() {
-        DeploymentConfiguration deploymentConfiguration = StubServletConfig
+        DeploymentConfiguration deploymentConfiguration = VaadinServletContextInitializer.SpringStubServletConfig
                 .createDeploymentConfiguration(context, registration,
                         SpringServlet.class, applicationContext);
 
@@ -61,7 +61,7 @@ public class StubServletConfigTest {
         when(environment.getProperty("vaadin."+ Constants.SERVLET_PARAMETER_PRODUCTION_MODE))
                 .thenReturn("true");
 
-        deploymentConfiguration = StubServletConfig
+        deploymentConfiguration = VaadinServletContextInitializer.SpringStubServletConfig
                 .createDeploymentConfiguration(context, registration,
                         SpringServlet.class, applicationContext);
 
@@ -72,7 +72,7 @@ public class StubServletConfigTest {
 
     @Test
     public void compatibilityMode_isReadFromEnvironmentVarables() {
-        DeploymentConfiguration deploymentConfiguration = StubServletConfig
+        DeploymentConfiguration deploymentConfiguration = VaadinServletContextInitializer.SpringStubServletConfig
                 .createDeploymentConfiguration(context, registration,
                         SpringServlet.class, applicationContext);
 
@@ -83,7 +83,7 @@ public class StubServletConfigTest {
         when(environment.getProperty("vaadin."+ Constants.SERVLET_PARAMETER_COMPATIBILITY_MODE))
                 .thenReturn("false");
 
-        deploymentConfiguration = StubServletConfig
+        deploymentConfiguration = VaadinServletContextInitializer.SpringStubServletConfig
                 .createDeploymentConfiguration(context, registration,
                         SpringServlet.class, applicationContext);
 
