@@ -49,7 +49,7 @@ public class SpringStubServletConfigTest {
     }
 
     @Test
-    public void vaadinProductionMode_isReadFromEnvironmentVarables() {
+    public void vaadinProductionMode_isReadFromEnvironmentVariables() {
         DeploymentConfiguration deploymentConfiguration = VaadinServletContextInitializer.SpringStubServletConfig
                 .createDeploymentConfiguration(context, registration,
                         SpringServlet.class, applicationContext);
@@ -71,7 +71,7 @@ public class SpringStubServletConfigTest {
     }
 
     @Test
-    public void compatibilityMode_isReadFromEnvironmentVarables() {
+    public void compatibilityMode_isReadFromEnvironmentVariables() {
         DeploymentConfiguration deploymentConfiguration = VaadinServletContextInitializer.SpringStubServletConfig
                 .createDeploymentConfiguration(context, registration,
                         SpringServlet.class, applicationContext);
