@@ -65,6 +65,7 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.AmbiguousRouteConfigurationException;
 import com.vaadin.flow.server.DeploymentConfigurationFactory;
+import com.vaadin.flow.server.DevModeHandler;
 import com.vaadin.flow.server.InvalidRouteConfigurationException;
 import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.VaadinServletContext;
@@ -283,8 +284,13 @@ public class VaadinServletContextInitializer
             classes.addAll(findBySuperType(allClasses, customLoader,
                     WebComponentExporter.class).collect(Collectors.toSet()));
 
-            DevModeInitializer.initDevModeHandler(classes,
-                    event.getServletContext(), config);
+            try {
+                DevModeInitializer.initDevModeHandler(classes,
+                        event.getServletContext(), config);
+            } catch (ServletException e) {
+                throw new RuntimeException(
+                        "Unable to initialize Vaadin DevModeHandler", e);
+            }
         }
 
         @Override
@@ -325,7 +331,10 @@ public class VaadinServletContextInitializer
 
         @Override
         public void contextDestroyed(ServletContextEvent sce) {
-            // no need to do anything
+            DevModeHandler handler = DevModeHandler.getDevModeHandler();
+            if (handler != null && !handler.reuseDevServer()) {
+                handler.stop();
+            }
         }
 
     }
