@@ -376,8 +376,6 @@ public class VaadinServletContextInitializer
 
         customLoader = new CustomResourceLoader(appContext, blacklist,
                 whitelist);
-
-        getLogger().info("CustomResourceLoader created: " + blacklistProperty + " | " + whitelistProperty);
     }
 
     @Override
@@ -588,37 +586,34 @@ public class VaadinServletContextInitializer
         private Resource[] collectResources(String locationPattern)
                 throws IOException {
             List<Resource> resourcesList = new ArrayList<>();
-            getLogger().info("collectResources: " + locationPattern);
             for (Resource resource : super.getResources(locationPattern)) {
                 String path = resource.getURL().getPath();
-                if(path.contains("SimpleView"))
-                    getLogger().info("SimpleView was here: " + path);
-
                 if (path.endsWith(".jar!/")) {
                     resourcesList.add(resource);
-                    getLogger().info("resourcesList.add jar: " + path);
                 } else if (path.endsWith("/")) {
                     rootPaths.add(path);
                     resourcesList.add(resource);
-                    getLogger().info("resourcesList.add parent: " + path);
                 } else {
-                    String relativePath;
                     int index = path.indexOf(".jar!/");
                     if (index >= 0) {
-                        relativePath = path.substring(index + 6);
+                        String relativePath = path.substring(index + 6);
+                        if (shouldPathBeScanned(relativePath)) {
+                            resourcesList.add(resource);
+                        }
                     } else {
-                        String parent = rootPaths.stream()
-                                .filter(path::startsWith).findFirst()
-                                .orElseThrow(() -> new IllegalStateException(
-                                        String.format(
-                                                "Parent resource of [%s] not found in the resources!",
-                                                path)));
-                        relativePath = path.substring(parent.length());
-                    }
+                        List<String> parents = rootPaths.stream()
+                                .filter(path::startsWith)
+                                .collect(Collectors.toList());
+                        if (parents.isEmpty())
+                            throw new IllegalStateException(String.format(
+                                    "Parent resource of [%s] not found in the resources!",
+                                    path));
 
-                    if (shouldPathBeScanned(relativePath)) {
-                        getLogger().info("resourcesList.add: " + path);
-                        resourcesList.add(resource);
+                        if (parents.stream()
+                                .anyMatch(parent -> shouldPathBeScanned(
+                                        path.substring(parent.length())))) {
+                            resourcesList.add(resource);
+                        }
                     }
                 }
             }
