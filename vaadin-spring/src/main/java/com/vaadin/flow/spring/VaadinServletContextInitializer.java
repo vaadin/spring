@@ -377,6 +377,7 @@ public class VaadinServletContextInitializer
         customLoader = new CustomResourceLoader(appContext, blacklist,
                 whitelist);
 
+        getLogger().info("CustomResourceLoader created: " + blacklistProperty + " | " + whitelistProperty);
     }
 
     @Override
@@ -587,6 +588,7 @@ public class VaadinServletContextInitializer
         private Resource[] collectResources(String locationPattern)
                 throws IOException {
             List<Resource> resourcesList = new ArrayList<>();
+            getLogger().info("collectResources: " + locationPattern);
             for (Resource resource : super.getResources(locationPattern)) {
                 String path = resource.getURL().getPath();
                 if (path.endsWith(".jar!/")) {
@@ -610,6 +612,7 @@ public class VaadinServletContextInitializer
                     }
 
                     if (shouldPathBeScanned(relativePath)) {
+                        getLogger().info("resourcesList.add: " + path);
                         resourcesList.add(resource);
                     }
                 }
