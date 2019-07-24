@@ -591,11 +591,16 @@ public class VaadinServletContextInitializer
             getLogger().info("collectResources: " + locationPattern);
             for (Resource resource : super.getResources(locationPattern)) {
                 String path = resource.getURL().getPath();
+                if(path.contains("SimpleView"))
+                    getLogger().info("SimpleView was here: " + path);
+
                 if (path.endsWith(".jar!/")) {
                     resourcesList.add(resource);
+                    getLogger().info("resourcesList.add jar: " + path);
                 } else if (path.endsWith("/")) {
                     rootPaths.add(path);
                     resourcesList.add(resource);
+                    getLogger().info("resourcesList.add parent: " + path);
                 } else {
                     String relativePath;
                     int index = path.indexOf(".jar!/");
