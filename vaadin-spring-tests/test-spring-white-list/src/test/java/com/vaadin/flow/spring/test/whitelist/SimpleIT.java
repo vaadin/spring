@@ -16,12 +16,13 @@
 
 package com.vaadin.flow.spring.test.whitelist;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 public class SimpleIT extends ChromeBrowserTest {
     @Before
@@ -31,15 +32,13 @@ public class SimpleIT extends ChromeBrowserTest {
 
     @Test
     public void simplePage_withWhiteList_works() {
-        WebElement viewElement = findElement(By.tagName("simple-view"));
-        WebElement button = findInShadowRoot(viewElement, By.id("button"))
-                .get(0);
+        TestBenchElement viewElement = $("simple-view").first();
+        ButtonElement button = viewElement.$(ButtonElement.class).id("button");
+
         button.click();
 
-        WebElement log = findInShadowRoot(viewElement, By.id("log")).get(0);
-        Assert.assertEquals(SimpleView.CLICKED_MESSAGE,
-                log.getAttribute("value"));
-        System.out.println(log.getAttribute("value"));
+        TextFieldElement log = viewElement.$(TextFieldElement.class).id("log");
+        Assert.assertEquals(SimpleView.CLICKED_MESSAGE, log.getValue());
     }
 
     @Override
