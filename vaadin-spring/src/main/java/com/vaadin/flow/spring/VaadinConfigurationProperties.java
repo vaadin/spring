@@ -115,7 +115,8 @@ public class VaadinConfigurationProperties {
     }
 
     /**
-     * Set list of packages to be scanned.
+     * Set list of packages to be scanned. If <code>whitelistedPackages</code>
+     * is set then <code>blacklistedPackages</code> is ignored.
      *
      * @param whitelistedPackages list of packages to be scanned
      */
