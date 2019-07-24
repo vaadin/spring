@@ -215,15 +215,16 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         UIStore(VaadinSession session) {
             sessionId = session.getSession().getId();
             this.session = session;
+            serviceDestroyRegistration = this.session.getService().addServiceDestroyListener(this);
             this.session.setAttribute(UIStore.class, this);
         }
 
         BeanStore getBeanStore(final UIID uiid) {
-        	if (serviceDestroyRegistration == null) {
-                // serviceDestroyRegistration is null if there was no listener yet, or session 
-                // has been moved from node to other node, hence creation delayed here
-        		serviceDestroyRegistration = this.session.getService().addServiceDestroyListener(this);
-        	}
+      	    if (serviceDestroyRegistration == null) {
+            // serviceDestroyRegistration is null if there was no listener as session 
+            // has been moved from node to other node, hence added here
+                serviceDestroyRegistration = this.session.getService().addServiceDestroyListener(this);
+            }
             BeanStore beanStore = beanStoreMap.get(uiid);
             if (beanStore == null) {
                 beanStore = new UIBeanStore(session, uiid,
