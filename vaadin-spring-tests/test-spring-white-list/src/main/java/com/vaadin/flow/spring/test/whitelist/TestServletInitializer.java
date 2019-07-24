@@ -58,10 +58,4 @@ public class TestServletInitializer implements AuthorizationServerConfigurer {
             throws Exception {
         // doesn't need any impl
     }
-
-    @Bean(name = "multipartResolver")
-    public CommonsMultipartResolver multipartResolver() {
-        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-        return multipartResolver;
-    }
 }

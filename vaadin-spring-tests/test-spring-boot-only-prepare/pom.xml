@@ -32,6 +32,22 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
 
+            <!-- tomcat is excluded here and spring-boot-starter-jetty is used
+                instead. Because, when more than one IT modules use tomcat, an
+                exception (factory already defined) is thrown at
+                URL.setURLStreamHandlerFactory.
+                See https://github.com/spring-projects/spring-boot/issues/10617 -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
 
         <dependency>

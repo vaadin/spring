@@ -325,7 +325,6 @@
                 <module>test-spring-war</module>
                 <!--        <module>test-spring</module>-->
                 <module>test-spring-boot-contextpath</module>
-                <module>test-spring-white-list</module>
 
                 <!-- nexus-staging-maven-plugin requires the last module to be not skipped for deployment -->
                 <module>dummy-module</module>
@@ -336,6 +335,7 @@
             <modules>
                 <module>test-spring-common</module>
                 <!-- This test tests that we find the packages as expected -->
+                <module>test-spring-white-list</module>
                 <module>test-spring-boot-only-prepare</module>
             </modules>
         </profile>
