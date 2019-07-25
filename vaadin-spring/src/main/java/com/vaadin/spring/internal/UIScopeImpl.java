@@ -277,7 +277,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         }
 
         @Override
-	public void sessionWillPassivate(HttpSessionEvent se) {
+        public void sessionWillPassivate(HttpSessionEvent se) {
             // Remove listener if session is being serialized and moved to other node
             serviceDestroyRegistration.remove();
             serviceDestroyRegistration = null;
@@ -285,7 +285,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
 
         @Override
         public void sessionDidActivate(HttpSessionEvent se) {
-            // No need for anything here			
+            // No need for anything here
         }
     }
 
