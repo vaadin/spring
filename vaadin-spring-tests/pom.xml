@@ -335,7 +335,6 @@
             <modules>
                 <module>test-spring-common</module>
                 <!-- This test tests that we find the packages as expected -->
-                <module>test-spring-white-list</module>
                 <module>test-spring-boot-only-prepare</module>
             </modules>
         </profile>
