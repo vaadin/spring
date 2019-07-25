@@ -276,16 +276,17 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
                     .getSimpleName(), System.identityHashCode(this), sessionId);
         }
 
-		@Override
-		public void sessionWillPassivate(HttpSessionEvent se) {
+        @Override
+	public void sessionWillPassivate(HttpSessionEvent se) {
             // Remove listener if session is being serialized and moved to other node
-            serviceDestroyRegistration.remove();			
-		}
+            serviceDestroyRegistration.remove();
+            serviceDestroyRegistration = null;
+        }
 
-		@Override
-		public void sessionDidActivate(HttpSessionEvent se) {
+        @Override
+        public void sessionDidActivate(HttpSessionEvent se) {
             // No need for anything here			
-		}
+        }
     }
 
     static class UIBeanStore extends SessionLockingBeanStore implements
