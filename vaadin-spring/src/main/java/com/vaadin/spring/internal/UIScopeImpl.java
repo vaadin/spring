@@ -220,7 +220,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         }
 
         BeanStore getBeanStore(final UIID uiid) {
-      	    if (serviceDestroyRegistration == null) {
+            if (serviceDestroyRegistration == null) {
             // serviceDestroyRegistration is null if there was no listener as session
             // has been moved from node to other node, hence added here
                 serviceDestroyRegistration = this.session.getService().addServiceDestroyListener(this);
