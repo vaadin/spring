@@ -20,6 +20,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionEvent;
+
 import com.vaadin.shared.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -188,7 +191,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         }
     }
 
-    static class UIStore implements ServiceDestroyListener, Serializable {
+    static class UIStore implements ServiceDestroyListener, HttpSessionActivationListener, Serializable {
 
         private static final long serialVersionUID = -2964924681534104416L;
 
@@ -198,7 +201,8 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         private final Map<UIID, BeanStore> beanStoreMap = new ConcurrentHashMap<>();
         private final VaadinSession session;
         private final String sessionId;
-        private final Registration serviceDestroyRegistration;
+        // This needs to be transient to avoid serialization issue in HA environment, see #11661
+        private transient Registration serviceDestroyRegistration;
 
         // for testing only
         UIStore() {
@@ -216,6 +220,11 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         }
 
         BeanStore getBeanStore(final UIID uiid) {
+            if (serviceDestroyRegistration == null) {
+            // serviceDestroyRegistration is null if there was no listener as session
+            // has been moved from node to other node, hence added here
+                serviceDestroyRegistration = this.session.getService().addServiceDestroyListener(this);
+            }
             BeanStore beanStore = beanStoreMap.get(uiid);
             if (beanStore == null) {
                 beanStore = new UIBeanStore(session, uiid,
@@ -265,6 +274,18 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         public String toString() {
             return String.format("%s[id=%x, sessionId=%s]", getClass()
                     .getSimpleName(), System.identityHashCode(this), sessionId);
+        }
+
+        @Override
+        public void sessionWillPassivate(HttpSessionEvent se) {
+            // Remove listener if session is being serialized and moved to other node
+            serviceDestroyRegistration.remove();
+            serviceDestroyRegistration = null;
+        }
+
+        @Override
+        public void sessionDidActivate(HttpSessionEvent se) {
+            // No need for anything here
         }
     }
 
