@@ -22,7 +22,7 @@ Getting started
 
 This version is part of the Vaadin platform ([github](https://github.com/vaadin/platform)).
 The easiest way to get started is to use the [Project Base for Vaadin 10 and Spring](https://vaadin.com/start/v10-project-base-spring).
-For help on getting started, see the [tutorial](https://github.com/vaadin/spring-tutorial).
+For help on getting started, see the [documentation](https://vaadin.com/docs/flow/spring/tutorial-spring-basic.html).
 
 Building the project
 ----
