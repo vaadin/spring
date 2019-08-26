@@ -21,6 +21,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -68,6 +69,8 @@ import com.vaadin.flow.server.DeploymentConfigurationFactory;
 import com.vaadin.flow.server.DevModeHandler;
 import com.vaadin.flow.server.InvalidRouteConfigurationException;
 import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.server.UIInitListener;
+import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.startup.AbstractRouteRegistryInitializer;
 import com.vaadin.flow.server.startup.AnnotationValidator;
@@ -283,6 +286,11 @@ public class VaadinServletContextInitializer
 
             classes.addAll(findBySuperType(allClasses, customLoader,
                     WebComponentExporter.class).collect(Collectors.toSet()));
+            classes.addAll(findBySuperType(allClasses, customLoader,
+                    UIInitListener.class).collect(Collectors.toSet()));
+            classes.addAll(findBySuperType(allClasses, customLoader,
+                    VaadinServiceInitListener.class)
+                            .collect(Collectors.toSet()));
 
             try {
                 DevModeInitializer.initDevModeHandler(classes,
