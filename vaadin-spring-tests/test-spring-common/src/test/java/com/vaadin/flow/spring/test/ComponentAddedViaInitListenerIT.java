@@ -18,10 +18,9 @@ package com.vaadin.flow.spring.test;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBenchElement;
 
-public class ComponentAddedViaInitListenerIT extends ChromeBrowserTest {
+public class ComponentAddedViaInitListenerIT extends AbstractSpringTest {
 
     @Test
     public void componentAddedViaInitListenerIsLoaded() {
