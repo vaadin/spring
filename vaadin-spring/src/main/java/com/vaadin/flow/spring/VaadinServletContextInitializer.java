@@ -118,7 +118,7 @@ public class VaadinServletContextInitializer
                 try {
                     List<Class<?>> routeClasses = findByAnnotation(
                             getRoutePackages(), Route.class, RouteAlias.class)
-                            .collect(Collectors.toList());
+                                    .collect(Collectors.toList());
 
                     getLogger().debug(
                             "Found {} route classes. Here is the list: {}",
@@ -155,7 +155,7 @@ public class VaadinServletContextInitializer
         }
 
         private void setAnnotatedRoutes(RouteConfiguration routeConfiguration,
-                                        Set<Class<? extends Component>> routes) {
+                Set<Class<? extends Component>> routes) {
             routeConfiguration.getHandledRegistry().clean();
             for (Class<? extends Component> navigationTarget : routes) {
                 try {
@@ -199,8 +199,8 @@ public class VaadinServletContextInitializer
 
             Stream<Class<? extends Component>> hasErrorComponents = findBySuperType(
                     getErrorParameterPackages(), HasErrorParameter.class)
-                    .filter(Component.class::isAssignableFrom)
-                    .map(clazz -> (Class<? extends Component>) clazz);
+                            .filter(Component.class::isAssignableFrom)
+                            .map(clazz -> (Class<? extends Component>) clazz);
             registry.setErrorNavigationTargets(
                     hasErrorComponents.collect(Collectors.toSet()));
         }
@@ -254,7 +254,7 @@ public class VaadinServletContextInitializer
     private class DevModeServletContextListener
             implements ServletContextListener {
 
-        @SuppressWarnings({"unchecked", "rawtypes"})
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         @Override
         public void contextInitialized(ServletContextEvent event) {
 
@@ -282,8 +282,8 @@ public class VaadinServletContextInitializer
             // WebComponentExporter.class
             Set<String> allClasses = Collections.singleton("");
             Set<Class<?>> classes = findByAnnotation(allClasses, customLoader,
-                    Route.class, NpmPackage.class,
-                    NpmPackage.Container.class).collect(Collectors.toSet());
+                    Route.class, NpmPackage.class, NpmPackage.Container.class)
+                            .collect(Collectors.toSet());
 
             classes.addAll(findBySuperType(allClasses, customLoader,
                     WebComponentExporter.class).collect(Collectors.toSet()));
@@ -323,7 +323,7 @@ public class VaadinServletContextInitializer
 
                 Set<Class<?>> webComponentExporters = findBySuperType(
                         getWebComponentPackages(), WebComponentExporter.class)
-                        .collect(Collectors.toSet());
+                                .collect(Collectors.toSet());
 
                 try {
                     initializer.onStartup(webComponentExporters,
@@ -353,7 +353,7 @@ public class VaadinServletContextInitializer
      * {@code context} provided.
      *
      * @param context
-     *         the application context
+     *            the application context
      */
     public VaadinServletContextInitializer(ApplicationContext context) {
         appContext = context;
@@ -429,12 +429,12 @@ public class VaadinServletContextInitializer
     }
 
     private Stream<Class<?>> findByAnnotation(Collection<String> packages,
-                                              Class<? extends Annotation>... annotations) {
+            Class<? extends Annotation>... annotations) {
         return findByAnnotation(packages, appContext, annotations);
     }
 
     private Stream<Class<?>> findByAnnotation(Collection<String> packages,
-                                              ResourceLoader loader, Class<? extends Annotation>... annotations) {
+            ResourceLoader loader, Class<? extends Annotation>... annotations) {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(
                 false);
 
@@ -447,12 +447,12 @@ public class VaadinServletContextInitializer
     }
 
     private Stream<Class<?>> findBySuperType(Collection<String> packages,
-                                             Class<?> type) {
+            Class<?> type) {
         return findBySuperType(packages, appContext, type);
     }
 
     private Stream<Class<?>> findBySuperType(Collection<String> packages,
-                                             ResourceLoader loader, Class<?> type) {
+            ResourceLoader loader, Class<?> type) {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(
                 false);
         scanner.setResourceLoader(loader);
@@ -493,7 +493,7 @@ public class VaadinServletContextInitializer
     private Collection<String> getErrorParameterPackages() {
         return Stream
                 .concat(Stream
-                                .of(HasErrorParameter.class.getPackage().getName()),
+                        .of(HasErrorParameter.class.getPackage().getName()),
                         getDefaultPackages().stream())
                 .collect(Collectors.toSet());
     }
@@ -554,7 +554,7 @@ public class VaadinServletContextInitializer
                 .collect(Collectors.toList());
 
         public CustomResourceLoader(ResourceLoader resourceLoader,
-                                    List<String> addedBlacklist, List<String> addedWhiteListed) {
+                List<String> addedBlacklist, List<String> addedWhiteListed) {
             super(resourceLoader);
 
             Objects.requireNonNull(addedBlacklist,
@@ -630,6 +630,7 @@ public class VaadinServletContextInitializer
         }
 
         private boolean shouldPathBeScanned(String path) {
+            getLogger().warn("Should be scanned call for {}", path);
             if (DEFAULT_WHITE_LISTED.stream().anyMatch(path::startsWith)) {
                 return true;
             }
@@ -638,6 +639,8 @@ public class VaadinServletContextInitializer
                 return addedWhiteListed.stream().anyMatch(path::startsWith);
             }
 
+            getLogger().warn("black list contains path {} :", path,
+                    blackListed.stream().anyMatch(path::startsWith));
             return !blackListed.stream().anyMatch(path::startsWith);
         }
     }
@@ -656,13 +659,13 @@ public class VaadinServletContextInitializer
          * Constructor.
          *
          * @param context
-         *         the ServletContext
+         *            the ServletContext
          * @param registration
-         *         the ServletRegistration for this ServletConfig instance
+         *            the ServletRegistration for this ServletConfig instance
          */
         private SpringStubServletConfig(ServletContext context,
-                                        ServletRegistrationBean registration,
-                                        ApplicationContext appContext) {
+                ServletRegistrationBean registration,
+                ApplicationContext appContext) {
             this.context = context;
             this.registration = registration;
             this.appContext = appContext;
@@ -707,11 +710,11 @@ public class VaadinServletContextInitializer
          * Creates a DeploymentConfiguration.
          *
          * @param context
-         *         the ServletContext
+         *            the ServletContext
          * @param registration
-         *         the ServletRegistrationBean to get servlet parameters from
+         *            the ServletRegistrationBean to get servlet parameters from
          * @param servletClass
-         *         the class to look for properties defined with annotations
+         *            the class to look for properties defined with annotations
          * @return a DeploymentConfiguration instance
          */
         public static DeploymentConfiguration createDeploymentConfiguration(
