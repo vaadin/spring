@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.spring.test;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,16 +27,22 @@ public class DoubleNpmAnnotationIT extends AbstractSpringTest {
     @Test
     public void bothPaperWebComponentsAreLoaded() throws Exception {
         open();
-        TestBenchElement paperCheckbox = $("paper-checkbox").first();
-        TestBenchElement paperInput = $("paper-input").first();
+        List<TestBenchElement> paperCheckboxes = $("paper-checkbox").all();
+        List<TestBenchElement> paperInputs = $("paper-input").all();
 
         // check that elements are on the page
-        Assert.assertNotNull(paperCheckbox);
-        Assert.assertNotNull(paperInput);
+        Assert.assertTrue("Should have found a 'paper-checkbox'",
+                paperCheckboxes.size() > 0);
+        Assert.assertTrue("Should have found a 'paper-input'",
+                paperInputs.size() > 0);
 
         // verify that the paper components are upgraded
-        Assert.assertNotNull(paperCheckbox.$("paper-input-container"));
-        Assert.assertNotNull(paperInput.$("checkboxContainer"));
+        Assert.assertNotNull(
+                "'paper-checkbox' should have had element in shadow dom",
+                paperCheckboxes.get(0).$("checkboxContainer"));
+        Assert.assertNotNull(
+                "'paper-input' should have had element in shadow dom",
+                paperInputs.get(0).$("paper-input-container"));
     }
 
     @Override
