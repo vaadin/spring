@@ -281,17 +281,42 @@ public class VaadinServletContextInitializer
             // Handle classes Route.class, NpmPackage.class,
             // WebComponentExporter.class
             Set<String> allClasses = Collections.singleton("");
+            long start = System.currentTimeMillis();
             Set<Class<?>> classes = findByAnnotation(allClasses, customLoader,
                     Route.class, NpmPackage.class, NpmPackage.Container.class)
                             .collect(Collectors.toSet());
+            long annotationScanning = System.currentTimeMillis();
+            getLogger().info(
+                    "Search for classes with annotations took {} seconds",
+                    (annotationScanning - start) / 1000);
 
             classes.addAll(findBySuperType(allClasses, customLoader,
                     WebComponentExporter.class).collect(Collectors.toSet()));
+            long webComponentsScanning = System.currentTimeMillis();
+            getLogger().info("Search for {} took {} seconds",
+                    WebComponentExporter.class.getSimpleName(),
+                    (webComponentsScanning - annotationScanning) / 1000);
+
             classes.addAll(findBySuperType(allClasses, customLoader,
                     UIInitListener.class).collect(Collectors.toSet()));
+            long uiInitScanning = System.currentTimeMillis();
+            getLogger().info("Search for {} took {} seconds",
+                    UIInitListener.class.getSimpleName(),
+                    (uiInitScanning - webComponentsScanning) / 1000);
+
             classes.addAll(findBySuperType(allClasses, customLoader,
                     VaadinServiceInitListener.class)
                             .collect(Collectors.toSet()));
+            long serviceInitScanning = System.currentTimeMillis();
+            getLogger().info("Search for {} took {} seconds",
+                    UIInitListener.class.getSimpleName(),
+                    (serviceInitScanning - uiInitScanning) / 1000);
+
+            getLogger().info("Search for subclasses took {} seconds",
+                    (serviceInitScanning - annotationScanning) / 1000);
+
+            getLogger().info("Search for all classes took {} seconds",
+                    (serviceInitScanning - start) / 1000);
 
             try {
                 DevModeInitializer.initDevModeHandler(classes,
