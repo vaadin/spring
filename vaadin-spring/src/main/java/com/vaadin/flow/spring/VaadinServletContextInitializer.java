@@ -630,7 +630,6 @@ public class VaadinServletContextInitializer
         }
 
         private boolean shouldPathBeScanned(String path) {
-            getLogger().warn("Should be scanned call for {}", path);
             if (DEFAULT_WHITE_LISTED.stream().anyMatch(path::startsWith)) {
                 return true;
             }
@@ -639,8 +638,6 @@ public class VaadinServletContextInitializer
                 return addedWhiteListed.stream().anyMatch(path::startsWith);
             }
 
-            getLogger().warn("black list contains path {} :", path,
-                    blackListed.stream().anyMatch(path::startsWith));
             return !blackListed.stream().anyMatch(path::startsWith);
         }
     }
