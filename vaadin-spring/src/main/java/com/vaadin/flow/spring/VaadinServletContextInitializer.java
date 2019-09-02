@@ -309,7 +309,7 @@ public class VaadinServletContextInitializer
                             .collect(Collectors.toSet()));
             long serviceInitScanning = System.currentTimeMillis();
             getLogger().info("Search for {} took {} seconds",
-                    UIInitListener.class.getSimpleName(),
+                    VaadinServiceInitListener.class.getSimpleName(),
                     (serviceInitScanning - uiInitScanning) / 1000);
 
             getLogger().info("Search for subclasses took {} seconds",
