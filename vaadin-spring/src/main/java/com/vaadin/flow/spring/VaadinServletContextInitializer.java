@@ -254,6 +254,11 @@ public class VaadinServletContextInitializer
     private class DevModeServletContextListener
             implements ServletContextListener {
 
+        /**
+         * 
+         */
+        private static final String SEARCH_TIME_MESSAGE = "Search for {} took {} seconds";
+
         @SuppressWarnings({ "unchecked", "rawtypes" })
         @Override
         public void contextInitialized(ServletContextEvent event) {
@@ -293,14 +298,14 @@ public class VaadinServletContextInitializer
             classes.addAll(findBySuperType(allClasses, customLoader,
                     WebComponentExporter.class).collect(Collectors.toSet()));
             long webComponentsScanning = System.currentTimeMillis();
-            getLogger().info("Search for {} took {} seconds",
+            getLogger().info(SEARCH_TIME_MESSAGE,
                     WebComponentExporter.class.getSimpleName(),
                     (webComponentsScanning - annotationScanning) / 1000);
 
             classes.addAll(findBySuperType(allClasses, customLoader,
                     UIInitListener.class).collect(Collectors.toSet()));
             long uiInitScanning = System.currentTimeMillis();
-            getLogger().info("Search for {} took {} seconds",
+            getLogger().info(SEARCH_TIME_MESSAGE,
                     UIInitListener.class.getSimpleName(),
                     (uiInitScanning - webComponentsScanning) / 1000);
 
@@ -308,7 +313,7 @@ public class VaadinServletContextInitializer
                     VaadinServiceInitListener.class)
                             .collect(Collectors.toSet()));
             long serviceInitScanning = System.currentTimeMillis();
-            getLogger().info("Search for {} took {} seconds",
+            getLogger().info(SEARCH_TIME_MESSAGE,
                     VaadinServiceInitListener.class.getSimpleName(),
                     (serviceInitScanning - uiInitScanning) / 1000);
 
