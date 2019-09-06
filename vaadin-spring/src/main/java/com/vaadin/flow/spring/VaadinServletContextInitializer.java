@@ -105,7 +105,7 @@ public class VaadinServletContextInitializer
      * packages that are white-listed (should be scanned) by default and
      * can't be overriden by <code>addedWhiteListed</code>.
      */
-    private final static List<String> DEFAULT_WHITE_LISTED = Stream
+    private static final List<String> DEFAULT_WHITE_LISTED = Stream
             .of(
                     Component.class.getPackage().getName(),
                     Theme.class.getPackage().getName(),
@@ -303,14 +303,17 @@ public class VaadinServletContextInitializer
             // Handle classes Route.class, NpmPackage.class,
             // WebComponentExporter.class
             Set<String> basePackages;
+            ResourceLoader resourceLoader;
             if (isWhitelistSet()) {
                 basePackages = new HashSet<>(getWhiteListPackages());
+                resourceLoader = appContext;
             } else {
                 basePackages = Collections.singleton("");
+                resourceLoader = customLoader;
             }
 
             long start = System.currentTimeMillis();
-            Set<Class<?>> classes = findByAnnotation(basePackages, customLoader,
+            Set<Class<?>> classes = findByAnnotation(basePackages, resourceLoader,
                     Route.class, NpmPackage.class, NpmPackage.Container.class)
                             .collect(Collectors.toSet());
             long annotationScanning = System.currentTimeMillis();
@@ -318,21 +321,21 @@ public class VaadinServletContextInitializer
                     "Search for classes with annotations took {} seconds",
                     (annotationScanning - start) / 1000);
 
-            classes.addAll(findBySuperType(basePackages, customLoader,
+            classes.addAll(findBySuperType(basePackages, resourceLoader,
                     WebComponentExporter.class).collect(Collectors.toSet()));
             long webComponentsScanning = System.currentTimeMillis();
             getLogger().info(SEARCH_TIME_MESSAGE,
                     WebComponentExporter.class.getSimpleName(),
                     (webComponentsScanning - annotationScanning) / 1000);
 
-            classes.addAll(findBySuperType(basePackages, customLoader,
+            classes.addAll(findBySuperType(basePackages, resourceLoader,
                     UIInitListener.class).collect(Collectors.toSet()));
             long uiInitScanning = System.currentTimeMillis();
             getLogger().info(SEARCH_TIME_MESSAGE,
                     UIInitListener.class.getSimpleName(),
                     (uiInitScanning - webComponentsScanning) / 1000);
 
-            classes.addAll(findBySuperType(basePackages, customLoader,
+            classes.addAll(findBySuperType(basePackages, resourceLoader,
                     VaadinServiceInitListener.class)
                             .collect(Collectors.toSet()));
             long serviceInitScanning = System.currentTimeMillis();
