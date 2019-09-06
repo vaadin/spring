@@ -607,6 +607,10 @@ public class VaadinServletContextInitializer
                 "org/springframework", "org/webjars/bowergithub", "org/yaml")
                 .collect(Collectors.toList());
 
+        private static List<String> defaultWhiteList =
+                DEFAULT_WHITE_LISTED.stream().map(packageName -> packageName.replace('.',
+                        '/')).collect(Collectors.toList());
+
         public CustomResourceLoader(ResourceLoader resourceLoader,
                                     List<String> addedBlacklist) {
             super(resourceLoader);
@@ -654,7 +658,7 @@ public class VaadinServletContextInitializer
                     rootPaths.add(path);
                     resourcesList.add(resource);
                 } else {
-                    int index = path.indexOf(".jar!/");
+                    int index = path.lastIndexOf(".jar!/");
                     if (index >= 0) {
                         String relativePath = path.substring(index + 6);
                         if (shouldPathBeScanned(relativePath)) {
@@ -681,7 +685,7 @@ public class VaadinServletContextInitializer
         }
 
         private boolean shouldPathBeScanned(String path) {
-            if (DEFAULT_WHITE_LISTED.stream().anyMatch(path::startsWith)) {
+            if (defaultWhiteList.stream().anyMatch(path::startsWith)) {
                 return true;
             }
 
