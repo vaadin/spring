@@ -300,8 +300,7 @@ public class VaadinServletContextInitializer
                 return;
             }
 
-            // Handle classes Route.class, NpmPackage.class,
-            // WebComponentExporter.class
+
             Set<String> basePackages;
             ResourceLoader resourceLoader;
             if (isWhitelistSet()) {
@@ -312,6 +311,8 @@ public class VaadinServletContextInitializer
                 resourceLoader = customLoader;
             }
 
+            // Handle classes Route.class, NpmPackage.class,
+            // WebComponentExporter.class
             long start = System.currentTimeMillis();
             Set<Class<?>> classes = findByAnnotation(basePackages, resourceLoader,
                     Route.class, NpmPackage.class, NpmPackage.Container.class)
@@ -361,6 +362,19 @@ public class VaadinServletContextInitializer
         @Override
         public void contextDestroyed(ServletContextEvent event) {
             // NO-OP
+        }
+
+        private Collection<String> getWhiteListPackages() {
+            HashSet<String> npmPackages = new HashSet<>(getDefaultPackages());
+            npmPackages.addAll(DEFAULT_WHITE_LISTED);
+            if (customWhitelist != null) {
+                npmPackages.addAll(customWhitelist);
+            }
+            return npmPackages;
+        }
+
+        private boolean isWhitelistSet() {
+            return customWhitelist != null && !customWhitelist.isEmpty();
         }
     }
 
@@ -552,15 +566,6 @@ public class VaadinServletContextInitializer
                 .collect(Collectors.toSet());
     }
 
-    private Collection<String> getWhiteListPackages() {
-        HashSet<String> npmPackages = new HashSet<>(getDefaultPackages());
-        npmPackages.addAll(DEFAULT_WHITE_LISTED);
-        if (customWhitelist != null) {
-            npmPackages.addAll(customWhitelist);
-        }
-        return npmPackages;
-    }
-
     private List<String> getDefaultPackages() {
         List<String> packagesList = Collections.emptyList();
         if (appContext
@@ -578,10 +583,6 @@ public class VaadinServletContextInitializer
             packagesList = AutoConfigurationPackages.get(appContext);
         }
         return packagesList;
-    }
-
-    private boolean isWhitelistSet() {
-        return customWhitelist != null && !customWhitelist.isEmpty();
     }
 
     /**
