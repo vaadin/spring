@@ -81,6 +81,7 @@ import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializ
 import com.vaadin.flow.server.startup.WebComponentExporterAwareValidator;
 import com.vaadin.flow.server.webcomponent.WebComponentConfigurationRegistry;
 import com.vaadin.flow.spring.VaadinScanPackagesRegistrar.VaadinScanPackages;
+import com.vaadin.flow.theme.Theme;
 
 /**
  * Servlet context initializer for Spring Boot Application.
@@ -565,7 +566,12 @@ public class VaadinServletContextInitializer
          * can't be overriden by <code>addedWhiteListed</code>.
          */
         private final static List<String> DEFAULT_WHITE_LISTED = Stream
-                .of("com/vaadin/flow/component").collect(Collectors.toList());
+                .of(
+                        Component.class.getPackage().getName(),
+                        Theme.class.getPackage().getName(),
+                        "com/vaadin/shrinkwrap"
+                ).map(name -> name.replace('.', '/'))
+                .collect(Collectors.toList());
 
         /**
          * Blacklisted packages that shouldn't be scanned for when scanning all
