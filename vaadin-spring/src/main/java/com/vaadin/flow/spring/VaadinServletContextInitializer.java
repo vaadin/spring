@@ -302,19 +302,16 @@ public class VaadinServletContextInitializer
 
 
             Set<String> basePackages;
-            ResourceLoader resourceLoader;
             if (isWhitelistSet()) {
                 basePackages = new HashSet<>(getWhiteListPackages());
-                resourceLoader = appContext;
             } else {
                 basePackages = Collections.singleton("");
-                resourceLoader = customLoader;
             }
 
             // Handle classes Route.class, NpmPackage.class,
             // WebComponentExporter.class
             long start = System.currentTimeMillis();
-            Set<Class<?>> classes = findByAnnotation(basePackages, resourceLoader,
+            Set<Class<?>> classes = findByAnnotation(basePackages, customLoader,
                     Route.class, NpmPackage.class, NpmPackage.Container.class)
                             .collect(Collectors.toSet());
             long annotationScanning = System.currentTimeMillis();
@@ -322,21 +319,21 @@ public class VaadinServletContextInitializer
                     "Search for classes with annotations took {} seconds",
                     (annotationScanning - start) / 1000);
 
-            classes.addAll(findBySuperType(basePackages, resourceLoader,
+            classes.addAll(findBySuperType(basePackages, customLoader,
                     WebComponentExporter.class).collect(Collectors.toSet()));
             long webComponentsScanning = System.currentTimeMillis();
             getLogger().info(SEARCH_TIME_MESSAGE,
                     WebComponentExporter.class.getSimpleName(),
                     (webComponentsScanning - annotationScanning) / 1000);
 
-            classes.addAll(findBySuperType(basePackages, resourceLoader,
+            classes.addAll(findBySuperType(basePackages, customLoader,
                     UIInitListener.class).collect(Collectors.toSet()));
             long uiInitScanning = System.currentTimeMillis();
             getLogger().info(SEARCH_TIME_MESSAGE,
                     UIInitListener.class.getSimpleName(),
                     (uiInitScanning - webComponentsScanning) / 1000);
 
-            classes.addAll(findBySuperType(basePackages, resourceLoader,
+            classes.addAll(findBySuperType(basePackages, customLoader,
                     VaadinServiceInitListener.class)
                             .collect(Collectors.toSet()));
             long serviceInitScanning = System.currentTimeMillis();
@@ -441,18 +438,18 @@ public class VaadinServletContextInitializer
                 .getProperty("vaadin.whitelisted-packages");
         if (whitelistProperty == null) {
             customWhitelist = Collections.emptyList();
+            customLoader = new CustomResourceLoader(appContext, blacklist);
+
         } else {
             customWhitelist = Arrays.stream(whitelistProperty.split(","))
                     .map(String::trim).collect(Collectors.toList());
+            customLoader = appContext;
         }
 
         if (!customWhitelist.isEmpty() && !blacklist.isEmpty()) {
             getLogger().warn(
                     "vaadin.blacklisted-packages is ignored because both vaadin.whitelisted-packages and vaadin.blacklisted-packages have been set.");
-            blacklist = Collections.emptyList();
         }
-
-        customLoader = new CustomResourceLoader(appContext, blacklist);
     }
 
     @Override
