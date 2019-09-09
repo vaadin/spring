@@ -442,8 +442,8 @@ public class VaadinServletContextInitializer
 
         } else {
             customWhitelist = Arrays.stream(whitelistProperty.split(","))
-                    .map(s -> s.replace('/', '.'))
-                    .map(String::trim).collect(Collectors.toList());
+                    .map(whitelistedPackage -> whitelistedPackage.replace('/', '.').trim())
+                    .collect(Collectors.toList());
             customLoader = appContext;
         }
 
