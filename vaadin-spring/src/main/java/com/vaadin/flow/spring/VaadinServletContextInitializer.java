@@ -72,6 +72,8 @@ import com.vaadin.flow.server.DeploymentConfigurationFactory;
 import com.vaadin.flow.server.DevModeHandler;
 import com.vaadin.flow.server.InvalidRouteConfigurationException;
 import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.server.UIInitListener;
+import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.startup.AbstractRouteRegistryInitializer;
 import com.vaadin.flow.server.startup.AnnotationValidator;
@@ -309,9 +311,11 @@ public class VaadinServletContextInitializer
                     JsModule.class, JsModule.Container.class, CssImport.class,
                     CssImport.Container.class, JavaScript.class,
                     JavaScript.Container.class, Theme.class, NoTheme.class);
+            List<Class<?>> supertypes = Arrays.asList(
+                    WebComponentExporter.class, UIInitListener.class,
+                    VaadinServiceInitListener.class);
             Set<Class<?>> classes = findByAnnotationOrSuperType(basePackages,
-                    customLoader, annotations,
-                    Collections.singletonList(WebComponentExporter.class))
+                    customLoader, annotations, supertypes)
                             .collect(Collectors.toSet());
 
             final long classScanning = System.currentTimeMillis();
