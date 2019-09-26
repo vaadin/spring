@@ -5,12 +5,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spring-parent</artifactId>
-        <version>12.1-SNAPSHOT</version>
+        <version>10.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-spring-boot-starter</artifactId>
     <name>Spring Boot Starter</name>
-    <version>12.1-SNAPSHOT</version>
+    <version>10.0-SNAPSHOT</version>
     <description>
         Spring Boot Starter for Vaadin Flow applications.
     </description>
@@ -34,7 +34,7 @@
 
     <properties>
         <skipTests>true</skipTests>
-        <vaadin.platform.version>11.0-SNAPSHOT</vaadin.platform.version>
+        <vaadin.platform.version>10.0-SNAPSHOT</vaadin.platform.version>
     </properties>
 
     <dependencyManagement>
@@ -58,7 +58,7 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-core</artifactId>
         </dependency>
-
+    
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -90,29 +90,12 @@
         </profile>
 
         <profile>
-            <id>bootRelease</id>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.sonatype.plugins</groupId>
-                            <artifactId>nexus-staging-maven-plugin</artifactId>
-                            <configuration>
-                                <skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-
-        <profile>
             <id>deploy</id>
             <properties>
                 <maven.deploy.skip>false</maven.deploy.skip>
                 <maven.javadoc.skip>false</maven.javadoc.skip>
             </properties>
-        </profile>
+        </profile>    
     </profiles>
 
 </project>
