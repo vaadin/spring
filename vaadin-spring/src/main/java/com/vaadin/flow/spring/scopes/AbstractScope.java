@@ -75,7 +75,7 @@ abstract class AbstractScope implements Scope, BeanFactoryPostProcessor {
             throw new IllegalStateException(
                     "No VaadinSession bound to current thread");
         }
-        if (session.getState() != VaadinSessionState.OPEN) {
+        if (!session.getConfiguration().isProductionMode() && (session.getState() != VaadinSessionState.OPEN)) {
             throw new IllegalStateException(
                     "Current VaadinSession is not open");
         }
