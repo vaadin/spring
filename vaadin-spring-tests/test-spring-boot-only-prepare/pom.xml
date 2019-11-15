@@ -64,16 +64,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
-                    <configuration>
-                        <maxAttempts>60</maxAttempts>
-                        <wait>2500</wait>
-                    </configuration>
-                </plugin>
-
                 <!--This plugin's configuration is used to store Eclipse
                     m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
@@ -151,6 +141,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <maxAttempts>60</maxAttempts>
+                    <wait>2500</wait>
+                </configuration>
                 <executions>
                     <!-- start and stop application when running
                         integration tests -->
