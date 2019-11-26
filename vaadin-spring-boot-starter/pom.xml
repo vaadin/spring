@@ -34,7 +34,7 @@
 
     <properties>
         <skipTests>true</skipTests>
-        <vaadin.platform.version>14.1-SNAPSHOT</vaadin.platform.version>
+        <vaadin.platform.version>15.0-SNAPSHOT</vaadin.platform.version>
     </properties>
 
     <dependencyManagement>
