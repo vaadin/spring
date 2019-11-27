@@ -77,6 +77,7 @@ import com.vaadin.flow.server.startup.AnnotationValidator;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.server.startup.DevModeInitializer;
 import com.vaadin.flow.server.startup.ServletVerifier;
+import com.vaadin.flow.server.startup.VaadinAppShellInitializer;
 import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializer;
 import com.vaadin.flow.server.startup.WebComponentExporterAwareValidator;
 import com.vaadin.flow.server.webcomponent.WebComponentConfigurationRegistry;
@@ -269,7 +270,7 @@ public class VaadinServletContextInitializer
     private class DevModeServletContextListener
             implements ServletContextListener {
 
-        @SuppressWarnings({ "unchecked", "rawtypes" })
+        @SuppressWarnings({"rawtypes"})
         @Override
         public void contextInitialized(ServletContextEvent event) {
 
@@ -399,6 +400,39 @@ public class VaadinServletContextInitializer
 
     }
 
+    private class VaadinAppShellListener
+            implements ServletContextListener {
+
+        @SuppressWarnings({"rawtypes"})
+        @Override
+        public void contextInitialized(ServletContextEvent event) {
+            long start = System.nanoTime();
+            ServletRegistrationBean servletRegistrationBean = appContext
+                    .getBean("servletRegistrationBean",
+                            ServletRegistrationBean.class);
+
+            DeploymentConfiguration config = SpringStubServletConfig
+                    .createDeploymentConfiguration(event.getServletContext(),
+                            servletRegistrationBean, SpringServlet.class,
+                            appContext);
+
+            if (!config.isClientSideMode()) {
+                return;
+            }
+
+            Set<Class<?>> classes = findByAnnotationOrSuperType(
+                    getVerifiableAnnotationPackages(), customLoader,
+                    VaadinAppShellInitializer.getValidAnnotations(),
+                    VaadinAppShellInitializer.getValidSupers())
+                            .collect(Collectors.toSet());
+
+            long ms = (System.nanoTime() - start) / 1000000;
+            getLogger().info("Search for VaadinAppShell took {} ms", ms);
+
+            VaadinAppShellInitializer.init(classes, event.getServletContext(), config);
+        }
+    }
+
     /**
      * Creates a new {@link ServletContextInitializer} instance with application
      * {@code context} provided.
@@ -467,6 +501,8 @@ public class VaadinServletContextInitializer
         servletContext
                 .addListener(new AnnotationValidatorServletContextListener());
 
+        servletContext.addListener(new VaadinAppShellListener());
+
         servletContext.addListener(new DevModeServletContextListener());
 
         // Skip custom web component builders search if registry already
@@ -512,6 +548,7 @@ public class VaadinServletContextInitializer
                 .addIncludeFilter(new AnnotationTypeFilter(annotation)));
         types.forEach(type -> scanner
                 .addIncludeFilter(new AssignableTypeFilter(type)));
+
         return packages.stream().map(scanner::findCandidateComponents)
                 .flatMap(Collection::stream).map(this::getBeanClass);
     }
