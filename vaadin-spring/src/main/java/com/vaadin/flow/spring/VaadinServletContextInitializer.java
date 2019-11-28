@@ -129,7 +129,8 @@ public class VaadinServletContextInitializer
             }
 
             ApplicationRouteRegistry registry = ApplicationRouteRegistry
-                    .getInstance(event.getServletContext());
+                    .getInstance(new VaadinServletContext(
+                            event.getServletContext()));
 
             getLogger().debug(
                     "Servlet Context initialized. Running route discovering....");
@@ -217,7 +218,7 @@ public class VaadinServletContextInitializer
         @SuppressWarnings("unchecked")
         public void contextInitialized(ServletContextEvent event) {
             ApplicationRouteRegistry registry = ApplicationRouteRegistry
-                    .getInstance(event.getServletContext());
+                    .getInstance(new VaadinServletContext(event.getServletContext()));
 
             Stream<Class<? extends Component>> hasErrorComponents = findBySuperType(
                     getErrorParameterPackages(), HasErrorParameter.class)
@@ -276,33 +277,21 @@ public class VaadinServletContextInitializer
         }
     }
 
+
     private class DevModeServletContextListener
             implements ServletContextListener {
 
-        @SuppressWarnings({"rawtypes"})
         @Override
         public void contextInitialized(ServletContextEvent event) {
             if (failed) {
                 return;
             }
 
-            ServletRegistrationBean servletRegistrationBean = appContext
-                    .getBean("servletRegistrationBean",
-                            ServletRegistrationBean.class);
-
-            if (servletRegistrationBean == null) {
-                getLogger().warn(
-                        "No servlet registration found. DevServer will not be started!");
-                return;
-            }
-
             DeploymentConfiguration config = SpringStubServletConfig
-                    .createDeploymentConfiguration(event.getServletContext(),
-                            servletRegistrationBean, SpringServlet.class,
-                            appContext);
+                    .createDeploymentConfiguration(this.getClass(), event, appContext);
 
-            if (config.isCompatibilityMode() || config.isProductionMode()
-                    || !config.enableDevServer()) {
+            if (config == null || config.isCompatibilityMode()
+                    || config.isProductionMode() || !config.enableDevServer()) {
                 return;
             }
 
@@ -411,23 +400,17 @@ public class VaadinServletContextInitializer
         }
     }
 
-    private class VaadinAppShellListener
+    private class VaadinAppShellContextListener
             implements ServletContextListener {
 
-        @SuppressWarnings({"rawtypes"})
         @Override
         public void contextInitialized(ServletContextEvent event) {
             long start = System.nanoTime();
-            ServletRegistrationBean servletRegistrationBean = appContext
-                    .getBean("servletRegistrationBean",
-                            ServletRegistrationBean.class);
 
             DeploymentConfiguration config = SpringStubServletConfig
-                    .createDeploymentConfiguration(event.getServletContext(),
-                            servletRegistrationBean, SpringServlet.class,
-                            appContext);
+                    .createDeploymentConfiguration(this, event, appContext);
 
-            if (!config.isClientSideMode()) {
+            if (config == null || !config.isClientSideMode()) {
                 return;
             }
 
@@ -447,6 +430,7 @@ public class VaadinServletContextInitializer
                 throw e;
             }
         }
+
     }
 
     /**
@@ -495,10 +479,11 @@ public class VaadinServletContextInitializer
         // Verify servlet version also for SpringBoot.
         ServletVerifier.verifyServletVersion();
 
-        servletContext.addListener(new VaadinAppShellListener());
+        servletContext.addListener(new VaadinAppShellContextListener());
 
         ApplicationRouteRegistry registry = ApplicationRouteRegistry
-                .getInstance(servletContext);
+                .getInstance(new VaadinServletContext(servletContext));
+
         // If the registry is already initialized then RouteRegistryInitializer
         // has done its job already, skip the custom routes search
         if (registry.getRegisteredRoutes().isEmpty()) {
@@ -740,7 +725,7 @@ public class VaadinServletContextInitializer
     protected static class SpringStubServletConfig implements ServletConfig {
 
         private final ServletContext context;
-        private final ServletRegistrationBean registration;
+        private final ServletRegistrationBean<?> registration;
         private final ApplicationContext appContext;
 
         /**
@@ -752,7 +737,7 @@ public class VaadinServletContextInitializer
          *            the ServletRegistration for this ServletConfig instance
          */
         private SpringStubServletConfig(ServletContext context,
-                ServletRegistrationBean registration,
+                ServletRegistrationBean<?> registration,
                 ApplicationContext appContext) {
             this.context = context;
             this.registration = registration;
@@ -769,7 +754,6 @@ public class VaadinServletContextInitializer
             return context;
         }
 
-        @SuppressWarnings("unchecked")
         @Override
         public String getInitParameter(String name) {
             Environment env = appContext.getBean(Environment.class);
@@ -794,6 +778,26 @@ public class VaadinServletContextInitializer
             return Collections.enumeration(initParameters);
         }
 
+        private static DeploymentConfiguration createDeploymentConfiguration(
+                Object listener, ServletContextEvent event,
+                ApplicationContext appContext) {
+
+            ServletRegistrationBean<?> servletRegistrationBean = appContext
+                    .getBean("servletRegistrationBean",
+                            ServletRegistrationBean.class);
+
+            if (servletRegistrationBean == null) {
+                getLogger().warn(
+                        "No servlet registration found. {} will not be started!",
+                        listener.getClass().getSimpleName());
+                return null;
+            }
+
+            return SpringStubServletConfig.createDeploymentConfiguration(
+                    event.getServletContext(), servletRegistrationBean,
+                    SpringServlet.class, appContext);
+        }
+
         /**
          * Creates a DeploymentConfiguration.
          *
@@ -806,7 +810,7 @@ public class VaadinServletContextInitializer
          * @return a DeploymentConfiguration instance
          */
         public static DeploymentConfiguration createDeploymentConfiguration(
-                ServletContext context, ServletRegistrationBean registration,
+                ServletContext context, ServletRegistrationBean<?> registration,
                 Class<?> servletClass, ApplicationContext appContext) {
             try {
                 ServletConfig servletConfig = new SpringStubServletConfig(
