@@ -116,12 +116,18 @@ public class VaadinServletContextInitializer
      */
     private List<String> customWhitelist;
 
+    private boolean failed = false;
+
     private class RouteServletContextListener extends
             AbstractRouteRegistryInitializer implements ServletContextListener {
 
         @SuppressWarnings("unchecked")
         @Override
         public void contextInitialized(ServletContextEvent event) {
+            if (failed) {
+                return;
+            }
+
             ApplicationRouteRegistry registry = ApplicationRouteRegistry
                     .getInstance(event.getServletContext());
 
@@ -233,6 +239,9 @@ public class VaadinServletContextInitializer
 
         @Override
         public void contextInitialized(ServletContextEvent event) {
+            if (failed) {
+                return;
+            }
             AnnotationValidator annotationValidator = new AnnotationValidator();
             validateAnnotations(annotationValidator, event.getServletContext(),
                     annotationValidator.getAnnotations());
@@ -273,6 +282,9 @@ public class VaadinServletContextInitializer
         @SuppressWarnings({"rawtypes"})
         @Override
         public void contextInitialized(ServletContextEvent event) {
+            if (failed) {
+                return;
+            }
 
             ServletRegistrationBean servletRegistrationBean = appContext
                     .getBean("servletRegistrationBean",
@@ -319,15 +331,19 @@ public class VaadinServletContextInitializer
             try {
                 DevModeInitializer.initDevModeHandler(classes,
                         event.getServletContext(), config);
-            } catch (ServletException e) {
+            } catch (Exception e) {
+                failed = true;
                 throw new RuntimeException(
                         "Unable to initialize Vaadin DevModeHandler", e);
             }
         }
 
         @Override
-        public void contextDestroyed(ServletContextEvent event) {
-            // NO-OP
+        public void contextDestroyed(ServletContextEvent sce) {
+            DevModeHandler handler = DevModeHandler.getDevModeHandler();
+            if (handler != null && !handler.reuseDevServer()) {
+                handler.stop();
+            }
         }
 
         private Collection<String> getWhiteListPackages() {
@@ -365,6 +381,10 @@ public class VaadinServletContextInitializer
 
         @Override
         public void contextInitialized(ServletContextEvent event) {
+            if (failed) {
+                return;
+            }
+
             WebComponentConfigurationRegistry registry = WebComponentConfigurationRegistry
                     .getInstance(new VaadinServletContext(
                             event.getServletContext()));
@@ -389,15 +409,6 @@ public class VaadinServletContextInitializer
                 }
             }
         }
-
-        @Override
-        public void contextDestroyed(ServletContextEvent sce) {
-            DevModeHandler handler = DevModeHandler.getDevModeHandler();
-            if (handler != null && !handler.reuseDevServer()) {
-                handler.stop();
-            }
-        }
-
     }
 
     private class VaadinAppShellListener
@@ -429,7 +440,12 @@ public class VaadinServletContextInitializer
             long ms = (System.nanoTime() - start) / 1000000;
             getLogger().info("Search for VaadinAppShell took {} ms", ms);
 
-            VaadinAppShellInitializer.init(classes, event.getServletContext(), config);
+            try {
+                VaadinAppShellInitializer.init(classes, event.getServletContext(), config);
+            } catch (Exception e) {
+                failed = true;
+                throw e;
+            }
         }
     }
 
@@ -479,6 +495,8 @@ public class VaadinServletContextInitializer
         // Verify servlet version also for SpringBoot.
         ServletVerifier.verifyServletVersion();
 
+        servletContext.addListener(new VaadinAppShellListener());
+
         ApplicationRouteRegistry registry = ApplicationRouteRegistry
                 .getInstance(servletContext);
         // If the registry is already initialized then RouteRegistryInitializer
@@ -501,7 +519,6 @@ public class VaadinServletContextInitializer
         servletContext
                 .addListener(new AnnotationValidatorServletContextListener());
 
-        servletContext.addListener(new VaadinAppShellListener());
 
         servletContext.addListener(new DevModeServletContextListener());
 
