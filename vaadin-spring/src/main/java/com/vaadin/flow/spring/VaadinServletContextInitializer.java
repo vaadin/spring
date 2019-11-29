@@ -122,17 +122,17 @@ public class VaadinServletContextInitializer
      * running more listeners when one fails. This allows that user does not
      * wait until the last listener has been run.
      */
-    private interface FailServletContextListener
+    private interface FailFastServletContextListener
             extends ServletContextListener, Serializable {
 
         static String ATTR = "failed-"
-                + FailServletContextListener.class.getName();
+                + FailFastServletContextListener.class.getName();
 
         @Override
         default void contextInitialized(ServletContextEvent event) {
             if (event.getServletContext().getAttribute(ATTR) == null) {
                 try {
-                    init(event);
+                    failFastContextInitialized(event);
                 } catch (Exception e) {
                     event.getServletContext().setAttribute(ATTR, true);
                     throw new RuntimeException("Unable to initialize "
@@ -141,20 +141,15 @@ public class VaadinServletContextInitializer
             }
         }
 
-        @Override
-        default void contextDestroyed(ServletContextEvent sce) {
-            // NOOP
-        }
-
-        void init(ServletContextEvent event) throws ServletException;
+        void failFastContextInitialized(ServletContextEvent event) throws ServletException;
     }
 
     private class RouteServletContextListener extends
-            AbstractRouteRegistryInitializer implements FailServletContextListener {
+            AbstractRouteRegistryInitializer implements FailFastServletContextListener {
 
         @SuppressWarnings("unchecked")
         @Override
-        public void init(ServletContextEvent event) {
+        public void failFastContextInitialized(ServletContextEvent event) {
             ApplicationRouteRegistry registry = ApplicationRouteRegistry
                     .getInstance(new VaadinServletContext(
                             event.getServletContext()));
@@ -233,11 +228,11 @@ public class VaadinServletContextInitializer
     }
 
     private class ErrorParameterServletContextListener
-            implements FailServletContextListener {
+            implements FailFastServletContextListener {
 
         @Override
         @SuppressWarnings("unchecked")
-        public void init(ServletContextEvent event) {
+        public void failFastContextInitialized(ServletContextEvent event) {
             ApplicationRouteRegistry registry = ApplicationRouteRegistry
                     .getInstance(new VaadinServletContext(event.getServletContext()));
 
@@ -251,10 +246,10 @@ public class VaadinServletContextInitializer
     }
 
     private class AnnotationValidatorServletContextListener
-            implements FailServletContextListener {
+            implements FailFastServletContextListener {
 
         @Override
-        public void init(ServletContextEvent event) {
+        public void failFastContextInitialized(ServletContextEvent event) {
             AnnotationValidator annotationValidator = new AnnotationValidator();
             validateAnnotations(annotationValidator, event.getServletContext(),
                     annotationValidator.getAnnotations());
@@ -285,10 +280,10 @@ public class VaadinServletContextInitializer
     }
 
     private class DevModeServletContextListener
-            implements FailServletContextListener {
+            implements FailFastServletContextListener {
 
         @Override
-        public void init(ServletContextEvent event) throws ServletException {
+        public void failFastContextInitialized(ServletContextEvent event) throws ServletException {
             DeploymentConfiguration config = SpringStubServletConfig
                     .createDeploymentConfiguration(this.getClass(), event, appContext);
 
@@ -362,10 +357,10 @@ public class VaadinServletContextInitializer
     }
 
     private class WebComponentServletContextListener
-            implements FailServletContextListener {
+            implements FailFastServletContextListener {
 
         @Override
-        public void init(ServletContextEvent event) throws ServletException {
+        public void failFastContextInitialized(ServletContextEvent event) throws ServletException {
 
             WebComponentConfigurationRegistry registry = WebComponentConfigurationRegistry
                     .getInstance(new VaadinServletContext(
@@ -386,10 +381,10 @@ public class VaadinServletContextInitializer
     }
 
     private class VaadinAppShellContextListener
-            implements FailServletContextListener {
+            implements FailFastServletContextListener {
 
         @Override
-        public void init(ServletContextEvent event) {
+        public void failFastContextInitialized(ServletContextEvent event) {
             long start = System.nanoTime();
 
             DeploymentConfiguration config = SpringStubServletConfig
