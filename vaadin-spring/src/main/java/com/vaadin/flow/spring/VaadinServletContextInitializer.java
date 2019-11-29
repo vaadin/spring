@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -121,8 +122,11 @@ public class VaadinServletContextInitializer
      * running more listeners when one fails. This allows that user does not
      * wait until the last listener has been run.
      */
-    private interface FailServletContextListener extends ServletContextListener {
-        static String ATTR = "failed-" + FailServletContextListener.class.getName();
+    private interface FailServletContextListener
+            extends ServletContextListener, Serializable {
+
+        static String ATTR = "failed-"
+                + FailServletContextListener.class.getName();
 
         @Override
         default void contextInitialized(ServletContextEvent event) {
