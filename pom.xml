@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>vaadin-spring-parent</artifactId>
-    <version>12.1-SNAPSHOT</version>
+    <version>12.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>vaadin-spring-parent</name>
@@ -44,7 +44,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- These are typically overridden with BOMs -->
-        <vaadin.flow.version>2.1-SNAPSHOT</vaadin.flow.version>
+        <vaadin.flow.version>2.2-SNAPSHOT</vaadin.flow.version>
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
 
         <!-- Additional manifest fields -->
@@ -199,7 +199,6 @@
                 </property>
             </activation>
             <modules>
-                <module>vaadin-spring-boot-starter</module>
                 <module>vaadin-spring-tests</module>
             </modules>
         </profile>
