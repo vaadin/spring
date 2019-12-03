@@ -314,6 +314,13 @@ public class VaadinServletContextInitializer
                     (classScanning - start) / 1000);
 
             try {
+                classes.add(Class
+                        .forName("com.vaadin.flow.component.dnd.DragSource"));
+            } catch (ClassNotFoundException e) {
+                // Ignore it as it means flow-dnd is not in the class path.
+            }
+
+            try {
                 DevModeInitializer.initDevModeHandler(classes,
                         event.getServletContext(), config);
             } catch (ServletException e) {
