@@ -328,6 +328,7 @@
 
                 <!-- nexus-staging-maven-plugin requires the last module to be not skipped for deployment -->
                 <module>dummy-module</module>
+                <module>test-spring-ccdm</module>
             </modules>
         </profile>
         <profile>
