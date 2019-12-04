@@ -344,7 +344,7 @@ public class VaadinServletContextInitializer
         private Optional<Class> getClassByName(String name) {
             try {
                 return Optional.of(Class
-                        .forName("com.vaadin.flow.component.dnd.DragSource"));
+                        .forName(name));
             } catch (ClassNotFoundException e) {
                 return Optional.empty();
             }
