@@ -7,8 +7,8 @@
         <artifactId>vaadin-spring-tests</artifactId>
         <version>13.0-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-test-spring-ccdm</artifactId>
-    <name>Vaadin Spring Boot integration tests for CCDM</name>
+    <artifactId>test-ts-services</artifactId>
+    <name>Vaadin integration tests for client-side mode and services</name>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
