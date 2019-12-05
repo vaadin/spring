@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 import com.googlecode.gentyref.GenericTypeReflector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
@@ -114,6 +115,32 @@ public class VaadinServletContextInitializer
      * Packages whitelisted by the user
      */
     private List<String> customWhitelist;
+
+    /**
+     * Class path scanner that reuses infrastructure from Spring while also
+     * considering abstract types.
+     */
+    private static class ClassPathScanner
+            extends ClassPathScanningCandidateComponentProvider {
+        private ClassPathScanner(ResourceLoader resourceLoader,
+                Collection<Class<? extends Annotation>> annotations,
+                Collection<Class<?>> types) {
+            super(false);
+            setResourceLoader(resourceLoader);
+
+            annotations.stream().map(AnnotationTypeFilter::new)
+                    .forEach(this::addIncludeFilter);
+            types.stream().map(AssignableTypeFilter::new)
+                    .forEach(this::addIncludeFilter);
+        }
+
+        @Override
+        protected boolean isCandidateComponent(
+                AnnotatedBeanDefinition beanDefinition) {
+            return super.isCandidateComponent(beanDefinition)
+                    || beanDefinition.getMetadata().isAbstract();
+        }
+    }
 
     private class RouteServletContextListener extends
             AbstractRouteRegistryInitializer implements ServletContextListener {
@@ -505,13 +532,8 @@ public class VaadinServletContextInitializer
             Collection<String> packages, ResourceLoader loader,
             Collection<Class<? extends Annotation>> annotations,
             Collection<Class<?>> types) {
-        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(
-                false);
-        scanner.setResourceLoader(loader);
-        annotations.forEach(annotation -> scanner
-                .addIncludeFilter(new AnnotationTypeFilter(annotation)));
-        types.forEach(type -> scanner
-                .addIncludeFilter(new AssignableTypeFilter(type)));
+        ClassPathScanner scanner = new ClassPathScanner(loader, annotations,
+                types);
         return packages.stream().map(scanner::findCandidateComponents)
                 .flatMap(Collection::stream).map(this::getBeanClass);
     }
@@ -654,10 +676,11 @@ public class VaadinServletContextInitializer
                         List<String> parents = rootPaths.stream()
                                 .filter(path::startsWith)
                                 .collect(Collectors.toList());
-                        if (parents.isEmpty())
+                        if (parents.isEmpty()) {
                             throw new IllegalStateException(String.format(
                                     "Parent resource of [%s] not found in the resources!",
                                     path));
+                        }
 
                         if (parents.stream()
                                 .anyMatch(parent -> shouldPathBeScanned(
@@ -761,9 +784,11 @@ public class VaadinServletContextInitializer
                         .createPropertyDeploymentConfiguration(servletClass,
                                 new VaadinServletConfig(servletConfig));
             } catch (VaadinConfigurationException e) {
-                throw new IllegalStateException(String.format(
-                        "Failed to get deployment configuration data for servlet with name '%s' and class '%s'",
-                        registration.getServletName(), servletClass), e);
+                throw new IllegalStateException(
+                        String.format(
+                                "Failed to get deployment configuration data for servlet with name '%s' and class '%s'",
+                                registration.getServletName(), servletClass),
+                        e);
             }
         }
     }
