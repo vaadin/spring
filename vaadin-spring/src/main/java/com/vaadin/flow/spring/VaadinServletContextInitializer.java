@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 import com.googlecode.gentyref.GenericTypeReflector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
@@ -506,7 +507,14 @@ public class VaadinServletContextInitializer
             Collection<Class<? extends Annotation>> annotations,
             Collection<Class<?>> types) {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(
-                false);
+                false) {
+            @Override
+            protected boolean isCandidateComponent(
+                    AnnotatedBeanDefinition beanDefinition) {
+                return super.isCandidateComponent(beanDefinition)
+                        || beanDefinition.getMetadata().isAbstract();
+            }
+        };
         scanner.setResourceLoader(loader);
         annotations.forEach(annotation -> scanner
                 .addIncludeFilter(new AnnotationTypeFilter(annotation)));
@@ -654,10 +662,11 @@ public class VaadinServletContextInitializer
                         List<String> parents = rootPaths.stream()
                                 .filter(path::startsWith)
                                 .collect(Collectors.toList());
-                        if (parents.isEmpty())
+                        if (parents.isEmpty()) {
                             throw new IllegalStateException(String.format(
                                     "Parent resource of [%s] not found in the resources!",
                                     path));
+                        }
 
                         if (parents.stream()
                                 .anyMatch(parent -> shouldPathBeScanned(
