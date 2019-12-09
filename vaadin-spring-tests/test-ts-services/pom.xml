@@ -35,11 +35,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-test-spring-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
