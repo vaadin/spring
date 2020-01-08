@@ -8,6 +8,7 @@ class TemplatePushViewElement extends PolymerElement {
               Hello <label id="label"></label>
               <button id="elementTest">Element API</button>
               <button id="execJsTest">Exec JS</button>
+              <button id="callFunctionTest">Element.callFunction</button>
           </div>
      `;
   }

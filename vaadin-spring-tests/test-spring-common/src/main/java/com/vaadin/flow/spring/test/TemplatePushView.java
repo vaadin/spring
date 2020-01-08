@@ -28,6 +28,8 @@ public class TemplatePushView extends PolymerTemplate<TemplateModel> {
     private NativeButton elementTest;
     @Id
     private NativeButton execJsTest;
+    @Id
+    private NativeButton callFunctionTest;
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
@@ -43,6 +45,9 @@ public class TemplatePushView extends PolymerTemplate<TemplateModel> {
         });
         ui.getPage().executeJs(
                 "$0.setText = function(text) {$0.innerText=text;}", label);
+        callFunctionTest.addClickListener(e -> {
+            new Thread(new CallFunction(ui)).start();
+        });
 
     }
 
@@ -65,6 +70,19 @@ public class TemplatePushView extends PolymerTemplate<TemplateModel> {
         }
 
         protected abstract void execute(UI ui);
+
+    }
+
+    private class CallFunction extends Cmd {
+
+        public CallFunction(UI ui) {
+            super(ui);
+        }
+
+        @Override
+        protected void execute(UI ui) {
+            label.getElement().callJsFunction("setText", "from callFunction");
+        }
 
     }
 
