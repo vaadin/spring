@@ -5,7 +5,6 @@ import java.util.concurrent.locks.Lock;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
@@ -19,7 +18,6 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @Route("template-push")
 @Push(transport = Transport.WEBSOCKET)
 @JsModule("TemplatePushView.js")
-@HtmlImport("TemplatePushView.html")
 @Tag("template-push-view")
 public class TemplatePushView extends PolymerTemplate<TemplateModel> {
 
@@ -30,8 +28,6 @@ public class TemplatePushView extends PolymerTemplate<TemplateModel> {
     private NativeButton elementTest;
     @Id
     private NativeButton execJsTest;
-    @Id
-    private NativeButton callFunctionTest;
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
@@ -45,11 +41,8 @@ public class TemplatePushView extends PolymerTemplate<TemplateModel> {
         execJsTest.addClickListener(e -> {
             new Thread(new ExecJS(ui)).start();
         });
-        ui.getPage().executeJavaScript(
+        ui.getPage().executeJs(
                 "$0.setText = function(text) {$0.innerText=text;}", label);
-        callFunctionTest.addClickListener(e -> {
-            new Thread(new CallFunction(ui)).start();
-        });
 
     }
 
@@ -75,19 +68,6 @@ public class TemplatePushView extends PolymerTemplate<TemplateModel> {
 
     }
 
-    private class CallFunction extends Cmd {
-
-        public CallFunction(UI ui) {
-            super(ui);
-        }
-
-        @Override
-        protected void execute(UI ui) {
-            label.getElement().callFunction("setText", "from callFunction");
-        }
-
-    }
-
     private class ExecJS extends Cmd {
 
         public ExecJS(UI ui) {
@@ -96,7 +76,7 @@ public class TemplatePushView extends PolymerTemplate<TemplateModel> {
 
         @Override
         protected void execute(UI ui) {
-            ui.getPage().executeJavaScript("$0.innerText='from execJS'", label);
+            ui.getPage().executeJs("$0.innerText='from execJS'", label);
         }
 
     }
