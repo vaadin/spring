@@ -15,12 +15,12 @@
  */
 package com.vaadin.flow.spring;
 
+import com.vaadin.flow.server.VaadinServlet;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.web.servlet.DispatcherServlet;
-
-import com.vaadin.flow.server.VaadinServlet;
 
 /**
  * Condition to check whether the Vaadin servlet is mapped to the root
@@ -43,8 +43,13 @@ public class RootMappedCondition implements Condition {
     @Override
     public boolean matches(ConditionContext context,
             AnnotatedTypeMetadata metadata) {
-        return isRootMapping(
-                context.getEnvironment().getProperty(URL_MAPPING_PROPERTY));
+        VaadinConfigurationProperties vaadinConfigurationProperties = Binder.get(context.getEnvironment())
+                .bind("vaadin", VaadinConfigurationProperties.class)
+                .orElse(null);
+        if (vaadinConfigurationProperties != null) {
+            return isRootMapping(vaadinConfigurationProperties.getUrlMapping());
+        }
+        return false;
     }
 
     /**
