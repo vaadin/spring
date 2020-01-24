@@ -28,19 +28,21 @@ import com.vaadin.testbench.TestBenchElement;
 /**
  * Class for testing issues in a spring-boot container.
  */
-public class VaadinViewIT extends ChromeBrowserTest {
+public class AppViewIT extends ChromeBrowserTest {
     @Override
     protected String getTestPath() {
         return "/foo";
     }
 
     private TestBenchElement testComponent;
+    private WebElement content;
 
     @Before
     public void setup() throws Exception {
         super.setup();
         open();
         testComponent = $("test-component").first();
+        content = testComponent.$(TestBenchElement.class).id("content");
     }
 
     /**
@@ -63,7 +65,6 @@ public class VaadinViewIT extends ChromeBrowserTest {
         WebElement button = testComponent.$(TestBenchElement.class).id("connect");
         button.click();
 
-        WebElement content = testComponent.$(TestBenchElement.class).id("content");
         // Wait for the server connect response
         waitUntil(ExpectedConditions.textToBePresentInElement(content,
                 "Anonymous access is not allowed"), 25);
@@ -75,7 +76,6 @@ public class VaadinViewIT extends ChromeBrowserTest {
                 "connectAnonymous");
         button.click();
 
-        WebElement content = testComponent.$(TestBenchElement.class).id("content");
         // Wait for the server connect response
         waitUntil(ExpectedConditions.textToBePresentInElement(content,
                 "Hello, stranger!"), 25);
@@ -84,12 +84,14 @@ public class VaadinViewIT extends ChromeBrowserTest {
     @Test
     public void should_requestAnonymously_when_CallConnectServiceFromANestedUrl() throws Exception {
         getDriver().get(getRootURL() + getTestPath() + "/more/levels/url");
+
         testComponent = $("test-component").first();
+        content = testComponent.$(TestBenchElement.class).id("content");
+
         WebElement button = testComponent.$(TestBenchElement.class).id(
                 "connectAnonymous");
         button.click();
 
-        WebElement content = testComponent.$(TestBenchElement.class).id("content");
         // Wait for the server connect response
         waitUntil(ExpectedConditions.textToBePresentInElement(content,
                 "Hello, stranger!"), 25);
@@ -101,8 +103,6 @@ public class VaadinViewIT extends ChromeBrowserTest {
                 "echoWithOptional");
         button.click();
 
-        WebElement content = testComponent.$(TestBenchElement.class)
-                .id("content");
         // Wait for the server connect response
         waitUntil(ExpectedConditions.textToBePresentInElement(content,
                 "1. one 3. three 4. four"), 25);

@@ -1,6 +1,6 @@
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
 import { html } from '@polymer/polymer/lib/utils/html-tag.js';
-import * as connectServices from '../generated/ConnectServices';
+import * as appEndpoint from '../generated/AppEndpoint';
 
 class TestComponent extends PolymerElement {
   static get template() {
@@ -19,28 +19,28 @@ class TestComponent extends PolymerElement {
   }
 
   connect(e) {
-    connectServices
+    appEndpoint
       .hello('Friend')
       .then(response => this.$.content.textContent = response)
       .catch(error => this.$.content.textContent = 'Error:' + error);
   }
 
   connectAnonymous(e) {
-      connectServices
+      appEndpoint
         .helloAnonymous()
         .then(response => this.$.content.textContent = response)
         .catch(error => this.$.content.textContent = 'Error:' + error);
     }
 
   echoWithOptional(e) {
-    connectServices
+    appEndpoint
       .echoWithOptional('one', undefined, 'three', 'four')
       .then(response => this.$.content.textContent = response)
       .catch(error => this.$.content.textContent = 'Error:' + error);
   }
 
   helloAdmin(e) {
-    connectServices
+    appEndpoint
       .helloAdmin()
       .then(response => this.$.content.textContent = response)
       .catch(error => this.$.content.textContent = 'Error:' + error);
