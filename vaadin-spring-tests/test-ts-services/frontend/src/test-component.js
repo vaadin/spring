@@ -5,11 +5,18 @@ import * as appEndpoint from '../generated/AppEndpoint';
 class TestComponent extends PolymerElement {
   static get template() {
     return html`
-        <button id="button">Click</button>
-        <button id="connect" on-click="connect">Click</button>
-        <button id="connectAnonymous" on-click="connectAnonymous">Click anonymous</button>
-        <button id="echoWithOptional" on-click="echoWithOptional">Echo with optional</button>
-        <button id="helloAdmin" on-click="helloAdmin">Echo only admin</button>
+        <button id="button">vaadin hello</button><br/>
+        <button id="hello" on-click="hello">endpoint hello</button><br/>
+        <button id="helloAnonymous" on-click="helloAnonymous">endpoint helloAnonymous</button><br/>
+        <button id="echoWithOptional" on-click="echoWithOptional">endpoint echoWithOptional</button><br/>
+        <button id="helloAdmin" on-click="helloAdmin">endpoint helloAdmin</button><br/>
+        <button id="checkUser" on-click="checkUser">endpoint checkUser</button><br/>
+        <button id="logout" on-click="logout">logout</button><br/>
+        <form method="post" action="login">
+          <input id="username" name="username"></input>
+          <input id="password" name="password"></input>
+          <input id="login" type="submit"></input>
+        </form>
         <div id="content"></div>
     `;
   }
@@ -18,14 +25,18 @@ class TestComponent extends PolymerElement {
     return 'test-component'
   }
 
-  connect(e) {
+  async logout() {
+    await fetch('logout');
+  }
+
+  hello(e) {
     appEndpoint
       .hello('Friend')
       .then(response => this.$.content.textContent = response)
       .catch(error => this.$.content.textContent = 'Error:' + error);
   }
 
-  connectAnonymous(e) {
+  helloAnonymous(e) {
       appEndpoint
         .helloAnonymous()
         .then(response => this.$.content.textContent = response)
@@ -44,6 +55,16 @@ class TestComponent extends PolymerElement {
       .helloAdmin()
       .then(response => this.$.content.textContent = response)
       .catch(error => this.$.content.textContent = 'Error:' + error);
+  }
+
+  checkUser(e) {
+    appEndpoint
+      .checkUser()
+      .then(response => this.$.content.textContent = response)
+      .catch(error => {
+        console.log(error);
+        this.$.content.textContent = 'Error:' + error
+      });
   }
 }
 customElements.define(TestComponent.is, TestComponent);

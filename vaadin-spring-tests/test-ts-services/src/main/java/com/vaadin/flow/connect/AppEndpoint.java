@@ -5,6 +5,10 @@ import javax.annotation.security.RolesAllowed;
 
 import java.util.Optional;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.connect.Endpoint;
 import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
 
@@ -13,7 +17,7 @@ import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
  */
 @Endpoint
 public class AppEndpoint {
-    
+
     public String hello(String name, @Nullable String title) {
         return "Hello, " + (title != null ? title + " " : "") + name + "!";
     }
@@ -50,4 +54,11 @@ public class AppEndpoint {
     public String helloAdmin() {
         return "Hello, admin!";
     }
+
+    @AnonymousAllowed
+    public String checkUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth == null ? null : auth.getName();
+    }
+
 }
