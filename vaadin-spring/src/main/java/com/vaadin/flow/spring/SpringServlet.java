@@ -61,6 +61,7 @@ public class SpringServlet extends VaadinServlet {
             Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_OPTIONS,
             Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_SUCCESS_PATTERN,
             Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_TIMEOUT,
+            Constants.SERVLET_PARAMETER_DEVMODE_TRANSPILE,
             Constants.SERVLET_PARAMETER_ENABLE_DEV_SERVER,
             Constants.SERVLET_PARAMETER_JSBUNDLE,
             Constants.SERVLET_PARAMETER_POLYFILLS,
