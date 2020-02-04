@@ -71,7 +71,7 @@ public class DeploymentConfigurationPropertiesTest {
 
         // Check that we have added all other constants as parameters (except
         // those we know)
-        Assert.assertEquals(38, constantsCopy.size());
+        Assert.assertEquals(39, constantsCopy.size());
 
         Assert.assertTrue(constantsCopy
                 .contains(Constants.REQUIRED_ATMOSPHERE_RUNTIME_VERSION));
@@ -120,5 +120,7 @@ public class DeploymentConfigurationPropertiesTest {
         Assert.assertTrue(constantsCopy.contains(Constants.PACKAGE_JSON));
         Assert.assertTrue(constantsCopy.contains(
                 Constants.SERVLET_PARAMETER_WEB_COMPONENT_DISCONNECT));
+        Assert.assertTrue(
+                constantsCopy.contains(Constants.VAADIN_VERSIONS_JSON));
     }
 }
