@@ -114,5 +114,7 @@ public class DeploymentConfigurationPropertiesTest {
                 Constants.SERVLET_PARAMETER_WEB_COMPONENT_DISCONNECT));
         Assert.assertTrue(
                 constantsCopy.contains(Constants.VAADIN_VERSIONS_JSON));
+        Assert.assertTrue(
+                constantsCopy.contains(Constants.REQUIRE_HOME_NODE_EXECUTABLE));
     }
 }
