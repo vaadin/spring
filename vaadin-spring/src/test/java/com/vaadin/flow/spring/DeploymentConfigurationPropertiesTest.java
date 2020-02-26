@@ -71,7 +71,7 @@ public class DeploymentConfigurationPropertiesTest {
 
         // Check that we have added all other constants as parameters (except
         // those we know)
-        Assert.assertEquals(46, constantsCopy.size());
+        Assert.assertEquals(47, constantsCopy.size());
 
         Assert.assertTrue(constantsCopy
                 .contains(Constants.REQUIRED_ATMOSPHERE_RUNTIME_VERSION));
