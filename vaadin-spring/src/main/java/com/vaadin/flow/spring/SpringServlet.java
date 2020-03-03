@@ -69,6 +69,7 @@ public class SpringServlet extends VaadinServlet {
             Constants.I18N_PROVIDER,
             Constants.DISABLE_AUTOMATIC_SERVLET_REGISTRATION,
             Constants.SERVLET_PARAMETER_ENABLE_PNPM,
+            Constants.SERVLET_PARAMETER_MAX_MESSAGE_SUSPEND_TIMEOUT,
             VaadinSession.UI_PARAMETER);
 
     private final ApplicationContext context;
