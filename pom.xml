@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>vaadin-spring-parent</artifactId>
-    <version>12.2-SNAPSHOT</version>
+    <version>13.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>vaadin-spring-parent</name>
@@ -44,7 +44,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- These are typically overridden with BOMs -->
-        <vaadin.flow.version>2.2-SNAPSHOT</vaadin.flow.version>
+        <vaadin.flow.version>3.1-SNAPSHOT</vaadin.flow.version>
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
 
         <!-- Additional manifest fields -->
@@ -136,7 +136,7 @@
                             <directory>${project.basedir}</directory>
                             <includes>
                                 <include>package*.json</include>
-                                <include>webpack.config.js</include>
+                                <include>webpack*.js</include>
                             </includes>
                         </fileset>
                         <fileset>
@@ -208,14 +208,12 @@
         <module>vaadin-spring</module>
     </modules>
     <repositories>
+        <!-- The order of definitions matters. Explicitly defining central here to make sure it has the highest priority. -->
         <repository>
-            <id>vaadin-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
             <snapshots>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
             </snapshots>
         </repository>
         <repository>
@@ -228,10 +226,42 @@
         </repository>
         <repository>
             <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+            <url>
+                https://maven.vaadin.com/vaadin-prereleases/
+            </url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>	
+            <id>vaadin-snapshots</id>	
+            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>	
+            <releases>	
+                <enabled>false</enabled>	
+            </releases>	
+            <snapshots>	
+                <enabled>true</enabled>	
+            </snapshots>	
+        </repository>
+        <!-- Repository used by many Vaadin add-ons -->
+        <repository>
+            <id>Vaadin Directory</id>
+            <url>https://maven.vaadin.com/vaadin-addons</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
+
     <pluginRepositories>
+        <!-- The order of definitions matters. Explicitly defining central here to make sure it has the highest priority. -->
+        <pluginRepository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
         <pluginRepository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>
@@ -240,13 +270,24 @@
                 <enabled>false</enabled>
             </snapshots>
         </pluginRepository>
-        <!-- Repository needed for the snapshot versions of Vaadin -->
         <pluginRepository>
-            <id>vaadin-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <id>vaadin-prereleases</id>
+            <url>
+                https://maven.vaadin.com/vaadin-prereleases/
+            </url>
             <snapshots>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
             </snapshots>
+        </pluginRepository>
+        <pluginRepository>	
+            <id>vaadin-snapshots</id>	
+            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>	
+            <releases>	
+                <enabled>false</enabled>	
+            </releases>	
+            <snapshots>	
+                <enabled>true</enabled>	
+            </snapshots>	
         </pluginRepository>
     </pluginRepositories>
 

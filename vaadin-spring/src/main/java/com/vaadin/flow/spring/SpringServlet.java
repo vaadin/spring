@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.spring;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
@@ -56,7 +56,6 @@ public class SpringServlet extends VaadinServlet {
             Constants.SERVLET_PARAMETER_SYNC_ID_CHECK,
             Constants.SERVLET_PARAMETER_PUSH_SUSPEND_TIMEOUT_LONGPOLLING,
             Constants.SERVLET_PARAMETER_REQUEST_TIMING,
-            Constants.SERVLET_PARAMETER_COMPATIBILITY_MODE,
             Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_ERROR_PATTERN,
             Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_OPTIONS,
             Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_SUCCESS_PATTERN,
@@ -65,12 +64,13 @@ public class SpringServlet extends VaadinServlet {
             Constants.SERVLET_PARAMETER_JSBUNDLE,
             Constants.SERVLET_PARAMETER_POLYFILLS,
             Constants.SERVLET_PARAMETER_STATISTICS_JSON,
-            Constants.DISABLE_WEBJARS, Constants.SERVLET_PARAMETER_BROTLI,
-            Constants.LOAD_ES5_ADAPTERS,
-            Constants.USE_ORIGINAL_FRONTEND_RESOURCES,
-            Constants.FRONTEND_URL_ES5, Constants.FRONTEND_URL_ES6,
+
+            Constants.SERVLET_PARAMETER_BROTLI,
             Constants.I18N_PROVIDER,
             Constants.DISABLE_AUTOMATIC_SERVLET_REGISTRATION,
+            Constants.SERVLET_PARAMETER_ENABLE_PNPM,
+            Constants.REQUIRE_HOME_NODE_EXECUTABLE,
+            Constants.SERVLET_PARAMETER_MAX_MESSAGE_SUSPEND_TIMEOUT,
             VaadinSession.UI_PARAMETER);
 
     private final ApplicationContext context;
