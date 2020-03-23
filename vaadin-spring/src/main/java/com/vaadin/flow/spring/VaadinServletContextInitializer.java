@@ -120,10 +120,11 @@ public class VaadinServletContextInitializer
      */
     private static class ClassPathScanner
             extends ClassPathScanningCandidateComponentProvider {
-        private ClassPathScanner(ResourceLoader resourceLoader,
+        private ClassPathScanner(Environment environment,
+                ResourceLoader resourceLoader,
                 Collection<Class<? extends Annotation>> annotations,
                 Collection<Class<?>> types) {
-            super(false);
+            super(false, environment);
             setResourceLoader(resourceLoader);
 
             annotations.stream().map(AnnotationTypeFilter::new)
@@ -530,8 +531,8 @@ public class VaadinServletContextInitializer
             Collection<String> packages, ResourceLoader loader,
             Collection<Class<? extends Annotation>> annotations,
             Collection<Class<?>> types) {
-        ClassPathScanner scanner = new ClassPathScanner(loader, annotations,
-                types);
+        ClassPathScanner scanner = new ClassPathScanner(
+                appContext.getEnvironment(), loader, annotations, types);
         return packages.stream().map(scanner::findCandidateComponents)
                 .flatMap(Collection::stream).map(this::getBeanClass);
     }
