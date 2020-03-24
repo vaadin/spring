@@ -16,7 +16,6 @@
 package com.vaadin.flow.spring;
 
 import com.vaadin.flow.server.VaadinServlet;
-import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
 import org.springframework.core.type.AnnotatedTypeMetadata;
@@ -38,36 +37,35 @@ import org.springframework.web.servlet.DispatcherServlet;
  */
 public class RootMappedCondition implements Condition {
 
-    public static final String URL_MAPPING_PROPERTY = "vaadin.urlMapping";
+	public static final String URL_MAPPING_PROPERTY = "vaadin.urlMapping";
 
-    @Override
-    public boolean matches(ConditionContext context,
-            AnnotatedTypeMetadata metadata) {
-        VaadinConfigurationProperties vaadinConfigurationProperties = Binder.get(context.getEnvironment())
-                .bind("vaadin", VaadinConfigurationProperties.class)
-                .orElse(null);
-        if (vaadinConfigurationProperties != null) {
-            return isRootMapping(vaadinConfigurationProperties.getUrlMapping());
-        }
-        return false;
-    }
+	@Override
+	public boolean matches(ConditionContext context,
+			AnnotatedTypeMetadata metadata) {
+		if (context.getBeanFactory() != null) {
+			VaadinConfigurationProperties vaadinConfigurationProperties = context.getBeanFactory().getBean(VaadinConfigurationProperties.class);
+			return isRootMapping(vaadinConfigurationProperties.getUrlMapping());
+		}
+		return isRootMapping(
+				context.getEnvironment().getProperty(URL_MAPPING_PROPERTY));
+	}
 
-    /**
-     * Returns {@code true} if {@code mapping} is the root mapping
-     * ({@literal "/*"}).
-     * <p>
-     * The mapping is controlled via the {@code vaadin.urlMapping} property
-     * value. By default it's {@literal "/*"}.
-     *
-     * @param mapping
-     *            the mapping string to check
-     * @return {@code true} if {@code mapping} is the root mapping and
-     *         {@code false} otherwise
-     */
-    public static boolean isRootMapping(String mapping) {
-        if (mapping == null) {
-            return true;
-        }
-        return mapping.trim().replaceAll("(/\\**)?$", "").isEmpty();
-    }
+	/**
+	 * Returns {@code true} if {@code mapping} is the root mapping
+	 * ({@literal "/*"}).
+	 * <p>
+	 * The mapping is controlled via the {@code vaadin.urlMapping} property
+	 * value. By default it's {@literal "/*"}.
+	 *
+	 * @param mapping
+	 *            the mapping string to check
+	 * @return {@code true} if {@code mapping} is the root mapping and
+	 *         {@code false} otherwise
+	 */
+	public static boolean isRootMapping(String mapping) {
+		if (mapping == null) {
+			return true;
+		}
+		return mapping.trim().replaceAll("(/\\**)?$", "").isEmpty();
+	}
 }
