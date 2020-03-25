@@ -5,13 +5,14 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spring-tests</artifactId>
-        <version>12.2-SNAPSHOT</version>
+        <version>13.1-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-test-spring</artifactId>
     <name>Flow Spring deployable integration tests</name>
     <packaging>war</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <spring.profiles.active>enabled</spring.profiles.active>
     </properties>
 
     <dependencies>
