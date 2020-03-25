@@ -15,17 +15,18 @@
  */
 package com.vaadin.flow.spring;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
+import org.springframework.web.servlet.mvc.ServletForwardingController;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.Constants;
@@ -36,6 +37,14 @@ import com.vaadin.flow.server.VaadinSession;
 
 /**
  * Spring application context aware Vaadin servlet implementation.
+ * <p>
+ * This class is not intended to be used directly. It's instantiated
+ * automatically by the Spring add-on:
+ * <ul>
+ * <li>Spring boot does this via {@link SpringBootAutoConfiguration}.
+ * <li>In case of using Spring MVC just extends
+ * {@link VaadinMVCWebAppInitializer}.
+ * </ul>
  *
  * @author Vaadin Ltd
  *
@@ -80,9 +89,24 @@ public class SpringServlet extends VaadinServlet {
     /**
      * Creates a new Vaadin servlet instance with the application
      * {@code context} provided.
+     * <p>
+     * Use {@code true} as a value for {@code forwardingEnforced} parameter if
+     * your servlet is mapped to the root ({@code "/*"}). In the case of root
+     * mapping a {@link RootMappedCondition} is checked and
+     * {@link VaadinServletConfiguration} is applied conditionally. This
+     * configuration provide a {@link ServletForwardingController} so that other
+     * Spring endpoints may co-exist with Vaadin application (it's required
+     * since root mapping handles any request to the context). This is not
+     * needed if you are using non-root mapping since are you free to use the
+     * mapping which doesn't overlap with any endpoint mapping. In this case use
+     * {@code false} for the {@code forwardingEnforced} parameter.
+     *
      *
      * @param context
      *            the Spring application context
+     * @param forwardingEnforced
+     *            the incoming HttpServletRequest is wrapped in
+     *            ForwardingRequestWrapper if {@code true}
      */
     public SpringServlet(ApplicationContext context,
             boolean forwardingEnforced) {
