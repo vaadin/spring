@@ -122,10 +122,11 @@ public class VaadinServletContextInitializer
      */
     private static class ClassPathScanner
             extends ClassPathScanningCandidateComponentProvider {
-        private ClassPathScanner(ResourceLoader resourceLoader,
+        private ClassPathScanner(Environment environment,
+                ResourceLoader resourceLoader,
                 Collection<Class<? extends Annotation>> annotations,
                 Collection<Class<?>> types) {
-            super(false);
+            super(false, environment);
             setResourceLoader(resourceLoader);
 
             annotations.stream().map(AnnotationTypeFilter::new)
@@ -532,8 +533,8 @@ public class VaadinServletContextInitializer
             Collection<String> packages, ResourceLoader loader,
             Collection<Class<? extends Annotation>> annotations,
             Collection<Class<?>> types) {
-        ClassPathScanner scanner = new ClassPathScanner(loader, annotations,
-                types);
+        ClassPathScanner scanner = new ClassPathScanner(
+                appContext.getEnvironment(), loader, annotations, types);
         return packages.stream().map(scanner::findCandidateComponents)
                 .flatMap(Collection::stream).map(this::getBeanClass);
     }
@@ -784,11 +785,9 @@ public class VaadinServletContextInitializer
                         .createPropertyDeploymentConfiguration(servletClass,
                                 new VaadinServletConfig(servletConfig));
             } catch (VaadinConfigurationException e) {
-                throw new IllegalStateException(
-                        String.format(
-                                "Failed to get deployment configuration data for servlet with name '%s' and class '%s'",
-                                registration.getServletName(), servletClass),
-                        e);
+                throw new IllegalStateException(String.format(
+                        "Failed to get deployment configuration data for servlet with name '%s' and class '%s'",
+                        registration.getServletName(), servletClass), e);
             }
         }
     }
