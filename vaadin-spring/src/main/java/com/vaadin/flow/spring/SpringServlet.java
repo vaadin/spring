@@ -81,6 +81,7 @@ public class SpringServlet extends VaadinServlet {
             Constants.FRONTEND_URL_ES5, Constants.FRONTEND_URL_ES6,
             Constants.I18N_PROVIDER,
             Constants.DISABLE_AUTOMATIC_SERVLET_REGISTRATION,
+            "devmode.liveReload.enabled",
             VaadinSession.UI_PARAMETER);
 
     private final ApplicationContext context;
