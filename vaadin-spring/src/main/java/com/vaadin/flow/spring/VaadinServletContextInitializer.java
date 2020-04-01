@@ -74,6 +74,7 @@ import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.startup.AbstractRouteRegistryInitializer;
 import com.vaadin.flow.server.startup.AnnotationValidator;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
+import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
 import com.vaadin.flow.server.startup.DevModeInitializer;
 import com.vaadin.flow.server.startup.ServletVerifier;
 import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializer;
@@ -274,15 +275,15 @@ public class VaadinServletContextInitializer
 
         @SuppressWarnings("unchecked")
         private void validateAnnotations(
-                ServletContainerInitializer initializer, ServletContext context,
-                List<Class<?>> annotations) {
+                ClassLoaderAwareServletContainerInitializer initializer,
+                ServletContext context, List<Class<?>> annotations) {
 
             Stream<Class<?>> annotatedClasses = findByAnnotation(
                     getVerifiableAnnotationPackages(),
                     annotations.toArray(new Class[annotations.size()]));
             Set<Class<?>> set = annotatedClasses.collect(Collectors.toSet());
             try {
-                initializer.onStartup(set, context);
+                initializer.process(set, context);
             } catch (ServletException exception) {
                 throw new RuntimeException(
                         "Unexpected servlet exception from "
@@ -403,7 +404,7 @@ public class VaadinServletContextInitializer
                                 .collect(Collectors.toSet());
 
                 try {
-                    initializer.onStartup(webComponentExporters,
+                    initializer.process(webComponentExporters,
                             event.getServletContext());
                 } catch (ServletException e) {
                     throw new RuntimeException(
