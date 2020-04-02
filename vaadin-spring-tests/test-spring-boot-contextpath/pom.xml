@@ -124,6 +124,9 @@
                 <version>${vaadin.flow.version}</version>
                 <executions>
                     <execution>
+                        <configuration>
+                            <pnpmEnable>true</pnpmEnable>
+                        </configuration>
                         <goals>
                             <goal>prepare-frontend</goal>
                             <goal>build-frontend</goal>
