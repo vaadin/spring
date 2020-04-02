@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -64,7 +65,7 @@
     <build>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse
+                <!--This plugin's configuration is used to store Eclipse 
                     m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
@@ -107,6 +108,9 @@
                 <version>${vaadin.flow.version}</version>
                 <executions>
                     <execution>
+                        <configuration>
+                            <pnpmEnable>true</pnpmEnable>
+                        </configuration>
                         <goals>
                             <goal>prepare-frontend</goal>
                         </goals>
@@ -146,8 +150,8 @@
                     <wait>2500</wait>
                 </configuration>
                 <executions>
-                    <!-- start and stop application when running
-                        integration tests -->
+                    <!-- start and stop application when running integration 
+                        tests -->
                     <execution>
                         <id>pre-integration-test</id>
                         <goals>
