@@ -322,8 +322,9 @@ public class VaadinServletContextInitializer
                     .createDeploymentConfiguration(this.getClass(), event,
                             appContext);
 
-            if (config == null || config.isProductionMode()
-                    || !config.enableDevServer()) {
+            if (config == null || config.isProductionMode() ||
+                    !config.enableDevServer() ||
+                    isDevModeAlreadyStarted(event.getServletContext())) {
                 return;
             }
 
@@ -395,6 +396,19 @@ public class VaadinServletContextInitializer
 
         private boolean isWhitelistSet() {
             return customWhitelist != null && !customWhitelist.isEmpty();
+        }
+
+        private boolean isDevModeAlreadyStarted(ServletContext servletContext) {
+            if (servletContext.getAttribute(
+                    DevModeInitializer.DEV_MODE_HANDLER_ALREADY_STARTED_ATTRIBUTE) == null) {
+                return false;
+            } else {
+                if (getLogger().isDebugEnabled()) {
+                    getLogger().debug(
+                            "Skipped Dev Mode initialization as it has been already initialized");
+                }
+                return true;
+            }
         }
     }
 
