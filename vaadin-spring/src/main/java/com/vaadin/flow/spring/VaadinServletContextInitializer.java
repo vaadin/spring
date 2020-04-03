@@ -325,7 +325,7 @@ public class VaadinServletContextInitializer
 
             if (config == null || config.isProductionMode() ||
                     !config.enableDevServer() ||
-                    isDevModeAlreadyStarted(event.getServletContext())) {
+                    isDevModeAlreadyStarted()) {
                 return;
             }
 
@@ -401,17 +401,15 @@ public class VaadinServletContextInitializer
             return customWhitelist != null && !customWhitelist.isEmpty();
         }
 
-        private boolean isDevModeAlreadyStarted(ServletContext servletContext) {
-            if (servletContext.getAttribute(
-                    DevModeInitializer.DEV_MODE_HANDLER_ALREADY_STARTED_ATTRIBUTE) == null) {
-                return false;
-            } else {
+        private boolean isDevModeAlreadyStarted() {
+            if (DevModeInitializer.isDevModeAlreadyStarted()) {
                 if (getLogger().isDebugEnabled()) {
                     getLogger().debug(
-                            "Skipped Dev Mode initialization as it has been already initialized");
+                            "Skipped DevModeHandler initialization as it has been already initialized");
                 }
                 return true;
             }
+            return false;
         }
     }
 
