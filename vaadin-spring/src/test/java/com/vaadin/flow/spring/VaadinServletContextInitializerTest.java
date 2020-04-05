@@ -116,7 +116,7 @@ public class VaadinServletContextInitializerTest {
 
         Mockito.doAnswer(answer -> {
             ServletContextListener devModeListener =
-                    answer.getArgumentAt(0, ServletContextListener.class);
+                    answer.getArgument(0);
             if ("DevModeServletContextListener".equals(
                     devModeListener.getClass().getSimpleName())) {
                 devModeListener.contextInitialized(new ServletContextEvent(servletContext));
