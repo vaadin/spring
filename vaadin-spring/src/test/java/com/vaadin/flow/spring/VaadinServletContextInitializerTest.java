@@ -20,6 +20,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @RunWith(PowerMockRunner.class)
@@ -89,7 +90,8 @@ public class VaadinServletContextInitializerTest {
                 .thenReturn(deploymentConfiguration);
 
         PowerMockito.when(DevModeInitializer.class,
-                "isDevModeAlreadyStarted")
+                "isDevModeAlreadyStarted",
+                servletContext)
                 .thenCallRealMethod();
 
         return new DevModeInitializer();
@@ -139,14 +141,20 @@ public class VaadinServletContextInitializerTest {
     }
 
     private void mockServletContext() {
-        mockServletContext(Mockito.anyString(), null);
+        final Map<String, Object> servletContextAttributesMap = Maps.newHashMap();
+        Mockito.doAnswer(answer -> {
+                    String key = answer.getArgument(0, String.class);
+                    Object value = answer.getArgument(1, Object.class);
+                    servletContextAttributesMap.putIfAbsent(key, value);
+                    return null;
+                })
+                .when(servletContext)
+                .setAttribute(Mockito.anyString(), Mockito.any());
+        Mockito.when(servletContext.getAttribute(Mockito.anyString()))
+                .thenAnswer(answer ->
+                        servletContextAttributesMap.get(answer.getArgument(0, String.class)));
         Mockito.when(servletContext.getServletRegistrations())
                 .thenReturn(Maps.newHashMap());
-    }
-
-    private void mockServletContext(String expectedAttributeKey, Object stub) {
-        Mockito.when(servletContext.getAttribute(expectedAttributeKey))
-                .thenReturn(stub);
     }
 
     private void mockEnvironment() {
