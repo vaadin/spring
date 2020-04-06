@@ -52,7 +52,7 @@ public class VaadinServletContextInitializerTest {
     }
 
     @Test
-    public void shouldStartDevModeInitializationWhenNotInvokedYet() throws Exception {
+    public void onStartup_devModeNotInitialized_devModeInitialized() throws Exception {
         initDefaultMocks();
 
         VaadinServletContextInitializer vaadinServletContextInitializer =
@@ -66,7 +66,7 @@ public class VaadinServletContextInitializerTest {
     }
 
     @Test
-    public void shouldSkipDevModeInitializationWhenAlreadyInvoked() throws Exception {
+    public void onStartup_devModeAlreadyInitialized_devModeInitializationSkipped() throws Exception {
         initDefaultMocks();
 
         VaadinServletContextInitializer vaadinServletContextInitializer =
@@ -172,5 +172,4 @@ public class VaadinServletContextInitializerTest {
     private void mockApplicationContext() {
         Mockito.when(applicationContext.getEnvironment()).thenReturn(environment);
     }
-
 }
