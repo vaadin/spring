@@ -75,7 +75,7 @@ public class VaadinServletContextInitializerTest {
         DevModeInitializer devModeInitializer = getStubbedDevModeInitializer();
 
         // Simulate Servlet container start -> Spring context start
-        devModeInitializer.onStartup(Collections.emptySet(), servletContext);
+        devModeInitializer.process(Collections.emptySet(), servletContext);
         vaadinServletContextInitializer.onStartup(servletContext);
 
         PowerMockito.verifyStatic(DevModeInitializer.class);
