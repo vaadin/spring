@@ -324,7 +324,7 @@ public class VaadinServletContextInitializer
 
             if (config == null || config.isProductionMode() ||
                     !config.enableDevServer() ||
-                    isDevModeAlreadyStarted()) {
+                    isDevModeAlreadyStarted(event.getServletContext())) {
                 return;
             }
 
@@ -398,8 +398,8 @@ public class VaadinServletContextInitializer
             return customWhitelist != null && !customWhitelist.isEmpty();
         }
 
-        private boolean isDevModeAlreadyStarted() {
-            if (DevModeInitializer.isDevModeAlreadyStarted()) {
+        private boolean isDevModeAlreadyStarted(ServletContext servletContext) {
+            if (DevModeInitializer.isDevModeAlreadyStarted(servletContext)) {
                 if (getLogger().isDebugEnabled()) {
                     getLogger().debug(
                             "Skipped DevModeHandler initialization as it has been already initialized");
