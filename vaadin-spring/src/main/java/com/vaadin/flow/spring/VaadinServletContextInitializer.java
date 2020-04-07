@@ -425,35 +425,33 @@ public class VaadinServletContextInitializer
             }
         }
     }
-}
 
-private class VaadinAppShellContextListener
-        implements FailFastServletContextListener {
+    private class VaadinAppShellContextListener
+            implements FailFastServletContextListener {
 
-    @Override
-    public void failFastContextInitialized(ServletContextEvent event) {
-        long start = System.nanoTime();
+        @Override
+        public void failFastContextInitialized(ServletContextEvent event) {
+            long start = System.nanoTime();
 
-        DeploymentConfiguration config = SpringStubServletConfig
-                .createDeploymentConfiguration(this, event, appContext);
+            DeploymentConfiguration config = SpringStubServletConfig
+                    .createDeploymentConfiguration(this, event, appContext);
 
-        if (config == null || config.useV14Bootstrap()) {
-            return;
+            if (config == null || config.useV14Bootstrap()) {
+                return;
+            }
+
+            Set<Class<?>> classes = findByAnnotationOrSuperType(
+                    getVerifiableAnnotationPackages(), customLoader,
+                    VaadinAppShellInitializer.getValidAnnotations(),
+                    VaadinAppShellInitializer.getValidSupers())
+                            .collect(Collectors.toSet());
+
+            long ms = (System.nanoTime() - start) / 1000000;
+            getLogger().info("Search for VaadinAppShell took {} ms", ms);
+
+            VaadinAppShellInitializer.init(classes, event.getServletContext(),
+                    config);
         }
-
-        Set<Class<?>> classes = findByAnnotationOrSuperType(
-                getVerifiableAnnotationPackages(), customLoader,
-                VaadinAppShellInitializer.getValidAnnotations(),
-                VaadinAppShellInitializer.getValidSupers())
-                        .collect(Collectors.toSet());
-
-        long ms = (System.nanoTime() - start) / 1000000;
-        getLogger().info("Search for VaadinAppShell took {} ms", ms);
-
-        VaadinAppShellInitializer.init(classes, event.getServletContext(),
-                config);
-    }
-
     }
 
     /**
