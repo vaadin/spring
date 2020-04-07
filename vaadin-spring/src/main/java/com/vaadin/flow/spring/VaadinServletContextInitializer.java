@@ -357,8 +357,10 @@ public class VaadinServletContextInitializer
                 throw new RuntimeException(
                         "Unable to initialize Vaadin DevModeHandler", e);
             }
-            // to make sure the user knows the application is ready, show notification to the user
-            ServletDeployer.logAppStartupToConsole(event.getServletContext(), true);
+            // to make sure the user knows the application is ready, show
+            // notification to the user
+            ServletDeployer.logAppStartupToConsole(event.getServletContext(),
+                    true);
         }
 
         @Override
@@ -418,46 +420,39 @@ public class VaadinServletContextInitializer
                         getWebComponentPackages(), WebComponentExporter.class)
                                 .collect(Collectors.toSet());
 
-                try {
-                    initializer.process(webComponentExporters,
-                            event.getServletContext());
-                } catch (ServletException e) {
-                    throw new RuntimeException(
-                            String.format("Failed to initialize %s",
-                                    WebComponentConfigurationRegistry.class
-                                            .getSimpleName()),
-                            e);
-                }
+                initializer.process(webComponentExporters,
+                        event.getServletContext());
             }
         }
     }
+}
 
-    private class VaadinAppShellContextListener
-            implements FailFastServletContextListener {
+private class VaadinAppShellContextListener
+        implements FailFastServletContextListener {
 
-        @Override
-        public void failFastContextInitialized(ServletContextEvent event) {
-            long start = System.nanoTime();
+    @Override
+    public void failFastContextInitialized(ServletContextEvent event) {
+        long start = System.nanoTime();
 
-            DeploymentConfiguration config = SpringStubServletConfig
-                    .createDeploymentConfiguration(this, event, appContext);
+        DeploymentConfiguration config = SpringStubServletConfig
+                .createDeploymentConfiguration(this, event, appContext);
 
-            if (config == null || config.useV14Bootstrap()) {
-                return;
-            }
-
-            Set<Class<?>> classes = findByAnnotationOrSuperType(
-                    getVerifiableAnnotationPackages(), customLoader,
-                    VaadinAppShellInitializer.getValidAnnotations(),
-                    VaadinAppShellInitializer.getValidSupers())
-                            .collect(Collectors.toSet());
-
-            long ms = (System.nanoTime() - start) / 1000000;
-            getLogger().info("Search for VaadinAppShell took {} ms", ms);
-
-            VaadinAppShellInitializer.init(classes, event.getServletContext(),
-                    config);
+        if (config == null || config.useV14Bootstrap()) {
+            return;
         }
+
+        Set<Class<?>> classes = findByAnnotationOrSuperType(
+                getVerifiableAnnotationPackages(), customLoader,
+                VaadinAppShellInitializer.getValidAnnotations(),
+                VaadinAppShellInitializer.getValidSupers())
+                        .collect(Collectors.toSet());
+
+        long ms = (System.nanoTime() - start) / 1000000;
+        getLogger().info("Search for VaadinAppShell took {} ms", ms);
+
+        VaadinAppShellInitializer.init(classes, event.getServletContext(),
+                config);
+    }
 
     }
 
