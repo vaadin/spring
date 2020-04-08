@@ -74,6 +74,7 @@ public class SpringServlet extends VaadinServlet {
             Constants.SERVLET_PARAMETER_JSBUNDLE,
             Constants.SERVLET_PARAMETER_POLYFILLS,
             Constants.SERVLET_PARAMETER_STATISTICS_JSON,
+            Constants.SERVLET_PARAMETER_ENABLE_PNPM,
             Constants.DISABLE_WEBJARS, Constants.SERVLET_PARAMETER_BROTLI,
             Constants.LOAD_ES5_ADAPTERS,
             Constants.USE_ORIGINAL_FRONTEND_RESOURCES,

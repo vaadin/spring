@@ -777,6 +777,8 @@ public class VaadinServletContextInitializer
          *            the ServletRegistrationBean to get servlet parameters from
          * @param servletClass
          *            the class to look for properties defined with annotations
+         * @param appContext
+         *            the ApplicationContext
          * @return a DeploymentConfiguration instance
          */
         public static DeploymentConfiguration createDeploymentConfiguration(
