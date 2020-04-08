@@ -61,7 +61,12 @@ public class VaadinServletContextInitializerTest {
         // Simulate Spring context start only
         vaadinServletContextInitializer.onStartup(servletContext);
 
+        // This is how PowerMockito works, call PowerMockito.verifyStatic() first
+        // to start verifying behavior of DevModeInitializer static methods
         PowerMockito.verifyStatic(DevModeInitializer.class);
+        // IMPORTANT:  Call the static method we want to verify.
+        // In our case, we want to check if Dev Mode has been started within onStartup() call,
+        // that means DevModeInitializer.initDevModeHandler() should has been called exactly one time
         DevModeInitializer.initDevModeHandler(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
@@ -78,7 +83,14 @@ public class VaadinServletContextInitializerTest {
         devModeInitializer.process(Collections.emptySet(), servletContext);
         vaadinServletContextInitializer.onStartup(servletContext);
 
+        // This is how PowerMockito works, call PowerMockito.verifyStatic() first
+        // to start verifying behavior of DevModeInitializer static methods
         PowerMockito.verifyStatic(DevModeInitializer.class);
+        // IMPORTANT:  Call the static method we want to verify.
+        // In our case, we want to check if Dev Mode has been started within
+        // devModeInitializer.process() call (i.e. from Servlet Container), and not started again
+        // within DevModeInitializer.initDevModeHandler() (Spring context),
+        // so, we expect this method has been called exactly one time:
         DevModeInitializer.initDevModeHandler(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
