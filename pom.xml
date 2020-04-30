@@ -250,18 +250,8 @@
                 https://maven.vaadin.com/vaadin-prereleases/
             </url>
             <snapshots>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </snapshots>
-        </repository>
-        <repository>	
-            <id>vaadin-snapshots</id>	
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>	
-            <releases>	
-                <enabled>false</enabled>	
-            </releases>	
-            <snapshots>	
-                <enabled>true</enabled>	
-            </snapshots>	
         </repository>
         <!-- Repository used by many Vaadin add-ons -->
         <repository>
@@ -296,18 +286,8 @@
                 https://maven.vaadin.com/vaadin-prereleases/
             </url>
             <snapshots>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </snapshots>
-        </pluginRepository>
-        <pluginRepository>	
-            <id>vaadin-snapshots</id>	
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>	
-            <releases>	
-                <enabled>false</enabled>	
-            </releases>	
-            <snapshots>	
-                <enabled>true</enabled>	
-            </snapshots>	
         </pluginRepository>
     </pluginRepositories>
 
