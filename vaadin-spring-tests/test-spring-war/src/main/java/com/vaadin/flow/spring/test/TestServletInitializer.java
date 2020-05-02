@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.spring.test;
 
+import com.vaadin.flow.spring.test.util.TestUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -48,5 +50,11 @@ public class TestServletInitializer extends SpringBootServletInitializer
     public void configure(AuthorizationServerEndpointsConfigurer endpoints)
             throws Exception {
         // doesn't need any impl
+    }
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        builder.properties(TestUtils.getVaadinProperties());
+        return super.configure(builder);
     }
 }
