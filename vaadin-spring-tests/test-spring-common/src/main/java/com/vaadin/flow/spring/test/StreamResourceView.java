@@ -34,7 +34,7 @@ public class StreamResourceView extends Div {
                         "Hello world".getBytes(StandardCharsets.UTF_8)));
         Anchor download = new Anchor("", "Download file");
         download.setHref(resource);
-        download.setId("download");
+        download.setId("downloadLink");
         add(download);
     }
 }
