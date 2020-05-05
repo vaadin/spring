@@ -201,16 +201,6 @@
     </modules>
     <repositories>
         <repository>
-            <id>vaadin-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>
             <url>https://repo.spring.io/milestone</url>
@@ -220,7 +210,20 @@
         </repository>
         <repository>
             <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>
+            <url>
+                https://maven.vaadin.com/vaadin-prereleases/
+            </url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <!-- Repository used by many Vaadin add-ons -->
+        <repository>
+            <id>Vaadin Directory</id>
+            <url>https://maven.vaadin.com/vaadin-addons</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
     <pluginRepositories>
@@ -230,6 +233,15 @@
             <url>https://repo.spring.io/milestone</url>
             <snapshots>
                 <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>vaadin-prereleases</id>
+            <url>
+                https://maven.vaadin.com/vaadin-prereleases/
+            </url>
+            <snapshots>
+                <enabled>true</enabled>
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
