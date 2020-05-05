@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.spring.test;
 
-import com.vaadin.flow.spring.test.util.TestUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -54,7 +53,6 @@ public class TestServletInitializer extends SpringBootServletInitializer
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        builder.properties(TestUtils.getVaadinProperties());
         return super.configure(builder);
     }
 }

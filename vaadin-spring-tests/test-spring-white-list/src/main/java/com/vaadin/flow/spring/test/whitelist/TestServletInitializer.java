@@ -28,8 +28,6 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
-import com.vaadin.flow.spring.test.util.TestUtils;
-
 /**
  * The entry point of the Spring Boot application.
  */
@@ -40,7 +38,6 @@ import com.vaadin.flow.spring.test.util.TestUtils;
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {
-        TestUtils.setVaadinProperties();
         SpringApplication.run(TestServletInitializer.class, args);
     }
 

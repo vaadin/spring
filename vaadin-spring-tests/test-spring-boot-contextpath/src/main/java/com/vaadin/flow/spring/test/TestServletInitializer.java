@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.spring.test;
 
-import com.vaadin.flow.spring.test.util.TestUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +32,6 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {
-        TestUtils.setVaadinProperties();
         SpringApplication.run(TestServletInitializer.class, args);
     }
 

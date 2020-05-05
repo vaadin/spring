@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.spring.scan.test;
 
-import com.vaadin.flow.spring.test.util.TestUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
@@ -38,7 +37,6 @@ import com.vaadin.flow.spring.annotation.EnableVaadin;
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {
-        TestUtils.setVaadinProperties();
         SpringApplication.run(TestServletInitializer.class, args);
     }
 

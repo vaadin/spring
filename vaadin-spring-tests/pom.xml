@@ -356,7 +356,7 @@
                             in order to avoid the issues with JMX connection between spring-boot-maven-plugin
                             and Spring Boot application.
                             NOTE: <jvmArguments>, <systemPropertyVariables> tags are ignored in
-                            fork mode and the properties should be set via TestUtils class.
+                            fork mode and the properties should be set in application.properties file.
                             Workaround for https://github.com/vaadin/spring/issues/605 -->
                             <fork>false</fork>
                         </configuration>
