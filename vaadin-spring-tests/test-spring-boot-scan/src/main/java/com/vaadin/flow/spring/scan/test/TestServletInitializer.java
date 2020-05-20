@@ -37,6 +37,9 @@ import com.vaadin.flow.spring.annotation.EnableVaadin;
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {
+        if (System.getProperty("bowerMode") != null) {
+            System.setProperty("vaadin.compatibilityMode", "true");
+        }
         SpringApplication.run(TestServletInitializer.class, args);
     }
 
