@@ -38,6 +38,9 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {
+        if (System.getProperty("bowerMode") != null) {
+            System.setProperty("vaadin.compatibilityMode", "true");
+        }
         SpringApplication.run(TestServletInitializer.class, args);
     }
 

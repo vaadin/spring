@@ -32,6 +32,9 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {
+        if (System.getProperty("bowerMode") != null) {
+            System.setProperty("vaadin.compatibilityMode", "true");
+        }
         SpringApplication.run(TestServletInitializer.class, args);
     }
 
