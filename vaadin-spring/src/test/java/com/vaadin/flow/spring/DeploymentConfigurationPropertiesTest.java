@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.server.Constants;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.Version;
 
 public class DeploymentConfigurationPropertiesTest {
 
@@ -66,12 +67,21 @@ public class DeploymentConfigurationPropertiesTest {
         // Check that the only parameter which is not in Constants is
         // UI_PARAMETER
         list.removeAll(constants);
-        Assert.assertEquals(1, list.size());
-        Assert.assertEquals(VaadinSession.UI_PARAMETER, list.get(0));
 
-        // Check that we have added all other constants as parameters (except
-        // those we know)
-        Assert.assertEquals(42, constantsCopy.size());
+        if (Version.getFullVersion().startsWith("2.3")) {
+            Assert.assertEquals(1, list.size());
+            Assert.assertEquals(VaadinSession.UI_PARAMETER, list.get(0));
+            // Check that we have added all other constants as parameters (except
+            // those we know)
+            Assert.assertEquals(42, constantsCopy.size());
+        } else {
+            Assert.assertEquals(2, list.size());
+            Assert.assertEquals("devmode.liveReload.enabled", list.get(0));
+            Assert.assertEquals(VaadinSession.UI_PARAMETER, list.get(1));
+            // Check that we have added all other constants as parameters (except
+            // those we know)
+            Assert.assertEquals(42, constantsCopy.size());
+        }
 
         Assert.assertTrue(constantsCopy
                 .contains(Constants.REQUIRED_ATMOSPHERE_RUNTIME_VERSION));
