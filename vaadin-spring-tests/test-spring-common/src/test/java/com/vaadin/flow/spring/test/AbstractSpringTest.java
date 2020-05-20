@@ -5,8 +5,18 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import com.vaadin.flow.testutil.ChromeBrowserTest;
+import org.junit.Before;
+import org.junit.BeforeClass;
 
 public abstract class AbstractSpringTest extends ChromeBrowserTest {
+
+    @Before
+    public void setup() throws Exception {
+        super.setup();
+        if (System.getProperty("bowerMode") != null) {
+            System.setProperty("vaadin.compatibilityMode", "true");
+        }
+    }
 
     @Override
     protected String getTestURL(String... parameters) {
