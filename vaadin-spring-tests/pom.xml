@@ -28,13 +28,6 @@
         <driver.binary.downloader.maven.plugin.version>1.0.14
         </driver.binary.downloader.maven.plugin.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
-
-
-        <!-- Specify the same port for both JMX and RMI in order to avoid the issues
-             with JMX connection between spring-boot-maven-plugin and Spring Boot application
-             Workaround for https://github.com/vaadin/spring/issues/605 -->
-        <spring.jmxremote.port>9001</spring.jmxremote.port>
-        <spring.rmi.port>9001</spring.rmi.port>
     </properties>
 
     <dependencyManagement>
@@ -359,11 +352,13 @@
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <configuration>
-                            <jvmArguments>-Dvaadin.compatibilityMode</jvmArguments>
-                            <systemPropertyVariables>
-                                <com.sun.management.jmxremote.port>${spring.jmxremote.port}</com.sun.management.jmxremote.port>
-                                <com.sun.management.jmxremote.rmi.port>${spring.rmi.port}</com.sun.management.jmxremote.rmi.port>
-                            </systemPropertyVariables>
+                            <!-- Disable JVM fork mode for applications started by spring-boot-maven-plugin
+                            in order to avoid the issues with JMX connection between spring-boot-maven-plugin
+                            and Spring Boot application.
+                            NOTE: <jvmArguments>, <systemPropertyVariables> tags are ignored in
+                            fork mode and the properties should be set via TestUtils class.
+                            Workaround for https://github.com/vaadin/spring/issues/605 -->
+                            <fork>false</fork>
                         </configuration>
                     </plugin>
                 </plugins>
