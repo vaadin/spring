@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.spring.scan.test;
 
-import org.springframework.boot.SpringApplication;
+import com.vaadin.flow.spring.annotation.EnableVaadin;
+import com.vaadin.flow.spring.test.util.TestUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurer;
@@ -27,20 +27,16 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 
-import com.vaadin.flow.spring.test.BowerModeConfig;
-import com.vaadin.flow.spring.annotation.EnableVaadin;
-
 @SpringBootApplication
 @EnableAuthorizationServer
 @Configuration
-@Import(BowerModeConfig.class)
 @EnableWebSecurity
 @EnableVaadin("com.vaadin.flow.spring.test")
 @ComponentScan("com.vaadin.flow.spring.test")
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {
-        SpringApplication.run(TestServletInitializer.class, args);
+        TestUtils.startSpringApplication(TestServletInitializer.class, args);
     }
 
     @Override

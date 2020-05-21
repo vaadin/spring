@@ -18,7 +18,6 @@ package com.vaadin.flow.spring.test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurer;
@@ -26,12 +25,9 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 
-import com.vaadin.flow.spring.test.BowerModeConfig;
-
 @SpringBootApplication
 @EnableAuthorizationServer
 @Configuration
-@Import(BowerModeConfig.class)
 @EnableWebSecurity
 public class TestServletInitializer extends SpringBootServletInitializer
         implements AuthorizationServerConfigurer {

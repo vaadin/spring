@@ -15,11 +15,10 @@
  */
 package com.vaadin.flow.spring.test;
 
-import org.springframework.boot.SpringApplication;
+import com.vaadin.flow.spring.test.util.TestUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurer;
@@ -28,17 +27,14 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
-import com.vaadin.flow.spring.test.BowerModeConfig;
-
 @SpringBootApplication
 @EnableAuthorizationServer
 @Configuration
-@Import(BowerModeConfig.class)
 @EnableWebSecurity
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {
-        SpringApplication.run(TestServletInitializer.class, args);
+        TestUtils.startSpringApplication(TestServletInitializer.class, args);
     }
 
     @Override
