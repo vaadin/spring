@@ -28,6 +28,8 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
+import com.vaadin.flow.spring.test.BowerModeConfig;
+
 @SpringBootApplication
 @EnableAuthorizationServer
 @Configuration

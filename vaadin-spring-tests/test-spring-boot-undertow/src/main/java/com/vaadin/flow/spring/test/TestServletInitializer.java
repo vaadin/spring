@@ -26,6 +26,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 
+import com.vaadin.flow.spring.test.BowerModeConfig;
+
 @SpringBootApplication
 @EnableAuthorizationServer
 @Configuration
@@ -34,9 +36,6 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {
-        if (System.getProperty("bowerMode") != null) {
-            System.setProperty("vaadin.compatibilityMode", "true");
-        }
         SpringApplication.run(TestServletInitializer.class, args);
     }
 
