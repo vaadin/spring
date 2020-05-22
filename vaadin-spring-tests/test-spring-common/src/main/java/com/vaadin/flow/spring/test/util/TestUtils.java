@@ -41,8 +41,6 @@ public final class TestUtils {
     public static void setVaadinProperties() {
         // Sets compatibility mode if application is launched with bower profile.
         // Workaround for https://github.com/vaadin/spring/issues/605
-        if (System.getProperty("bowerMode") != null) {
-            System.setProperty("vaadin.compatibilityMode", "true");
-        }
+        System.setProperty("vaadin.compatibilityMode", String.valueOf(System.getProperty("bowerMode") != null));
     }
 }
