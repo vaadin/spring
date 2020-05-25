@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.spring.test;
 
-import org.springframework.boot.SpringApplication;
+import com.vaadin.flow.spring.test.util.TestUtils;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,7 +32,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 public class TestServletInitializer implements AuthorizationServerConfigurer {
 
     public static void main(String[] args) {
-        SpringApplication.run(TestServletInitializer.class, args);
+        TestUtils.startSpringApplication(TestServletInitializer.class, args);
     }
 
     @Override
