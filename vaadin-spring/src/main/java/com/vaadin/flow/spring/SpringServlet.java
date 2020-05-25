@@ -20,7 +20,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -29,11 +31,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.mvc.ServletForwardingController;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.server.Constants;
+import com.vaadin.flow.server.InitParameters;
 import com.vaadin.flow.server.ServiceException;
 import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinServletService;
-import com.vaadin.flow.server.VaadinSession;
 
 /**
  * Spring application context aware Vaadin servlet implementation.
@@ -54,33 +55,24 @@ public class SpringServlet extends VaadinServlet {
     /**
      * Property names that are read from the application.properties file
      */
-    protected static final List<String> PROPERTY_NAMES = Arrays.asList(
-            Constants.SERVLET_PARAMETER_PRODUCTION_MODE,
-            Constants.SERVLET_PARAMETER_DISABLE_XSRF_PROTECTION,
-            Constants.SERVLET_PARAMETER_CLOSE_IDLE_SESSIONS,
-            Constants.SERVLET_PARAMETER_HEARTBEAT_INTERVAL,
-            Constants.SERVLET_PARAMETER_SEND_URLS_AS_PARAMETERS,
-            Constants.SERVLET_PARAMETER_PUSH_MODE,
-            Constants.SERVLET_PARAMETER_PUSH_URL,
-            Constants.SERVLET_PARAMETER_SYNC_ID_CHECK,
-            Constants.SERVLET_PARAMETER_PUSH_SUSPEND_TIMEOUT_LONGPOLLING,
-            Constants.SERVLET_PARAMETER_REQUEST_TIMING,
-            Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_ERROR_PATTERN,
-            Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_OPTIONS,
-            Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_SUCCESS_PATTERN,
-            Constants.SERVLET_PARAMETER_DEVMODE_WEBPACK_TIMEOUT,
-            Constants.SERVLET_PARAMETER_ENABLE_DEV_SERVER,
-            Constants.SERVLET_PARAMETER_JSBUNDLE,
-            Constants.SERVLET_PARAMETER_POLYFILLS,
-            Constants.SERVLET_PARAMETER_STATISTICS_JSON,
-
-            Constants.SERVLET_PARAMETER_BROTLI, Constants.I18N_PROVIDER,
-            Constants.DISABLE_AUTOMATIC_SERVLET_REGISTRATION,
-            Constants.SERVLET_PARAMETER_ENABLE_PNPM,
-            Constants.REQUIRE_HOME_NODE_EXECUTABLE,
-            Constants.SERVLET_PARAMETER_MAX_MESSAGE_SUSPEND_TIMEOUT,
-            Constants.SERVLET_PARAMETER_DEVMODE_ENABLE_LIVE_RELOAD,
-            VaadinSession.UI_PARAMETER);
+    protected static final List<String> PROPERTY_NAMES = new ArrayList<>();
+    static {
+        for (Field field : InitParameters.class.getDeclaredFields()) {
+            if (Modifier.isPublic(field.getModifiers())) {
+                if (field.getName().startsWith("$")) {
+                    // thanks to java code coverage which adds non-existent
+                    // initially variables everywhere: we should skip this extra
+                    // field
+                    continue;
+                }
+                try {
+                    PROPERTY_NAMES.add((String) field.get(null));
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException("unable to access field", e);
+                }
+            }
+        }
+    }
 
     private final ApplicationContext context;
     private final boolean forwardingEnforced;
