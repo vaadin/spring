@@ -20,11 +20,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
@@ -55,24 +54,21 @@ public class SpringServlet extends VaadinServlet {
     /**
      * Property names that are read from the application.properties file
      */
-    protected static final List<String> PROPERTY_NAMES = new ArrayList<>();
-    static {
-        for (Field field : InitParameters.class.getDeclaredFields()) {
-            if (Modifier.isPublic(field.getModifiers())) {
-                if (field.getName().startsWith("$")) {
-                    // thanks to java code coverage which adds non-existent
-                    // initially variables everywhere: we should skip this extra
-                    // field
-                    continue;
-                }
+    protected static final List<String> PROPERTY_NAMES = Arrays
+            .stream(InitParameters.class.getDeclaredFields())
+            // thanks to java code coverage which adds non-existent
+            // initially variables everywhere: we should skip this extra
+            // field
+            .filter(field -> !field.getName().startsWith("$"))
+            .map(field -> {
                 try {
-                    PROPERTY_NAMES.add((String) field.get(null));
+                    return (String) field.get(null);
                 } catch (IllegalAccessException e) {
-                    throw new RuntimeException("unable to access field", e);
+                    throw new IllegalStateException("unable to access field",
+                            e);
                 }
-            }
-        }
-    }
+            })
+            .collect(Collectors.toList());
 
     private final ApplicationContext context;
     private final boolean forwardingEnforced;
