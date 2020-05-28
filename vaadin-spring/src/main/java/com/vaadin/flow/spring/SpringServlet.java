@@ -59,7 +59,7 @@ public class SpringServlet extends VaadinServlet {
             // thanks to java code coverage which adds non-existent
             // initially variables everywhere: we should skip this extra
             // field
-            .filter(field -> !field.getName().startsWith("$"))
+            .filter(field -> !field.isSynthetic())
             .map(field -> {
                 try {
                     return (String) field.get(null);
