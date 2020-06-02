@@ -15,9 +15,11 @@
  */
 package com.vaadin.flow.connect;
 
+import java.util.regex.Pattern;
+
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.flow.testutil.ChromeBrowserTest;
@@ -33,28 +35,29 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private TestBenchElement mainView;
-    private WebElement content;
 
     @Before
     public void setup() throws Exception {
         super.setup();
         openTestUrl("/");
         mainView = $("main-view").waitForFirst();
-        content = mainView.$(TestBenchElement.class).id("content");
     }
 
     @Test
-    public void should_requestAnonymously_connect_service() throws Exception {
-        TestBenchElement button = mainView.$(TestBenchElement.class).id("helloAnonymous");
+    public void should_requestAnonymously_connect_service() {
+        TestBenchElement button = mainView.$(TestBenchElement.class)
+                .id("helloAnonymous");
         button.click();
 
         // Wait for the server connect response
-        verifyContent("Hello, stranger!");
-    }
+        waitUntil(ExpectedConditions.textToBePresentInElement(
+                mainView.$(TestBenchElement.class).id("content"),
+                "Hello, stranger!"), 25);
 
-    private void verifyContent(String expected) {
+        // verify that the custom Connect client works
         waitUntil(
-                ExpectedConditions.textToBePresentInElement(content, expected),
+                ExpectedConditions.textMatches(By.id("log"), Pattern.compile(
+                        "\\[LOG] AppEndpoint/helloAnonymous took \\d+ ms")),
                 25);
     }
 }

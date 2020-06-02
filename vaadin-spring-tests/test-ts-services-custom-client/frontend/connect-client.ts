@@ -6,7 +6,9 @@ async function logger(context: MiddlewareContext, next: MiddlewareNext): Promise
     return await next(context);
   } finally {
     const duration = new Date().getTime() - start;
-    console.log(`[LOG] ${context.endpoint}/${context.method} took ${duration} ms`)
+    const message = `[LOG] ${context.endpoint}/${context.method} took ${duration} ms`;
+    console.log(message);
+    document.querySelector('#log')!.append(message);
   }
 }
 
