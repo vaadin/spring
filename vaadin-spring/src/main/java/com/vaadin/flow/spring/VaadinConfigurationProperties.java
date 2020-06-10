@@ -43,11 +43,6 @@ public class VaadinConfigurationProperties {
     private boolean asyncSupported = true;
 
     /**
-     * Whetcher pnpm support is enabled
-     **/
-    private boolean pnpmEnabled = false;
-
-    /**
      * Custom package blacklist that should be skipped in scanning.
      */
     private List<String> blacklistedPackages = new ArrayList<>();
@@ -91,24 +86,6 @@ public class VaadinConfigurationProperties {
      */
     public void setAsyncSupported(boolean asyncSupported) {
         this.asyncSupported = asyncSupported;
-    }
-
-    /**
-     * Returns if pnpm support is enabled.
-     *
-     * @return if pnpm is enabled
-     */
-    public boolean isPnpmEnabled() {
-        return pnpmEnabled;
-    }
-
-    /**
-     * Sets {@code pnpmEnabled} property value.
-     *
-     * @param pnpmEnabled the {@code pnpmEnabled} property value
-     */
-    public void setPnpmEnabled(boolean pnpmEnabled) {
-        this.pnpmEnabled = pnpmEnabled;
     }
 
     /**
