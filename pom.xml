@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>vaadin-spring-parent</artifactId>
-    <version>13.1-SNAPSHOT</version>
+    <version>14.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>vaadin-spring-parent</name>
