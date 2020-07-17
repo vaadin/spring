@@ -36,16 +36,17 @@ public class VaadinSpringDataHelpers implements Serializable {
      * component to a Spring Data based back-end. The method expects Vaadin sort 
      * data to include the property name.
      *
-     * @param vaadinQuery
-     * @return
+     * @param vaadinQuery the Vaadin Query object passed by he component
+     * @return the Sort object that can be passed for Spring Data based back-end
      */
-    public static Sort toSpringDataSort(Query<?, Void> vaadinQuery) {
-        Sort springDataSort = Sort.by(vaadinQuery.getSortOrders().stream()
+    public static Sort toSpringDataSort(Query<?, ?> vaadinQuery) {
+        return Sort.by(vaadinQuery.getSortOrders().stream()
                 .map(
                         so -> so.getDirection() == SortDirection.ASCENDING
                         ? Order.asc(so.getSorted())
                         : Order.desc(so.getSorted()))
-                .collect(Collectors.toList()));
-        return springDataSort;
+                .collect(Collectors.toList())
+        );
     }
+
 }
