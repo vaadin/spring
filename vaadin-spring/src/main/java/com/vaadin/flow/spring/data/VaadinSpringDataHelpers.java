@@ -26,7 +26,7 @@ import org.springframework.data.domain.Sort.Order;
  * Contains helper methods to work with Spring Data based back-ends
  * and Vaadin components.
  */
-public interface VaadinSpringDataHelpers {
+public interface VaadinSpringDataHelpers extends Serializable {
     
     /**
      * Translates given Query object from a Vaadin component to Spring Data Sort
