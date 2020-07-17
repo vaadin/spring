@@ -36,7 +36,7 @@ public interface VaadinSpringDataHelpers {
      * component to a Spring Data based back-end. The method expects Vaadin sort 
      * data to include the property name.
      *
-     * @param vaadinQuery the Vaadin Query object passed by he component
+     * @param vaadinQuery the Vaadin Query object passed by the component
      * @return the Sort object that can be passed for Spring Data based back-end
      */
     static Sort toSpringDataSort(Query<?, ?> vaadinQuery) {
