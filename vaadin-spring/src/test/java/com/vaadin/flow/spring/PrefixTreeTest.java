@@ -33,7 +33,7 @@ public class PrefixTreeTest {
     }
 
     @Test
-    public void hasPrefix_containsPrefix_returnsFalse() {
+    public void hasPrefix_doesNotContainPrefix_returnsFalse() {
         PrefixTree prefixTree = new PrefixTree(
                 Arrays.asList("com/sun", "antlr", "ch/quos/logback"));
         Assert.assertFalse(prefixTree.hasPrefix(""));

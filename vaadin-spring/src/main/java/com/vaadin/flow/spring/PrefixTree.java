@@ -61,12 +61,9 @@ class PrefixTree implements Serializable {
         private boolean terminal = true;
 
         void addPrefix(String prefix) {
-            assert !prefix.isEmpty();
             terminal = false;
             char ch = prefix.charAt(0);
-            if (!children.containsKey(ch)) {
-                children.put(ch, new Node());
-            }
+            children.putIfAbsent(ch, new Node());
             if (prefix.length() > 1) {
                 children.get(ch).addPrefix(prefix.substring(1));
             }
