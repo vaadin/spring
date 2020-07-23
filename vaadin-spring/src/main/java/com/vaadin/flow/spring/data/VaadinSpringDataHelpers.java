@@ -15,12 +15,15 @@
  */
 package com.vaadin.flow.spring.data;
 
+import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
 import java.io.Serializable;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
  * Contains helper methods to work with Spring Data based back-ends
@@ -48,5 +51,38 @@ public interface VaadinSpringDataHelpers extends Serializable {
                 .collect(Collectors.toList())
         );
     }
+    
+    /**
+     * Creates a Spring Data {@link PageRequest} based on the Vaadin
+     * {@link Query} object. Takes sort into account, based on properties.
+     *
+     * @param vaadinQuery the query object from Vaadin component
+     * @return a {@link PageRequest} that can be passed for Spring Data based
+     * back-end
+     */
+    public static PageRequest pageRequestOfQuery(Query<?, ?> vaadinQuery) {
+        Sort sort = VaadinSpringDataHelpers.toSpringDataSort(vaadinQuery);
+        return PageRequest.of(vaadinQuery.getPage(), vaadinQuery.getPageSize(), sort);
+    }
+
+    /**
+     * Binds all items from a given Spring Data repositories.
+     *
+     * @param <T> the type of items to bind
+     * @param repo the repository where he results should be fetched
+     * @return the FetchCallback that makes the lazy binding to {@link Grid}.
+     */
+    public static <T> FetchCallback<T, Void> bindToRepository(PagingAndSortingRepository<T, ?> repo) {
+        return query -> {
+            return repo.findAll(
+                    PageRequest.of(
+                        query.getPage(), 
+                        query.getPageSize(), 
+                        VaadinSpringDataHelpers.toSpringDataSort(query)
+                    )
+            ).stream();
+        };
+    }
+
 
 }
