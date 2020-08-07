@@ -34,6 +34,7 @@ import com.vaadin.flow.server.InitParameters;
 import com.vaadin.flow.server.ServiceException;
 import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinServletService;
+import com.vaadin.flow.shared.util.SharedUtil;
 
 /**
  * Spring application context aware Vaadin servlet implementation.
@@ -59,16 +60,14 @@ public class SpringServlet extends VaadinServlet {
             // thanks to java code coverage which adds non-existent
             // initially variables everywhere: we should skip this extra
             // field
-            .filter(field -> !field.isSynthetic())
-            .map(field -> {
+            .filter(field -> !field.isSynthetic()).map(field -> {
                 try {
                     return (String) field.get(null);
                 } catch (IllegalAccessException e) {
                     throw new IllegalStateException("unable to access field",
                             e);
                 }
-            })
-            .collect(Collectors.toList());
+            }).collect(Collectors.toList());
 
     private final ApplicationContext context;
     private final boolean forwardingEnforced;
@@ -154,7 +153,11 @@ public class SpringServlet extends VaadinServlet {
     private void setProperty(String envProperty, String initParam,
             Properties properties) {
         Environment env = context.getBean(Environment.class);
-        String value = env.getProperty(envProperty);
+        String value = env
+                .getProperty(SharedUtil.camelCaseToDashSeparated(envProperty));
+        if (value == null) {
+            value = env.getProperty(envProperty);
+        }
         if (value != null) {
             properties.put(initParam, value);
         }
