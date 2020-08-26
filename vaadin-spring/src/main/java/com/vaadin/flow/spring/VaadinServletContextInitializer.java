@@ -631,14 +631,10 @@ public class VaadinServletContextInitializer
     }
 
     private Collection<String> getErrorParameterPackages() {
-        return Stream
-                .concat(Stream.of(
+        return Stream.concat(
+                Stream.of(HasErrorParameter.class.getPackage().getName(),
                         SpringRouteNotFoundError.class.getPackage().getName()),
-                        Stream.concat(
-                                Stream.of(HasErrorParameter.class.getPackage()
-                                        .getName()),
-                                getDefaultPackages().stream()))
-                .collect(Collectors.toSet());
+                getDefaultPackages().stream()).collect(Collectors.toSet());
     }
 
     private List<String> getDefaultPackages() {
