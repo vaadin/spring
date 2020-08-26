@@ -86,6 +86,7 @@ import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializ
 import com.vaadin.flow.server.startup.WebComponentExporterAwareValidator;
 import com.vaadin.flow.server.webcomponent.WebComponentConfigurationRegistry;
 import com.vaadin.flow.spring.VaadinScanPackagesRegistrar.VaadinScanPackages;
+import com.vaadin.flow.spring.router.SpringRouteNotFoundError;
 import com.vaadin.flow.theme.Theme;
 
 /**
@@ -631,9 +632,12 @@ public class VaadinServletContextInitializer
 
     private Collection<String> getErrorParameterPackages() {
         return Stream
-                .concat(Stream
-                        .of(HasErrorParameter.class.getPackage().getName()),
-                        getDefaultPackages().stream())
+                .concat(Stream.of(
+                        SpringRouteNotFoundError.class.getPackage().getName()),
+                        Stream.concat(
+                                Stream.of(HasErrorParameter.class.getPackage()
+                                        .getName()),
+                                getDefaultPackages().stream()))
                 .collect(Collectors.toSet());
     }
 
