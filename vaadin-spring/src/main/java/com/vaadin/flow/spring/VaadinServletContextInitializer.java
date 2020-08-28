@@ -42,6 +42,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.gentyref.GenericTypeReflector;
+
+import com.vaadin.flow.router.RouteNotFoundError;
 import com.vaadin.flow.server.startup.ServletDeployer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -294,9 +296,16 @@ public class VaadinServletContextInitializer
             Stream<Class<? extends Component>> hasErrorComponents = findBySuperType(
                     getErrorParameterPackages(), HasErrorParameter.class)
                             .filter(Component.class::isAssignableFrom)
+                            // Replace Flow default with custom version for Spring
+                            .filter(clazz -> clazz != RouteNotFoundError.class)
                             .map(clazz -> (Class<? extends Component>) clazz);
-            registry.setErrorNavigationTargets(
-                    hasErrorComponents.collect(Collectors.toSet()));
+            final Set<Class<? extends Component>> errorComponents =
+                    hasErrorComponents.collect(Collectors.toSet());
+
+            if (errorComponents.stream().noneMatch(RouteNotFoundError.class::isAssignableFrom)) {
+                errorComponents.add(SpringRouteNotFoundError.class);
+            }
+            registry.setErrorNavigationTargets(errorComponents);
         }
     }
 
@@ -632,8 +641,7 @@ public class VaadinServletContextInitializer
 
     private Collection<String> getErrorParameterPackages() {
         return Stream.concat(
-                Stream.of(HasErrorParameter.class.getPackage().getName(),
-                        SpringRouteNotFoundError.class.getPackage().getName()),
+                Stream.of(HasErrorParameter.class.getPackage().getName()),
                 getDefaultPackages().stream()).collect(Collectors.toSet());
     }
 
