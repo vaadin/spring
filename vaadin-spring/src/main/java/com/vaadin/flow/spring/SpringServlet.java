@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -153,14 +154,24 @@ public class SpringServlet extends VaadinServlet {
     private void setProperty(String envProperty, String initParam,
             Properties properties) {
         Environment env = context.getBean(Environment.class);
-        String value = env
-                .getProperty(SharedUtil.camelCaseToDashSeparated(envProperty));
+        String value = env.getProperty(upperCaseToDashSeparated(envProperty));
         if (value == null) {
             value = env.getProperty(envProperty);
         }
         if (value != null) {
             properties.put(initParam, value);
         }
+    }
+
+    private String upperCaseToDashSeparated(String value) {
+        String result = value;
+        if (result == null) {
+            return null;
+        }
+        while (!result.equals(result.toLowerCase(Locale.ENGLISH))) {
+            result = SharedUtil.camelCaseToDashSeparated(result);
+        }
+        return result;
     }
 
 }
