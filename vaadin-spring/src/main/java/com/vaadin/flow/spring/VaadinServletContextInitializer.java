@@ -293,15 +293,13 @@ public class VaadinServletContextInitializer
                     .getInstance(new VaadinServletContext(
                             event.getServletContext()));
 
-            Stream<Class<? extends Component>> hasErrorComponents = findBySuperType(
+            Set<Class<? extends Component>> errorComponents = findBySuperType(
                     getErrorParameterPackages(), HasErrorParameter.class)
                             .filter(Component.class::isAssignableFrom)
                             // Replace Flow default with custom version for Spring
                             .filter(clazz -> clazz != RouteNotFoundError.class)
-                            .map(clazz -> (Class<? extends Component>) clazz);
-            final Set<Class<? extends Component>> errorComponents =
-                    hasErrorComponents.collect(Collectors.toSet());
-
+                            .map(clazz -> (Class<? extends Component>) clazz)
+                    .collect(Collectors.toSet());
             if (errorComponents.stream().noneMatch(RouteNotFoundError.class::isAssignableFrom)) {
                 errorComponents.add(SpringRouteNotFoundError.class);
             }
