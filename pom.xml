@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>vaadin-spring-parent</artifactId>
-    <version>13.1-SNAPSHOT</version>
+    <version>14.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>vaadin-spring-parent</name>
@@ -44,7 +44,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- These are typically overridden with BOMs -->
-        <vaadin.flow.version>3.1-SNAPSHOT</vaadin.flow.version>
+        <vaadin.flow.version>5.0-SNAPSHOT</vaadin.flow.version>
         <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
 
         <!-- Additional manifest fields -->
@@ -52,6 +52,8 @@
 
         <junit.version>4.12</junit.version>
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
+        <mockito.version>3.1.0</mockito.version>
+        <powermock.version>2.0.7</powermock.version>
     </properties>
 
     <dependencyManagement>
@@ -82,6 +84,29 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-html-components</artifactId>
                 <version>${vaadin.flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-data</artifactId>
+                <version>${vaadin.flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito2</artifactId>
+                <version>${powermock.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -230,18 +255,8 @@
                 https://maven.vaadin.com/vaadin-prereleases/
             </url>
             <snapshots>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </snapshots>
-        </repository>
-        <repository>	
-            <id>vaadin-snapshots</id>	
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>	
-            <releases>	
-                <enabled>false</enabled>	
-            </releases>	
-            <snapshots>	
-                <enabled>true</enabled>	
-            </snapshots>	
         </repository>
         <!-- Repository used by many Vaadin add-ons -->
         <repository>
@@ -276,18 +291,8 @@
                 https://maven.vaadin.com/vaadin-prereleases/
             </url>
             <snapshots>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </snapshots>
-        </pluginRepository>
-        <pluginRepository>	
-            <id>vaadin-snapshots</id>	
-            <url>https://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>	
-            <releases>	
-                <enabled>false</enabled>	
-            </releases>	
-            <snapshots>	
-                <enabled>true</enabled>	
-            </snapshots>	
         </pluginRepository>
     </pluginRepositories>
 

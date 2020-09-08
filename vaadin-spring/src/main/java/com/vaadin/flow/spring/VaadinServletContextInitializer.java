@@ -42,6 +42,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.gentyref.GenericTypeReflector;
+
+import com.vaadin.flow.internal.ReflectTools;
+import com.vaadin.flow.router.NotFoundException;
+import com.vaadin.flow.router.RouteNotFoundError;
 import com.vaadin.flow.server.startup.ServletDeployer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +82,7 @@ import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.startup.AbstractRouteRegistryInitializer;
 import com.vaadin.flow.server.startup.AnnotationValidator;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
+import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
 import com.vaadin.flow.server.startup.DevModeInitializer;
 import com.vaadin.flow.server.startup.ServletVerifier;
 import com.vaadin.flow.server.startup.VaadinAppShellInitializer;
@@ -85,6 +90,7 @@ import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializ
 import com.vaadin.flow.server.startup.WebComponentExporterAwareValidator;
 import com.vaadin.flow.server.webcomponent.WebComponentConfigurationRegistry;
 import com.vaadin.flow.spring.VaadinScanPackagesRegistrar.VaadinScanPackages;
+import com.vaadin.flow.spring.router.SpringRouteNotFoundError;
 import com.vaadin.flow.theme.Theme;
 
 /**
@@ -106,18 +112,38 @@ public class VaadinServletContextInitializer
     private ResourceLoader customLoader;
 
     /**
-     * packages that are white-listed (should be scanned) by default and can't
-     * be overriden by <code>addedWhiteListed</code>.
+     * Packages that should be excluded when scanning all packages.
      */
-    private static final List<String> DEFAULT_WHITE_LISTED = Stream
+    private static final List<String> DEFAULT_SCAN_NEVER = Stream.of("antlr",
+            "cglib", "ch/quos/logback", "commons-codec", "commons-fileupload",
+            "commons-io", "commons-logging", "com/fasterxml", "com/google",
+            "com/h2database", "com/helger", "com/vaadin/external/atmosphere",
+            "com/vaadin/webjar", "junit", "net/bytebuddy", "org/apache",
+            "org/aspectj", "org/bouncycastle", "org/dom4j", "org/easymock",
+            "org/hamcrest", "org/hibernate", "org/javassist", "org/jboss",
+            "org/jsoup", "org/seleniumhq", "org/slf4j", "org/atmosphere",
+            "org/springframework", "org/webjars/bowergithub", "org/yaml",
+
+            "java/", "javax/", "javafx/", "com/sun/", "oracle/deploy",
+            "oracle/javafx", "oracle/jrockit", "oracle/jvm", "oracle/net",
+            "oracle/nio", "oracle/tools", "oracle/util", "oracle/webservices",
+            "oracle/xmlns",
+
+            "com/intellij/", "org/jetbrains").collect(Collectors.toList());
+
+   /**
+     * Packages that should be scanned by default and can't be overriden by
+     * a custom list.
+     */
+    private static final List<String> DEFAULT_SCAN_ONLY = Stream
             .of(Component.class.getPackage().getName(),
                     Theme.class.getPackage().getName(), "com.vaadin.shrinkwrap")
             .collect(Collectors.toList());
 
     /**
-     * Packages whitelisted by the user
+     * Packages marked by the user to be scanned exclusively.
      */
-    private List<String> customWhitelist;
+    private final List<String> customScanOnly;
 
     /**
      * Class path scanner that reuses infrastructure from Spring while also
@@ -269,12 +295,25 @@ public class VaadinServletContextInitializer
                     .getInstance(new VaadinServletContext(
                             event.getServletContext()));
 
-            Stream<Class<? extends Component>> hasErrorComponents = findBySuperType(
+            Set<Class<? extends Component>> errorComponents = findBySuperType(
                     getErrorParameterPackages(), HasErrorParameter.class)
                             .filter(Component.class::isAssignableFrom)
-                            .map(clazz -> (Class<? extends Component>) clazz);
-            registry.setErrorNavigationTargets(
-                    hasErrorComponents.collect(Collectors.toSet()));
+                            // Replace Flow default with custom version for Spring
+                            .filter(clazz -> clazz != RouteNotFoundError.class)
+                            .map(clazz -> (Class<? extends Component>) clazz)
+                    .collect(Collectors.toSet());
+
+            // If there is no custom HasErrorParameter<? super NotFoundException>
+            // add SpringRouteNotFoundError, with Spring Boot specific hints
+            if (errorComponents.stream().noneMatch(clazz -> {
+                Class<?> exceptionType = ReflectTools.getGenericInterfaceType(
+                        clazz, HasErrorParameter.class);
+                return exceptionType != null && exceptionType
+                        .isAssignableFrom(NotFoundException.class);
+            })) {
+                errorComponents.add(SpringRouteNotFoundError.class);
+            }
+            registry.setErrorNavigationTargets(errorComponents);
         }
     }
 
@@ -294,15 +333,15 @@ public class VaadinServletContextInitializer
 
         @SuppressWarnings("unchecked")
         private void validateAnnotations(
-                ServletContainerInitializer initializer, ServletContext context,
-                List<Class<?>> annotations) {
+                ClassLoaderAwareServletContainerInitializer initializer,
+                ServletContext context, List<Class<?>> annotations) {
 
             Stream<Class<?>> annotatedClasses = findByAnnotation(
                     getVerifiableAnnotationPackages(),
                     annotations.toArray(new Class[annotations.size()]));
             Set<Class<?>> set = annotatedClasses.collect(Collectors.toSet());
             try {
-                initializer.onStartup(set, context);
+                initializer.process(set, context);
             } catch (ServletException exception) {
                 throw new RuntimeException(
                         "Unexpected servlet exception from "
@@ -322,14 +361,15 @@ public class VaadinServletContextInitializer
                     .createDeploymentConfiguration(this.getClass(), event,
                             appContext);
 
-            if (config == null || config.isProductionMode()
-                    || !config.enableDevServer()) {
+            if (config == null || config.isProductionMode() ||
+                    !config.enableDevServer() ||
+                    isDevModeAlreadyStarted(event.getServletContext())) {
                 return;
             }
 
             Set<String> basePackages;
-            if (isWhitelistSet()) {
-                basePackages = new HashSet<>(getWhiteListPackages());
+            if (isScanOnlySet()) {
+                basePackages = new HashSet<>(getScanOnlyPackages());
             } else {
                 basePackages = Collections.singleton("");
             }
@@ -356,8 +396,10 @@ public class VaadinServletContextInitializer
                 throw new RuntimeException(
                         "Unable to initialize Vaadin DevModeHandler", e);
             }
-            // to make sure the user knows the application is ready, show notification to the user
-            ServletDeployer.logAppStartupToConsole(event.getServletContext(), true);
+            // to make sure the user knows the application is ready, show
+            // notification to the user
+            ServletDeployer.logAppStartupToConsole(event.getServletContext(),
+                    true);
         }
 
         @Override
@@ -368,11 +410,11 @@ public class VaadinServletContextInitializer
             }
         }
 
-        private Collection<String> getWhiteListPackages() {
+        private Collection<String> getScanOnlyPackages() {
             HashSet<String> npmPackages = new HashSet<>(getDefaultPackages());
-            npmPackages.addAll(DEFAULT_WHITE_LISTED);
-            if (customWhitelist != null) {
-                npmPackages.addAll(customWhitelist);
+            npmPackages.addAll(DEFAULT_SCAN_ONLY);
+            if (customScanOnly != null) {
+                npmPackages.addAll(customScanOnly);
             }
             return npmPackages;
         }
@@ -393,8 +435,20 @@ public class VaadinServletContextInitializer
             }
         }
 
-        private boolean isWhitelistSet() {
-            return customWhitelist != null && !customWhitelist.isEmpty();
+        private boolean isScanOnlySet() {
+            return customScanOnly != null
+                    && !customScanOnly.isEmpty();
+        }
+
+        private boolean isDevModeAlreadyStarted(ServletContext servletContext) {
+            if (DevModeInitializer.isDevModeAlreadyStarted(servletContext)) {
+                if (getLogger().isDebugEnabled()) {
+                    getLogger().debug(
+                            "Skipped DevModeHandler initialization as it has been already initialized");
+                }
+                return true;
+            }
+            return false;
         }
     }
 
@@ -417,7 +471,7 @@ public class VaadinServletContextInitializer
                         getWebComponentPackages(), WebComponentExporter.class)
                                 .collect(Collectors.toSet());
 
-                initializer.onStartup(webComponentExporters,
+                initializer.process(webComponentExporters,
                         event.getServletContext());
             }
         }
@@ -449,7 +503,6 @@ public class VaadinServletContextInitializer
             VaadinAppShellInitializer.init(classes, event.getServletContext(),
                     config);
         }
-
     }
 
     /**
@@ -461,31 +514,30 @@ public class VaadinServletContextInitializer
      */
     public VaadinServletContextInitializer(ApplicationContext context) {
         appContext = context;
-        String blacklistProperty = appContext.getEnvironment()
+        String neverScanProperty = appContext.getEnvironment()
                 .getProperty("vaadin.blacklisted-packages");
-        List<String> blacklist;
-        if (blacklistProperty == null) {
-            blacklist = Collections.emptyList();
+        List<String> neverScan;
+        if (neverScanProperty == null) {
+            neverScan = Collections.emptyList();
         } else {
-            blacklist = Arrays.stream(blacklistProperty.split(","))
+            neverScan = Arrays.stream(neverScanProperty.split(","))
                     .map(String::trim).collect(Collectors.toList());
         }
 
-        String whitelistProperty = appContext.getEnvironment()
+        String onlyScanProperty = appContext.getEnvironment()
                 .getProperty("vaadin.whitelisted-packages");
-        if (whitelistProperty == null) {
-            customWhitelist = Collections.emptyList();
-            customLoader = new CustomResourceLoader(appContext, blacklist);
+        if (onlyScanProperty == null) {
+            customScanOnly = Collections.emptyList();
+            customLoader = new CustomResourceLoader(appContext, neverScan);
 
         } else {
-            customWhitelist = Arrays.stream(whitelistProperty.split(","))
-                    .map(whitelistedPackage -> whitelistedPackage
-                            .replace('/', '.').trim())
+            customScanOnly = Arrays.stream(onlyScanProperty.split(","))
+                    .map(onlyPackage -> onlyPackage.replace('/', '.').trim())
                     .collect(Collectors.toList());
             customLoader = appContext;
         }
 
-        if (!customWhitelist.isEmpty() && !blacklist.isEmpty()) {
+        if (!customScanOnly.isEmpty() && !neverScan.isEmpty()) {
             getLogger().warn(
                     "vaadin.blacklisted-packages is ignored because both vaadin.whitelisted-packages and vaadin.blacklisted-packages have been set.");
         }
@@ -596,11 +648,9 @@ public class VaadinServletContextInitializer
     }
 
     private Collection<String> getErrorParameterPackages() {
-        return Stream
-                .concat(Stream
-                        .of(HasErrorParameter.class.getPackage().getName()),
-                        getDefaultPackages().stream())
-                .collect(Collectors.toSet());
+        return Stream.concat(
+                Stream.of(HasErrorParameter.class.getPackage().getName()),
+                getDefaultPackages().stream()).collect(Collectors.toSet());
     }
 
     private List<String> getDefaultPackages() {
@@ -628,34 +678,22 @@ public class VaadinServletContextInitializer
      */
     private static class CustomResourceLoader
             extends PathMatchingResourcePatternResolver {
-        /**
-         * Blacklisted packages that shouldn't be scanned for when scanning all
-         * packages.
-         */
-        private List<String> blackListed = Stream.of("antlr", "cglib",
-                "ch/quos/logback", "commons-codec", "commons-fileupload",
-                "commons-io", "commons-logging", "com/fasterxml", "com/google",
-                "com/h2database", "com/helger",
-                "com/vaadin/external/atmosphere", "com/vaadin/webjar", "javax/",
-                "junit", "net/bytebuddy", "org/apache", "org/aspectj",
-                "org/bouncycastle", "org/dom4j", "org/easymock", "org/hamcrest",
-                "org/hibernate", "org/javassist", "org/jboss", "org/jsoup",
-                "org/seleniumhq", "org/slf4j", "org/atmosphere",
-                "org/springframework", "org/webjars/bowergithub", "org/yaml")
-                .collect(Collectors.toList());
 
-        private static List<String> defaultWhiteList = DEFAULT_WHITE_LISTED
-                .stream().map(packageName -> packageName.replace('.', '/'))
-                .collect(Collectors.toList());
+        private final PrefixTree scanNever = new PrefixTree(DEFAULT_SCAN_NEVER);
+
+        private final PrefixTree scanAlways = new PrefixTree(
+                DEFAULT_SCAN_ONLY.stream()
+                        .map(packageName -> packageName.replace('.', '/'))
+                        .collect(Collectors.toList()));
 
         public CustomResourceLoader(ResourceLoader resourceLoader,
-                List<String> addedBlacklist) {
+                List<String> addedScanNever) {
             super(resourceLoader);
 
-            Objects.requireNonNull(addedBlacklist,
-                    "addedBlacklist shouldn't be null!");
+            Objects.requireNonNull(addedScanNever,
+                    "addedScanNever shouldn't be null!");
 
-            blackListed.addAll(addedBlacklist);
+            addedScanNever.forEach(scanNever::addPrefix);
         }
 
         /**
@@ -723,11 +761,8 @@ public class VaadinServletContextInitializer
         }
 
         private boolean shouldPathBeScanned(String path) {
-            if (defaultWhiteList.stream().anyMatch(path::startsWith)) {
-                return true;
-            }
-
-            return !blackListed.stream().anyMatch(path::startsWith);
+            return scanAlways.hasPrefix(path)
+                    || !scanNever.hasPrefix(path);
         }
     }
 
