@@ -42,7 +42,7 @@ public class SpringServletTest {
     private ApplicationContext context;
 
     @Test
-    public void readUniformNameProperty_propertyNameContansDash_propertyNameIsConvertedToCamelCaseAndReadProperly()
+    public void readUniformNameProperty_propertyNameContainsDash_propertyNameIsConvertedToCamelCaseAndReadProperly()
             throws ServletException {
         VaadinService service = SpringInstantiatorTest.getService(context,
                 new Properties());
@@ -50,6 +50,15 @@ public class SpringServletTest {
         Assert.assertEquals(PushMode.MANUAL, pushMode);
 
         Assert.assertEquals("someUrl",
+                service.getDeploymentConfiguration().getPushURL());
+    }
+
+    @Test
+    public void customPushUrl_rootMapping_isPrefixedWithContextVaadinMapping()
+            throws ServletException {
+        VaadinService service = SpringInstantiatorTest.getService(context,
+                new Properties(), true);
+        Assert.assertEquals("context://vaadinServlet/someUrl",
                 service.getDeploymentConfiguration().getPushURL());
     }
 }
