@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.spring.instantiator;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +30,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +54,7 @@ import com.vaadin.flow.server.Constants;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinServletService;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.spring.SpringInstantiator;
 import com.vaadin.flow.spring.SpringServlet;
 
@@ -164,27 +170,41 @@ public class SpringInstantiatorTest {
 
     public static VaadinServletService getService(ApplicationContext context,
             Properties configProperties, boolean rootMapping) throws ServletException {
+        Properties properties = configProperties == null ? new Properties()
+                : configProperties;
+
+        // create a webpack.config.js passing FrontendUtils::isWebpackConfigFile
+        // check
+        try {
+            File tempDir = Files.createTempDirectory(null).toFile();
+            File webpackConfig = new File(tempDir, "webpack.config.js");
+            FileUtils.write(webpackConfig, "./webpack.generated.js",
+                    StandardCharsets.UTF_8);
+            properties.put(FrontendUtils.PROJECT_BASEDIR,
+                    tempDir.getAbsolutePath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         SpringServlet servlet = new SpringServlet(context, rootMapping) {
             @Override
             protected DeploymentConfiguration createDeploymentConfiguration(
                     Properties initParameters) {
-                if (configProperties != null) {
-                    configProperties.putAll(initParameters);
-                    return super.createDeploymentConfiguration(
-                            configProperties);
-                }
-                return super.createDeploymentConfiguration(initParameters);
+                properties.putAll(initParameters);
+                return super.createDeploymentConfiguration(properties);
             }
         };
 
         ServletConfig config = Mockito.mock(ServletConfig.class);
         ServletContext servletContext = Mockito.mock(ServletContext.class);
-
         Mockito.when(config.getServletContext()).thenReturn(servletContext);
 
         Mockito.when(config.getInitParameterNames())
-                .thenReturn(Collections.emptyEnumeration());
-
+                .thenReturn(Collections.enumeration(properties.stringPropertyNames()));
+        Mockito.when(config.getInitParameter(Mockito.anyString()))
+                .thenAnswer(iom -> properties
+                        .getProperty(iom.getArgument(0, String.class)));
+            
         Mockito.when(servletContext.getInitParameterNames())
                 .thenReturn(Collections.emptyEnumeration());
         servlet.init(config);
