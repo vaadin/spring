@@ -105,7 +105,7 @@ public class SpringServletTest {
                 fallbackChunk);
         VaadinService service = SpringInstantiatorTest.getService(context,
                 properties, true);
-        Assert.assertEquals(fallbackChunk,
+        Assert.assertSame(fallbackChunk,
                 service.getDeploymentConfiguration().getInitParameters()
                         .get(DeploymentConfigurationFactory.FALLBACK_CHUNK));
     }
