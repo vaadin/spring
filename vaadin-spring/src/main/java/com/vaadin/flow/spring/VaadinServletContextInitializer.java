@@ -42,6 +42,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.gentyref.GenericTypeReflector;
+
+import com.vaadin.flow.internal.ReflectTools;
+import com.vaadin.flow.router.NotFoundException;
+import com.vaadin.flow.router.RouteNotFoundError;
 import com.vaadin.flow.server.startup.ServletDeployer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +90,7 @@ import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializ
 import com.vaadin.flow.server.startup.WebComponentExporterAwareValidator;
 import com.vaadin.flow.server.webcomponent.WebComponentConfigurationRegistry;
 import com.vaadin.flow.spring.VaadinScanPackagesRegistrar.VaadinScanPackages;
+import com.vaadin.flow.spring.router.SpringRouteNotFoundError;
 import com.vaadin.flow.theme.Theme;
 
 /**
@@ -290,12 +295,25 @@ public class VaadinServletContextInitializer
                     .getInstance(new VaadinServletContext(
                             event.getServletContext()));
 
-            Stream<Class<? extends Component>> hasErrorComponents = findBySuperType(
+            Set<Class<? extends Component>> errorComponents = findBySuperType(
                     getErrorParameterPackages(), HasErrorParameter.class)
                             .filter(Component.class::isAssignableFrom)
-                            .map(clazz -> (Class<? extends Component>) clazz);
-            registry.setErrorNavigationTargets(
-                    hasErrorComponents.collect(Collectors.toSet()));
+                            // Replace Flow default with custom version for Spring
+                            .filter(clazz -> clazz != RouteNotFoundError.class)
+                            .map(clazz -> (Class<? extends Component>) clazz)
+                    .collect(Collectors.toSet());
+
+            // If there is no custom HasErrorParameter<? super NotFoundException>
+            // add SpringRouteNotFoundError, with Spring Boot specific hints
+            if (errorComponents.stream().noneMatch(clazz -> {
+                Class<?> exceptionType = ReflectTools.getGenericInterfaceType(
+                        clazz, HasErrorParameter.class);
+                return exceptionType != null && exceptionType
+                        .isAssignableFrom(NotFoundException.class);
+            })) {
+                errorComponents.add(SpringRouteNotFoundError.class);
+            }
+            registry.setErrorNavigationTargets(errorComponents);
         }
     }
 
@@ -630,11 +648,9 @@ public class VaadinServletContextInitializer
     }
 
     private Collection<String> getErrorParameterPackages() {
-        return Stream
-                .concat(Stream
-                        .of(HasErrorParameter.class.getPackage().getName()),
-                        getDefaultPackages().stream())
-                .collect(Collectors.toSet());
+        return Stream.concat(
+                Stream.of(HasErrorParameter.class.getPackage().getName()),
+                getDefaultPackages().stream()).collect(Collectors.toSet());
     }
 
     private List<String> getDefaultPackages() {
