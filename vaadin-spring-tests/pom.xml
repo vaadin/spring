@@ -316,6 +316,15 @@
             <modules>
                 <module>test-spring-common</module>
                 <module>test-spring-boot</module>
+                <!--
+                Disabled as the resource scanner does not work with Undertow
+                <module>test-spring-boot-undertow</module>
+                -->
+                <module>test-spring-boot-scan</module>
+                <!-- Skipping deployable module as it behaves strangely right now -->
+                <module>test-spring-war</module>
+                <!--        <module>test-spring</module>-->
+                <module>test-spring-boot-contextpath</module>
                 
                 <module>test-mvc-without-endpoints</module>
 
