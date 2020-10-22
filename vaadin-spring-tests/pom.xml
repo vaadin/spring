@@ -325,7 +325,6 @@
                 <module>test-spring-war</module>
                 <!--        <module>test-spring</module>-->
                 <module>test-spring-boot-contextpath</module>
-                <module>test-mvc-without-endpoints</module>
                 <module>test-ts-services</module>
                 <module>test-ts-services-custom-client</module>
 
