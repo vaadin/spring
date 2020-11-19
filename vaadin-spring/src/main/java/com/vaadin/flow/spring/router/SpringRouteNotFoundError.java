@@ -5,6 +5,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.RouteNotFoundError;
+import com.vaadin.flow.server.frontend.FrontendVersion;
 import org.springframework.boot.SpringBootVersion;
 
 public class SpringRouteNotFoundError extends RouteNotFoundError {
@@ -18,9 +19,12 @@ public class SpringRouteNotFoundError extends RouteNotFoundError {
             // routes https://github.com/spring-projects/spring-boot/issues/19543
             // This has been fixed since Spring Boot 2.4.0
             String springBootVersion = SpringBootVersion.getVersion();
+            if (springBootVersion == null || springBootVersion.isEmpty()) {
+                return retval;
+            }
             // the version is e.g. "2.2.0.RELEASE" or "2.4.0" ...
-            final String[] numbers = springBootVersion == null ? null : springBootVersion.split("\\.");
-            if (numbers != null && numbers.length > 1 && "2".equals(numbers[0]) && 4 > Integer.parseInt(numbers[1])) {
+            FrontendVersion version = new FrontendVersion(springBootVersion);
+            if (version.isOlderThan(new FrontendVersion(2, 4, 0))) {
                 String customMessage = "<span>When using Spring Boot Devtools with "
                         + "automatic reload, please note that routes can sometimes be "
                         + "lost due to a <a href ='https://github.com/spring-projects/spring-boot/issues/19543'>"

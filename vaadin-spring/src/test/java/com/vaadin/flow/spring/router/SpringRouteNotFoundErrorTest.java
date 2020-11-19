@@ -68,11 +68,13 @@ public class SpringRouteNotFoundErrorTest {
     }
 
     @Test
-    public void testRouteNotFoundError_bootVersionIsTwoFourSomething_noAddedMessageShown() {
+    public void testRouteNotFoundError_bootVersionIsTwoFourOrNewer_noAddedMessageShown() {
         final RouteNotFoundError normalErrorView = new RouteNotFoundError();
         final SpringRouteNotFoundError springRouteNotFoundError = new SpringRouteNotFoundError();
 
         normalErrorView.setErrorParameter(event, parameter);
+        // the project uses 2.4.0 at the time of writing this test, so it will
+        // not add the message
         springRouteNotFoundError.setErrorParameter(event, parameter);
 
         Assert.assertEquals("Invalid number of children", ((Long) normalErrorView.getChildren().count()).intValue(), ((Long) springRouteNotFoundError.getChildren().count()).intValue());
