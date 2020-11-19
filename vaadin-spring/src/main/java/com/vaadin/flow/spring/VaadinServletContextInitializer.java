@@ -61,6 +61,7 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.WebComponentExporter;
+import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.router.HasErrorParameter;
@@ -229,6 +230,12 @@ public class VaadinServletContextInitializer
         @Override
         public void failFastContextInitialized(ServletContextEvent event)
                 throws ServletException {
+            VaadinServletContext vaadinContext = new VaadinServletContext(
+                    event.getServletContext());
+            if (vaadinContext.getAttribute(Lookup.class) != null) {
+                return;
+            }
+
             // intentionally make annotation unmodifiable empty list because
             // LookupInitializer doesn't have annotations at the moment
             List<Class<? extends Annotation>> annotations = Collections
