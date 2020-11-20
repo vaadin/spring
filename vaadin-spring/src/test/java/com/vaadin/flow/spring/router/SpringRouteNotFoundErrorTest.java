@@ -90,6 +90,8 @@ public class SpringRouteNotFoundErrorTest {
 
             normalErrorView.setErrorParameter(event, parameter);
             springRouteNotFoundError.setErrorParameter(event, parameter);
+
+            theMock.verify(SpringBootVersion::getVersion);
         }
         Assert.assertNotEquals("Invalid number of children", ((Long) normalErrorView.getChildren().count()).intValue(), ((Long) springRouteNotFoundError.getChildren().count()).intValue());
     }
@@ -102,7 +104,6 @@ public class SpringRouteNotFoundErrorTest {
             when(configuration.isProductionMode()).thenReturn(true);
             theMock.when(SpringBootVersion::getVersion).then(AssertionError::new);
             springRouteNotFoundError.setErrorParameter(event, parameter);
-
             theMock.verifyNoInteractions();
         }
     }
