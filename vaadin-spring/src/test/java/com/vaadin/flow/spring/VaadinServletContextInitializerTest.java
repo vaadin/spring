@@ -1,7 +1,14 @@
 package com.vaadin.flow.spring;
 
-import com.google.common.collect.Maps;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
+import com.google.common.collect.Maps;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -14,28 +21,22 @@ import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.server.startup.DevModeInitializer;
 import com.vaadin.flow.server.startup.ServletDeployer;
 import com.vaadin.flow.spring.router.SpringRouteNotFoundError;
-
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DevModeInitializer.class,
@@ -60,7 +61,9 @@ public class VaadinServletContextInitializerTest {
 
     @Before
     public void init() {
-        PowerMockito.mockStatic(VaadinServletContextInitializer.SpringStubServletConfig.class);
+        MockitoAnnotations.openMocks(this);
+        PowerMockito.mockStatic(
+                VaadinServletContextInitializer.SpringStubServletConfig.class);
         PowerMockito.mockStatic(ServletDeployer.class);
         PowerMockito.mockStatic(ServletDeployer.StubServletConfig.class);
         PowerMockito.mockStatic(DevModeInitializer.class);
@@ -77,13 +80,19 @@ public class VaadinServletContextInitializerTest {
         // Simulate Spring context start only
         vaadinServletContextInitializer.onStartup(servletContext);
 
-        // This is how PowerMockito works, call PowerMockito.verifyStatic() first
-        // to start verifying behavior of DevModeInitializer static methods
-        PowerMockito.verifyStatic(DevModeInitializer.class);
-        // IMPORTANT:  Call the static method we want to verify.
-        // In our case, we want to check if Dev Mode has been started within onStartup() call,
-        // that means DevModeInitializer.initDevModeHandler() should has been called exactly one time
-        DevModeInitializer.initDevModeHandler(Mockito.any(), Mockito.any(), Mockito.any());
+        try (MockedStatic<DevModeInitializer> theMock = Mockito
+                .mockStatic(DevModeInitializer.class)) {
+            // IMPORTANT: Call the static method we want to verify.
+            // In our case, we want to check if Dev Mode has been started within
+            // onStartup() call,
+            // that means DevModeInitializer.initDevModeHandler() should has
+            // been called exactly one time
+            DevModeInitializer.initDevModeHandler(Mockito.any(), Mockito.any(),
+                    Mockito.any());
+            theMock.verify(() -> DevModeInitializer.initDevModeHandler(
+                    Mockito.any(), Mockito.any(), Mockito.any()));
+            theMock.verifyNoMoreInteractions();
+        }
     }
 
     @Test
@@ -99,15 +108,19 @@ public class VaadinServletContextInitializerTest {
         devModeInitializer.process(Collections.emptySet(), servletContext);
         vaadinServletContextInitializer.onStartup(servletContext);
 
-        // This is how PowerMockito works, call PowerMockito.verifyStatic() first
-        // to start verifying behavior of DevModeInitializer static methods
-        PowerMockito.verifyStatic(DevModeInitializer.class);
-        // IMPORTANT:  Call the static method we want to verify.
-        // In our case, we want to check if Dev Mode has been started within
-        // devModeInitializer.process() call (i.e. from Servlet Container), and not started again
-        // within DevModeInitializer.initDevModeHandler() (Spring context),
-        // so, we expect this method has been called exactly one time:
-        DevModeInitializer.initDevModeHandler(Mockito.any(), Mockito.any(), Mockito.any());
+        try (MockedStatic<DevModeInitializer> theMock = Mockito
+                .mockStatic(DevModeInitializer.class)) {
+            // IMPORTANT: Call the static method we want to verify.
+            // In our case, we want to check if Dev Mode has been started within
+            // onStartup() call,
+            // that means DevModeInitializer.initDevModeHandler() should has
+            // been called exactly one time
+            DevModeInitializer.initDevModeHandler(Mockito.any(), Mockito.any(),
+                    Mockito.any());
+            theMock.verify(() -> DevModeInitializer.initDevModeHandler(
+                    Mockito.any(), Mockito.any(), Mockito.any()));
+            theMock.verifyNoMoreInteractions();
+        }
     }
 
     @Test
@@ -209,7 +222,9 @@ public class VaadinServletContextInitializerTest {
         Mockito.when(applicationContext.getBeanNamesForType(VaadinScanPackagesRegistrar.VaadinScanPackages.class))
                 .thenReturn(new String[]{});
         PowerMockito.when(AutoConfigurationPackages.class, "has",
-                applicationContext).thenReturn(false);
+                applicationContext)
+                // https://github.com/powermock/powermock/issues/992
+                .thenAnswer((Answer<Boolean>) invocation -> false);
 
         ServletContextEvent initEventMock = Mockito.mock(ServletContextEvent.class);
         Mockito.when(initEventMock.getServletContext()).thenReturn(servletContext);
@@ -224,7 +239,9 @@ public class VaadinServletContextInitializerTest {
                 "createDeploymentConfiguration",
                 Mockito.any(),
                 Mockito.any())
-                .thenReturn(deploymentConfiguration);
+                // https://github.com/powermock/powermock/issues/992
+                .thenAnswer(
+                        (Answer<DeploymentConfiguration>) invocation -> deploymentConfiguration);
 
         PowerMockito.when(DevModeInitializer.class,
                 "isDevModeAlreadyStarted",
@@ -242,8 +259,9 @@ public class VaadinServletContextInitializerTest {
                 "createDeploymentConfiguration",
                 Mockito.any(),
                 Mockito.any(),
-                Mockito.any())
-                .thenReturn(deploymentConfiguration);
+                // https://github.com/powermock/powermock/issues/992
+                Mockito.any()).thenAnswer(
+                        (Answer<DeploymentConfiguration>) invocation -> deploymentConfiguration);
 
         PowerMockito.doReturn(Stream.empty())
                 .when(vaadinServletContextInitializerMock,
@@ -263,8 +281,6 @@ public class VaadinServletContextInitializerTest {
             return null;
         }).when(servletContext).addListener(Mockito.any(ServletContextListener.class));
 
-        PowerMockito.doNothing()
-                .when(ServletDeployer.class);
         ServletDeployer.logAppStartupToConsole(Mockito.any(), Mockito.anyBoolean());
 
         return vaadinServletContextInitializerMock;
