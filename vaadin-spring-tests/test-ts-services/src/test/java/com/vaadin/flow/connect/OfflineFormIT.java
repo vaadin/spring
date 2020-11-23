@@ -31,7 +31,7 @@ import org.openqa.selenium.mobile.NetworkConnection;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 /**
- * Class for testing issues in a spring-boot container.
+ * Class for testing offline form submission feature.
  */
 public class OfflineFormIT extends ChromeDeviceTest {
 
