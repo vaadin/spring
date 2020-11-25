@@ -44,8 +44,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- These are typically overridden with BOMs -->
-        <vaadin.flow.version>2.3-SNAPSHOT</vaadin.flow.version>
-        <spring-boot.version>2.2.0.RELEASE</spring-boot.version>
+        <vaadin.flow.version>2.4-SNAPSHOT</vaadin.flow.version>
+        <spring-boot.version>2.4.0</spring-boot.version>
 
         <!-- Additional manifest fields -->
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
