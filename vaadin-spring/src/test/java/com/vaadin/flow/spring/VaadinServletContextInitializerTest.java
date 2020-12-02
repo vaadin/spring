@@ -3,24 +3,15 @@ package com.vaadin.flow.spring;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
 import java.util.Collections;
 import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Maps;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.function.DeploymentConfiguration;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.ErrorParameter;
-import com.vaadin.flow.router.HasErrorParameter;
-import com.vaadin.flow.router.NotFoundException;
-import com.vaadin.flow.router.RouteNotFoundError;
-import com.vaadin.flow.server.VaadinServletContext;
-import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
-import com.vaadin.flow.server.startup.DevModeInitializer;
-import com.vaadin.flow.server.startup.ServletDeployer;
-import com.vaadin.flow.spring.router.SpringRouteNotFoundError;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,14 +28,27 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
+import org.springframework.core.task.TaskExecutor;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.ErrorParameter;
+import com.vaadin.flow.router.HasErrorParameter;
+import com.vaadin.flow.router.NotFoundException;
+import com.vaadin.flow.router.RouteNotFoundError;
+import com.vaadin.flow.server.VaadinServletContext;
+import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
+import com.vaadin.flow.server.startup.DevModeInitializer;
+import com.vaadin.flow.server.startup.ServletDeployer;
+import com.vaadin.flow.spring.router.SpringRouteNotFoundError;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({DevModeInitializer.class,
+@PrepareForTest({ DevModeInitializer.class,
         VaadinServletContextInitializer.SpringStubServletConfig.class,
-        VaadinServletContextInitializer.class,
-        ServletDeployer.class,
+        VaadinServletContextInitializer.class, ServletDeployer.class,
         ServletDeployer.StubServletConfig.class,
-        AutoConfigurationPackages.class})
+        AutoConfigurationPackages.class })
 public class VaadinServletContextInitializerTest {
 
     @Mock
@@ -59,9 +63,23 @@ public class VaadinServletContextInitializerTest {
     @Mock
     private DeploymentConfiguration deploymentConfiguration;
 
+    private Properties properties;
+
+    @Mock
+    private TaskExecutor executor;
+
     @Before
     public void init() {
         MockitoAnnotations.openMocks(this);
+
+        properties = new Properties();
+
+        Mockito.when(deploymentConfiguration.getInitParameters())
+                .thenReturn(properties);
+
+        Mockito.when(applicationContext.getBean(TaskExecutor.class))
+                .thenReturn(executor);
+
         PowerMockito.mockStatic(
                 VaadinServletContextInitializer.SpringStubServletConfig.class);
         PowerMockito.mockStatic(ServletDeployer.class);
@@ -71,11 +89,11 @@ public class VaadinServletContextInitializerTest {
     }
 
     @Test
-    public void onStartup_devModeNotInitialized_devModeInitialized() throws Exception {
+    public void onStartup_devModeNotInitialized_devModeInitialized()
+            throws Exception {
         initDefaultMocks();
 
-        VaadinServletContextInitializer vaadinServletContextInitializer =
-                getStubbedVaadinServletContextInitializer();
+        VaadinServletContextInitializer vaadinServletContextInitializer = getStubbedVaadinServletContextInitializer();
 
         // Simulate Spring context start only
         vaadinServletContextInitializer.onStartup(servletContext);
@@ -93,14 +111,17 @@ public class VaadinServletContextInitializerTest {
                     Mockito.any(), Mockito.any(), Mockito.any()));
             theMock.verifyNoMoreInteractions();
         }
+
+        Mockito.verify(applicationContext).getBean(TaskExecutor.class);
+        Assert.assertSame(executor, properties.get(Executor.class));
     }
 
     @Test
-    public void onStartup_devModeAlreadyInitialized_devModeInitializationSkipped() throws Exception {
+    public void onStartup_devModeAlreadyInitialized_devModeInitializationSkipped()
+            throws Exception {
         initDefaultMocks();
 
-        VaadinServletContextInitializer vaadinServletContextInitializer =
-                getStubbedVaadinServletContextInitializer();
+        VaadinServletContextInitializer vaadinServletContextInitializer = getStubbedVaadinServletContextInitializer();
 
         DevModeInitializer devModeInitializer = getStubbedDevModeInitializer();
 
@@ -124,10 +145,12 @@ public class VaadinServletContextInitializerTest {
     }
 
     @Test
-    public void errorParameterServletContextListenerEvent_defaultRouteNotFoundView_defaultRouteNotFoundViewIsRegistered() throws Exception {
+    public void errorParameterServletContextListenerEvent_defaultRouteNotFoundView_defaultRouteNotFoundViewIsRegistered()
+            throws Exception {
         // given
         initDefaultMocks();
-        Runnable when = initRouteNotFoundMocksAndGetContextInitializedMockCall(getStubbedVaadinServletContextInitializer());
+        Runnable when = initRouteNotFoundMocksAndGetContextInitializedMockCall(
+                getStubbedVaadinServletContextInitializer());
 
         // when
         when.run();
@@ -135,28 +158,28 @@ public class VaadinServletContextInitializerTest {
         // then
         ApplicationRouteRegistry registry = ApplicationRouteRegistry
                 .getInstance(new VaadinServletContext(servletContext));
-        final Class<? extends Component> navigationTarget =
-                registry.getErrorNavigationTarget(new NotFoundException()).get().getNavigationTarget();
+        final Class<? extends Component> navigationTarget = registry
+                .getErrorNavigationTarget(new NotFoundException()).get()
+                .getNavigationTarget();
         Assert.assertEquals(SpringRouteNotFoundError.class, navigationTarget);
     }
 
     @Test
-    public void errorParameterServletContextListenerEvent_hasCustomRouteNotFoundViewExtendingRouteNotFoundError_customRouteNotFoundViewIsRegistered() throws Exception {
+    public void errorParameterServletContextListenerEvent_hasCustomRouteNotFoundViewExtendingRouteNotFoundError_customRouteNotFoundViewIsRegistered()
+            throws Exception {
         // given
         initDefaultMocks();
         VaadinServletContextInitializer initializer = getStubbedVaadinServletContextInitializer();
-        Runnable when = initRouteNotFoundMocksAndGetContextInitializedMockCall(initializer);
+        Runnable when = initRouteNotFoundMocksAndGetContextInitializedMockCall(
+                initializer);
 
         class TestErrorView extends RouteNotFoundError {
         }
 
-        PowerMockito.doReturn(Stream.of(TestErrorView.class))
-                .when(initializer,
-                        "findByAnnotationOrSuperType",
-                        Mockito.anyCollection(),
-                        Mockito.any(),
-                        Mockito.anyCollection(),
-                        Mockito.anyCollection());
+        PowerMockito.doReturn(Stream.of(TestErrorView.class)).when(initializer,
+                "findByAnnotationOrSuperType", Mockito.anyCollection(),
+                Mockito.any(), Mockito.anyCollection(),
+                Mockito.anyCollection());
 
         // when
         when.run();
@@ -164,32 +187,34 @@ public class VaadinServletContextInitializerTest {
         // then
         ApplicationRouteRegistry registry = ApplicationRouteRegistry
                 .getInstance(new VaadinServletContext(servletContext));
-        final Class<? extends Component> navigationTarget =
-                registry.getErrorNavigationTarget(new NotFoundException()).get().getNavigationTarget();
+        final Class<? extends Component> navigationTarget = registry
+                .getErrorNavigationTarget(new NotFoundException()).get()
+                .getNavigationTarget();
         Assert.assertEquals(TestErrorView.class, navigationTarget);
     }
 
     @Test
-    public void errorParameterServletContextListenerEvent_hasCustomRouteNotFoundViewImplementingHasErrorParameter_customRouteNotFoundViewIsRegistered() throws Exception {
+    public void errorParameterServletContextListenerEvent_hasCustomRouteNotFoundViewImplementingHasErrorParameter_customRouteNotFoundViewIsRegistered()
+            throws Exception {
         // given
         initDefaultMocks();
         VaadinServletContextInitializer initializer = getStubbedVaadinServletContextInitializer();
-        Runnable when = initRouteNotFoundMocksAndGetContextInitializedMockCall(initializer);
+        Runnable when = initRouteNotFoundMocksAndGetContextInitializedMockCall(
+                initializer);
 
-        class TestErrorView extends Component implements HasErrorParameter<NotFoundException> {
+        class TestErrorView extends Component
+                implements HasErrorParameter<NotFoundException> {
             @Override
-            public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<NotFoundException> parameter) {
+            public int setErrorParameter(BeforeEnterEvent event,
+                    ErrorParameter<NotFoundException> parameter) {
                 return 0;
             }
         }
 
-        PowerMockito.doReturn(Stream.of(TestErrorView.class))
-                .when(initializer,
-                        "findByAnnotationOrSuperType",
-                        Mockito.anyCollection(),
-                        Mockito.any(),
-                        Mockito.anyCollection(),
-                        Mockito.anyCollection());
+        PowerMockito.doReturn(Stream.of(TestErrorView.class)).when(initializer,
+                "findByAnnotationOrSuperType", Mockito.anyCollection(),
+                Mockito.any(), Mockito.anyCollection(),
+                Mockito.anyCollection());
 
         // when
         when.run();
@@ -197,8 +222,9 @@ public class VaadinServletContextInitializerTest {
         // then
         ApplicationRouteRegistry registry = ApplicationRouteRegistry
                 .getInstance(new VaadinServletContext(servletContext));
-        final Class<? extends Component> navigationTarget =
-                registry.getErrorNavigationTarget(new NotFoundException()).get().getNavigationTarget();
+        final Class<? extends Component> navigationTarget = registry
+                .getErrorNavigationTarget(new NotFoundException()).get()
+                .getNavigationTarget();
         Assert.assertEquals(TestErrorView.class, navigationTarget);
     }
 
@@ -210,24 +236,29 @@ public class VaadinServletContextInitializerTest {
         AtomicReference<ServletContextListener> theListener = new AtomicReference<>();
         Mockito.doAnswer(answer -> {
             ServletContextListener listener = answer.getArgument(0);
-            if ("ErrorParameterServletContextListener".equals(
-                    listener.getClass().getSimpleName())) {
+            if ("ErrorParameterServletContextListener"
+                    .equals(listener.getClass().getSimpleName())) {
                 theListener.set(listener);
             }
             return null;
-        }).when(servletContext).addListener(Mockito.any(ServletContextListener.class));
+        }).when(servletContext)
+                .addListener(Mockito.any(ServletContextListener.class));
 
         vaadinServletContextInitializer.onStartup(servletContext);
 
-        Mockito.when(applicationContext.getBeanNamesForType(VaadinScanPackagesRegistrar.VaadinScanPackages.class))
-                .thenReturn(new String[]{});
-        PowerMockito.when(AutoConfigurationPackages.class, "has",
-                applicationContext)
+        Mockito.when(applicationContext.getBeanNamesForType(
+                VaadinScanPackagesRegistrar.VaadinScanPackages.class))
+                .thenReturn(new String[] {});
+        PowerMockito
+                .when(AutoConfigurationPackages.class, "has",
+                        applicationContext)
                 // https://github.com/powermock/powermock/issues/992
                 .thenAnswer((Answer<Boolean>) invocation -> false);
 
-        ServletContextEvent initEventMock = Mockito.mock(ServletContextEvent.class);
-        Mockito.when(initEventMock.getServletContext()).thenReturn(servletContext);
+        ServletContextEvent initEventMock = Mockito
+                .mock(ServletContextEvent.class);
+        Mockito.when(initEventMock.getServletContext())
+                .thenReturn(servletContext);
 
         return () -> {
             theListener.get().contextInitialized(initEventMock);
@@ -236,52 +267,48 @@ public class VaadinServletContextInitializerTest {
 
     private DevModeInitializer getStubbedDevModeInitializer() throws Exception {
         PowerMockito.when(ServletDeployer.StubServletConfig.class,
-                "createDeploymentConfiguration",
-                Mockito.any(),
-                Mockito.any())
+                "createDeploymentConfiguration", Mockito.any(), Mockito.any())
                 // https://github.com/powermock/powermock/issues/992
                 .thenAnswer(
                         (Answer<DeploymentConfiguration>) invocation -> deploymentConfiguration);
 
-        PowerMockito.when(DevModeInitializer.class,
-                "isDevModeAlreadyStarted",
-                servletContext)
-                .thenCallRealMethod();
+        PowerMockito.when(DevModeInitializer.class, "isDevModeAlreadyStarted",
+                servletContext).thenCallRealMethod();
 
         return new DevModeInitializer();
     }
 
-    private VaadinServletContextInitializer getStubbedVaadinServletContextInitializer() throws Exception {
-        VaadinServletContextInitializer vaadinServletContextInitializerMock =
-                PowerMockito.spy(new VaadinServletContextInitializer(applicationContext));
+    private VaadinServletContextInitializer getStubbedVaadinServletContextInitializer()
+            throws Exception {
+        VaadinServletContextInitializer vaadinServletContextInitializerMock = PowerMockito
+                .spy(new VaadinServletContextInitializer(applicationContext));
 
-        PowerMockito.when(VaadinServletContextInitializer.SpringStubServletConfig.class,
-                "createDeploymentConfiguration",
-                Mockito.any(),
-                Mockito.any(),
+        PowerMockito.when(
+                VaadinServletContextInitializer.SpringStubServletConfig.class,
+                "createDeploymentConfiguration", Mockito.any(), Mockito.any(),
                 // https://github.com/powermock/powermock/issues/992
                 Mockito.any()).thenAnswer(
                         (Answer<DeploymentConfiguration>) invocation -> deploymentConfiguration);
 
-        PowerMockito.doReturn(Stream.empty())
-                .when(vaadinServletContextInitializerMock,
-                        "findByAnnotationOrSuperType",
-                        Mockito.anyCollection(),
-                        Mockito.any(),
-                        Mockito.anyCollection(),
-                        Mockito.anyCollection());
+        PowerMockito.doReturn(Stream.empty()).when(
+                vaadinServletContextInitializerMock,
+                "findByAnnotationOrSuperType", Mockito.anyCollection(),
+                Mockito.any(), Mockito.anyCollection(),
+                Mockito.anyCollection());
 
         Mockito.doAnswer(answer -> {
-            ServletContextListener devModeListener =
-                    answer.getArgument(0);
-            if ("DevModeServletContextListener".equals(
-                    devModeListener.getClass().getSimpleName())) {
-                devModeListener.contextInitialized(new ServletContextEvent(servletContext));
+            ServletContextListener devModeListener = answer.getArgument(0);
+            if ("DevModeServletContextListener"
+                    .equals(devModeListener.getClass().getSimpleName())) {
+                devModeListener.contextInitialized(
+                        new ServletContextEvent(servletContext));
             }
             return null;
-        }).when(servletContext).addListener(Mockito.any(ServletContextListener.class));
+        }).when(servletContext)
+                .addListener(Mockito.any(ServletContextListener.class));
 
-        ServletDeployer.logAppStartupToConsole(Mockito.any(), Mockito.anyBoolean());
+        ServletDeployer.logAppStartupToConsole(Mockito.any(),
+                Mockito.anyBoolean());
 
         return vaadinServletContextInitializerMock;
     }
@@ -294,18 +321,18 @@ public class VaadinServletContextInitializerTest {
     }
 
     private void mockServletContext() {
-        final Map<String, Object> servletContextAttributesMap = Maps.newHashMap();
+        final Map<String, Object> servletContextAttributesMap = Maps
+                .newHashMap();
         Mockito.doAnswer(answer -> {
-                    String key = answer.getArgument(0, String.class);
-                    Object value = answer.getArgument(1, Object.class);
-                    servletContextAttributesMap.putIfAbsent(key, value);
-                    return null;
-                })
-                .when(servletContext)
-                .setAttribute(Mockito.anyString(), Mockito.any());
+            String key = answer.getArgument(0, String.class);
+            Object value = answer.getArgument(1, Object.class);
+            servletContextAttributesMap.putIfAbsent(key, value);
+            return null;
+        }).when(servletContext).setAttribute(Mockito.anyString(),
+                Mockito.any());
         Mockito.when(servletContext.getAttribute(Mockito.anyString()))
-                .thenAnswer(answer ->
-                        servletContextAttributesMap.get(answer.getArgument(0, String.class)));
+                .thenAnswer(answer -> servletContextAttributesMap
+                        .get(answer.getArgument(0, String.class)));
         Mockito.when(servletContext.getServletRegistrations())
                 .thenReturn(Maps.newHashMap());
     }
@@ -323,6 +350,7 @@ public class VaadinServletContextInitializerTest {
     }
 
     private void mockApplicationContext() {
-        Mockito.when(applicationContext.getEnvironment()).thenReturn(environment);
+        Mockito.when(applicationContext.getEnvironment())
+                .thenReturn(environment);
     }
 }
