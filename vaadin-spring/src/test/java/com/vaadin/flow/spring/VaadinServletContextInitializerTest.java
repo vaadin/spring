@@ -5,13 +5,12 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Maps;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,7 +71,7 @@ public class VaadinServletContextInitializerTest {
         MockitoAnnotations.openMocks(this);
 
         Mockito.when(applicationContext.getBeansOfType(TaskExecutor.class))
-            .thenReturn(Collections.singletonMap("foo", executor));
+                .thenReturn(Collections.singletonMap("foo", executor));
 
         PowerMockito.mockStatic(
                 VaadinServletContextInitializer.SpringStubServletConfig.class);
@@ -108,7 +107,7 @@ public class VaadinServletContextInitializerTest {
             theMock.verifyNoMoreInteractions();
         }
 
-        Mockito.verify(applicationContext).getBean(TaskExecutor.class);
+        Mockito.verify(applicationContext).getBeansOfType(TaskExecutor.class);
         Mockito.verify(servletContext).setAttribute(
                 Mockito.eq(Lookup.class.getName()), capture.capture());
         Lookup lookup = capture.getValue();
@@ -315,8 +314,7 @@ public class VaadinServletContextInitializerTest {
     }
 
     private void mockServletContext() {
-        final Map<String, Object> servletContextAttributesMap = Maps
-                .newHashMap();
+        final Map<String, Object> servletContextAttributesMap = new HashMap<>();
         Mockito.doAnswer(answer -> {
             String key = answer.getArgument(0, String.class);
             Object value = answer.getArgument(1, Object.class);
@@ -328,12 +326,12 @@ public class VaadinServletContextInitializerTest {
                 .thenAnswer(answer -> servletContextAttributesMap
                         .get(answer.getArgument(0, String.class)));
         Mockito.when(servletContext.getServletRegistrations())
-                .thenReturn(Maps.newHashMap());
+                .thenReturn(new HashMap<>());
     }
 
     private void mockEnvironment() {
-        Mockito.when(environment.resolveRequiredPlaceholders(StringUtils.EMPTY))
-                .thenReturn(StringUtils.EMPTY);
+        Mockito.when(environment.resolveRequiredPlaceholders(""))
+                .thenReturn("");
     }
 
     private void mockDeploymentConfiguration() {
