@@ -71,8 +71,8 @@ public class VaadinServletContextInitializerTest {
     public void init() {
         MockitoAnnotations.openMocks(this);
 
-        Mockito.when(applicationContext.getBean(TaskExecutor.class))
-                .thenReturn(executor);
+        Mockito.when(applicationContext.getBeansOfType(TaskExecutor.class))
+            .thenReturn(Collections.singletonMap("foo", executor));
 
         PowerMockito.mockStatic(
                 VaadinServletContextInitializer.SpringStubServletConfig.class);
