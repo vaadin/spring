@@ -43,11 +43,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.gentyref.GenericTypeReflector;
-
-import com.vaadin.flow.internal.ReflectTools;
-import com.vaadin.flow.router.NotFoundException;
-import com.vaadin.flow.router.RouteNotFoundError;
-import com.vaadin.flow.server.startup.ServletDeployer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -69,10 +64,13 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.WebComponentExporter;
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.router.HasErrorParameter;
+import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.RouteNotFoundError;
 import com.vaadin.flow.server.AmbiguousRouteConfigurationException;
 import com.vaadin.flow.server.DeploymentConfigurationFactory;
 import com.vaadin.flow.server.DevModeHandler;
@@ -86,6 +84,7 @@ import com.vaadin.flow.server.startup.AnnotationValidator;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
 import com.vaadin.flow.server.startup.DevModeInitializer;
+import com.vaadin.flow.server.startup.ServletDeployer;
 import com.vaadin.flow.server.startup.ServletVerifier;
 import com.vaadin.flow.server.startup.VaadinAppShellInitializer;
 import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializer;
@@ -124,7 +123,7 @@ public class VaadinServletContextInitializer
             "org/aspectj", "org/bouncycastle", "org/dom4j", "org/easymock",
             "org/eclipse/persistence", "org/hamcrest", "org/hibernate",
             "org/javassist", "org/jboss", "org/jsoup", "org/seleniumhq",
-            "org/slf4j", "org/atmosphere", "org/springframework", 
+            "org/slf4j", "org/atmosphere", "org/springframework",
             "org/webjars/bowergithub", "org/yaml",
 
             "java/", "javax/", "javafx/", "com/sun/", "oracle/deploy",
@@ -134,9 +133,9 @@ public class VaadinServletContextInitializer
 
             "com/intellij/", "org/jetbrains").collect(Collectors.toList());
 
-   /**
-     * Packages that should be scanned by default and can't be overriden by
-     * a custom list.
+    /**
+     * Packages that should be scanned by default and can't be overriden by a
+     * custom list.
      */
     private static final List<String> DEFAULT_SCAN_ONLY = Stream
             .of(Component.class.getPackage().getName(),
@@ -301,12 +300,14 @@ public class VaadinServletContextInitializer
             Set<Class<? extends Component>> errorComponents = findBySuperType(
                     getErrorParameterPackages(), HasErrorParameter.class)
                             .filter(Component.class::isAssignableFrom)
-                            // Replace Flow default with custom version for Spring
+                            // Replace Flow default with custom version for
+                            // Spring
                             .filter(clazz -> clazz != RouteNotFoundError.class)
                             .map(clazz -> (Class<? extends Component>) clazz)
-                    .collect(Collectors.toSet());
+                            .collect(Collectors.toSet());
 
-            // If there is no custom HasErrorParameter<? super NotFoundException>
+            // If there is no custom HasErrorParameter<? super
+            // NotFoundException>
             // add SpringRouteNotFoundError, with Spring Boot specific hints
             if (errorComponents.stream().noneMatch(clazz -> {
                 Class<?> exceptionType = ReflectTools.getGenericInterfaceType(
@@ -364,13 +365,18 @@ public class VaadinServletContextInitializer
                     .createDeploymentConfiguration(this.getClass(), event,
                             appContext);
 
-            if (config == null || config.isProductionMode() ||
-                    !config.enableDevServer() ||
-                    isDevModeAlreadyStarted(event.getServletContext())) {
+            if (config == null || config.isProductionMode()
+                    || !config.enableDevServer()
+                    || isDevModeAlreadyStarted(event.getServletContext())) {
                 return;
             }
-            config.getInitParameters().put(Executor.class,
-                    appContext.getBean(TaskExecutor.class));
+
+            Map<String, TaskExecutor> executors = appContext
+                    .getBeansOfType(TaskExecutor.class);
+            if (!executors.isEmpty()) {
+                config.getInitParameters().put(Executor.class,
+                        executors.values().iterator().next());
+            }
 
             Set<String> basePackages;
             if (isScanOnlySet()) {
@@ -441,8 +447,7 @@ public class VaadinServletContextInitializer
         }
 
         private boolean isScanOnlySet() {
-            return customScanOnly != null
-                    && !customScanOnly.isEmpty();
+            return customScanOnly != null && !customScanOnly.isEmpty();
         }
 
         private boolean isDevModeAlreadyStarted(ServletContext servletContext) {
@@ -653,9 +658,11 @@ public class VaadinServletContextInitializer
     }
 
     private Collection<String> getErrorParameterPackages() {
-        return Stream.concat(
-                Stream.of(HasErrorParameter.class.getPackage().getName()),
-                getDefaultPackages().stream()).collect(Collectors.toSet());
+        return Stream
+                .concat(Stream
+                        .of(HasErrorParameter.class.getPackage().getName()),
+                        getDefaultPackages().stream())
+                .collect(Collectors.toSet());
     }
 
     private List<String> getDefaultPackages() {
@@ -686,10 +693,9 @@ public class VaadinServletContextInitializer
 
         private final PrefixTree scanNever = new PrefixTree(DEFAULT_SCAN_NEVER);
 
-        private final PrefixTree scanAlways = new PrefixTree(
-                DEFAULT_SCAN_ONLY.stream()
-                        .map(packageName -> packageName.replace('.', '/'))
-                        .collect(Collectors.toList()));
+        private final PrefixTree scanAlways = new PrefixTree(DEFAULT_SCAN_ONLY
+                .stream().map(packageName -> packageName.replace('.', '/'))
+                .collect(Collectors.toList()));
 
         public CustomResourceLoader(ResourceLoader resourceLoader,
                 List<String> addedScanNever) {
@@ -766,8 +772,7 @@ public class VaadinServletContextInitializer
         }
 
         private boolean shouldPathBeScanned(String path) {
-            return scanAlways.hasPrefix(path)
-                    || !scanNever.hasPrefix(path);
+            return scanAlways.hasPrefix(path) || !scanNever.hasPrefix(path);
         }
     }
 
