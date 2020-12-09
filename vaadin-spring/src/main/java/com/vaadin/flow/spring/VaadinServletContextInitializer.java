@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.gentyref.GenericTypeReflector;
-import com.vaadin.flow.server.startup.ServletDeployer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -81,6 +80,7 @@ import com.vaadin.flow.server.startup.AnnotationValidator;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
 import com.vaadin.flow.server.startup.DevModeInitializer;
+import com.vaadin.flow.server.startup.ServletDeployer;
 import com.vaadin.flow.server.startup.ServletVerifier;
 import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializer;
 import com.vaadin.flow.server.startup.WebComponentExporterAwareValidator;
@@ -117,7 +117,7 @@ public class VaadinServletContextInitializer
             "org/aspectj", "org/bouncycastle", "org/dom4j", "org/easymock",
             "org/eclipse/persistence", "org/hamcrest", "org/hibernate",
             "org/javassist", "org/jboss", "org/jsoup", "org/seleniumhq",
-            "org/slf4j", "org/atmosphere", "org/springframework", 
+            "org/slf4j", "org/atmosphere", "org/springframework",
             "org/webjars/bowergithub", "org/yaml",
 
             "java/", "javax/", "javafx/", "com/sun/", "oracle/deploy",
@@ -127,9 +127,9 @@ public class VaadinServletContextInitializer
 
             "com/intellij/", "org/jetbrains").collect(Collectors.toList());
 
-   /**
-     * Packages that should be scanned by default and can't be overriden by
-     * a custom list.
+    /**
+     * Packages that should be scanned by default and can't be overriden by a
+     * custom list.
      */
     private static final List<String> DEFAULT_SCAN_ONLY = Stream
             .of(Component.class.getPackage().getName(),
@@ -345,8 +345,12 @@ public class VaadinServletContextInitializer
                     || !config.enableDevServer()) {
                 return;
             }
-            config.getInitParameters().put(Executor.class,
-                    appContext.getBean(TaskExecutor.class));
+            Map<String, TaskExecutor> executors = appContext
+                    .getBeansOfType(TaskExecutor.class);
+            if (!executors.isEmpty()) {
+                config.getInitParameters().put(Executor.class,
+                        executors.values().iterator().next());
+            }
 
             Set<String> basePackages;
             if (isScanOnlySet()) {
@@ -377,8 +381,10 @@ public class VaadinServletContextInitializer
                 throw new RuntimeException(
                         "Unable to initialize Vaadin DevModeHandler", e);
             }
-            // to make sure the user knows the application is ready, show notification to the user
-            ServletDeployer.logAppStartupToConsole(event.getServletContext(), true);
+            // to make sure the user knows the application is ready, show
+            // notification to the user
+            ServletDeployer.logAppStartupToConsole(event.getServletContext(),
+                    true);
         }
 
         @Override
@@ -412,8 +418,7 @@ public class VaadinServletContextInitializer
         }
 
         private boolean isScanOnlySet() {
-            return customScanOnly != null
-                    && !customScanOnly.isEmpty();
+            return customScanOnly != null && !customScanOnly.isEmpty();
         }
     }
 
@@ -632,10 +637,9 @@ public class VaadinServletContextInitializer
 
         private final PrefixTree scanNever = new PrefixTree(DEFAULT_SCAN_NEVER);
 
-        private final PrefixTree scanAlways = new PrefixTree(
-                DEFAULT_SCAN_ONLY.stream()
-                        .map(packageName -> packageName.replace('.', '/'))
-                        .collect(Collectors.toList()));
+        private final PrefixTree scanAlways = new PrefixTree(DEFAULT_SCAN_ONLY
+                .stream().map(packageName -> packageName.replace('.', '/'))
+                .collect(Collectors.toList()));
 
         public CustomResourceLoader(ResourceLoader resourceLoader,
                 List<String> addedScanNever) {
@@ -712,8 +716,7 @@ public class VaadinServletContextInitializer
         }
 
         private boolean shouldPathBeScanned(String path) {
-            return scanAlways.hasPrefix(path)
-                    || !scanNever.hasPrefix(path);
+            return scanAlways.hasPrefix(path) || !scanNever.hasPrefix(path);
         }
     }
 
