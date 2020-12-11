@@ -131,7 +131,7 @@ public class VaadinServletContextInitializer
 
             "com/intellij/", "org/jetbrains").collect(Collectors.toList());
 
-   /**
+    /**
      * Packages that should be scanned by default and can't be overriden by
      * a custom list.
      */
