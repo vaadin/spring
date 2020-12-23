@@ -16,9 +16,14 @@
 package com.vaadin.flow.spring;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.vaadin.flow.server.VaadinContext;
@@ -36,6 +41,20 @@ import com.vaadin.flow.server.startup.DefaultApplicationConfigurationFactory;
 public class SpringApplicationConfigurationFactory
         extends DefaultApplicationConfigurationFactory {
 
+    @Component
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    private static class AppContextHolder {
+
+        @Autowired
+        private ApplicationContext context;
+
+        private static AtomicReference<AppContextHolder> self = new AtomicReference<>();
+
+        private AppContextHolder() {
+            self.set(this);
+        }
+    }
+
     @Override
     protected ApplicationConfigurationImpl doCreate(VaadinContext context,
             FallbackChunk chunk, Map<String, String> properties) {
@@ -43,8 +62,14 @@ public class SpringApplicationConfigurationFactory
         // get the object of this class as a Spring bean (it comes from standard
         // WAR Lookup which instantiates everything directly via default CTOR)
         VaadinServletContext servletContext = (VaadinServletContext) context;
-        WebApplicationContext appContext = WebApplicationContextUtils
+        ApplicationContext appContext = WebApplicationContextUtils
                 .getWebApplicationContext(servletContext.getContext());
+        // sometimes for deployable WAR (couldn't find exact circumstances) the
+        // web app context is not yet available here, let's use a hack to get an
+        // app context from Spring singelton bean
+        if (appContext == null) {
+            appContext = AppContextHolder.self.get().context;
+        }
         Environment env = appContext.getBean(Environment.class);
         // Collect any vaadin.XZY properties from application.properties
         SpringServlet.PROPERTY_NAMES.stream()
