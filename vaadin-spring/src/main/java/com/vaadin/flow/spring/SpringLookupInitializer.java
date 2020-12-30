@@ -26,11 +26,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -106,9 +103,7 @@ public class SpringLookupInitializer extends LookupInitializer {
 
     }
 
-    @Component
-    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    private static class SpringApplicationContextInit
+    static class SpringApplicationContextInit
             implements ApplicationContextAware {
 
         @Override

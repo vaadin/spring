@@ -16,10 +16,12 @@
 package com.vaadin.flow.spring;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.vaadin.flow.server.startup.ApplicationConfigurationFactory;
+import com.vaadin.flow.spring.SpringLookupInitializer.SpringApplicationContextInit;
 
 /**
  * Vaadin Application Spring configuration.
@@ -44,5 +46,16 @@ public class VaadinApplicaitonConfiguration {
     @ConditionalOnMissingBean
     public ApplicationConfigurationFactory defaultApplicationConfigurationFactory() {
         return new SpringApplicationConfigurationFactory();
+    }
+
+    /**
+     * Creates an application context initializer for lookup initializer
+     * {@link SpringLookupInitializer}.
+     * 
+     * @return an application context initializer
+     */
+    @Bean
+    public ApplicationContextAware vaadinApplicationContextInitializer() {
+        return new SpringApplicationContextInit();
     }
 }

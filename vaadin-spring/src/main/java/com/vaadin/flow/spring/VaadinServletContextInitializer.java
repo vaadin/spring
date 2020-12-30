@@ -233,9 +233,11 @@ public class VaadinServletContextInitializer
                 return;
             }
 
-            Set<Class<?>> classes = findByAnnotationOrSuperType(
-                    getLookupPackages(), appContext, Collections.emptyList(),
-                    getServiceTypes()).collect(Collectors.toSet());
+            Set<Class<?>> classes = Stream.concat(
+                    findByAnnotationOrSuperType(getLookupPackages(), appContext,
+                            Collections.emptyList(), getServiceTypes()),
+                    Stream.of(SpringLookupInitializer.class))
+                    .collect(Collectors.toSet());
             process(classes, event.getServletContext());
         }
 
