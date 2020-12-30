@@ -32,7 +32,6 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.DispatcherServlet;
 
 import com.vaadin.flow.server.Constants;
-import com.vaadin.flow.spring.annotation.VaadinApplicaitonConfiguration;
 
 /**
  * Abstract Vaadin Spring MVC {@link WebApplicationInitializer}.

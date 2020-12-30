@@ -13,14 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.spring.annotation;
+package com.vaadin.flow.spring;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.vaadin.flow.server.startup.ApplicationConfigurationFactory;
-import com.vaadin.flow.spring.SpringApplicationConfigurationFactory;
 
 /**
  * Vaadin Application Spring configuration.

@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.VaadinApplicaitonConfiguration;
 import com.vaadin.flow.spring.VaadinScanPackagesRegistrar;
 import com.vaadin.flow.spring.VaadinScopesConfig;
 import com.vaadin.flow.spring.VaadinServletConfiguration;
