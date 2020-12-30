@@ -61,7 +61,8 @@ import com.vaadin.flow.spring.VaadinServletConfiguration;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Import({ VaadinScopesConfig.class, VaadinServletConfiguration.class,
-        VaadinScanPackagesRegistrar.class })
+        VaadinScanPackagesRegistrar.class,
+        VaadinApplicaitonConfiguration.class })
 public @interface EnableVaadin {
 
     /**
@@ -69,6 +70,7 @@ public @interface EnableVaadin {
      * <p>
      * If packages are not specified then default Spring Boot application
      * package is used.
+     * 
      * @return the base packages to scan
      */
     String[] value() default {};
