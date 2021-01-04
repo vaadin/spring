@@ -9,7 +9,7 @@ import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
  * Simple Vaadin Connect Service definition.
  */
 @Endpoint
-public class PackagePrivateEndpoint {
+class PackagePrivateEndpoint {
 
     public String hello(String name, @Nullable String title) {
         return "Hello, " + (title != null ? title + " " : "") + name + "!";
