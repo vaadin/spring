@@ -30,7 +30,7 @@ import com.vaadin.testbench.TestBenchElement;
 /**
  * Class for testing issues in a spring-boot container.
  */
-@Ignore
+@Ignore("Ignored because of https://github.com/vaadin/flow/issues/9751")
 public class AppViewIT extends ChromeBrowserTest {
 
     private void openTestUrl(String url) {

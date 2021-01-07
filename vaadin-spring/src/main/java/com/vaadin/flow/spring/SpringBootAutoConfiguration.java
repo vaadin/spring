@@ -42,7 +42,7 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 @AutoConfigureBefore(WebMvcAutoConfiguration.class)
 @ConditionalOnClass(ServletContextInitializer.class)
 @EnableConfigurationProperties(VaadinConfigurationProperties.class)
-@Import({ VaadinApplicaitonConfiguration.class,
+@Import({ VaadinApplicationConfiguration.class,
         VaadinServletConfiguration.class })
 public class SpringBootAutoConfiguration {
 

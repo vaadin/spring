@@ -34,7 +34,7 @@ import com.vaadin.flow.spring.SpringLookupInitializer.SpringApplicationContextIn
  *
  */
 @Configuration
-public class VaadinApplicaitonConfiguration {
+public class VaadinApplicationConfiguration {
 
     /**
      * Creates a default {@link ApplicationConfigurationFactory} bean in case

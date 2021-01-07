@@ -112,7 +112,7 @@ public abstract class VaadinMVCWebAppInitializer
         Stream<Class<? extends Object>> configs = Stream.concat(
                 Stream.of(VaadinScopesConfig.class,
                         VaadinServletConfiguration.class,
-                        VaadinApplicaitonConfiguration.class),
+                        VaadinApplicationConfiguration.class),
                 getConfigurationClasses().stream());
         context.register(configs.toArray(Class<?>[]::new));
     }
