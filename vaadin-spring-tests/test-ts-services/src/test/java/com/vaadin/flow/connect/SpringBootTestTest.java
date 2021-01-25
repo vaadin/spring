@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 // https://github.com/vaadin/flow/issues/9792
-public class SpringBootTestIT {
+public class SpringBootTestTest {
 
     @Test
     public void hello() {
