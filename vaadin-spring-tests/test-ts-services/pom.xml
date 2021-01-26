@@ -75,6 +75,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <jmxPort>9009</jmxPort>
+                </configuration>
                 <executions>
                     <!-- start and stop application when running
                         integration tests -->
