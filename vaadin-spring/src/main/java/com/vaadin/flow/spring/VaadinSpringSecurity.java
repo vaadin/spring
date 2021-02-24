@@ -53,7 +53,8 @@ public class VaadinSpringSecurity {
     public static RequestMatcher getDefaultHttpSecurityPermitMatcher() {
         return new OrRequestMatcher(Stream.of(
                 "/",
-                "/vaadinServlet/**")
+                "/vaadinServlet/**",
+                "/VAADIN/**")
                 .map(AntPathRequestMatcher::new)
                 .collect(Collectors.toList()));
     }
@@ -65,7 +66,6 @@ public class VaadinSpringSecurity {
      */
     public static RequestMatcher getDefaultWebSecurityIgnoreMatcher() {
         return new OrRequestMatcher(Stream.of(
-                "/VAADIN/**",
                 "/favicon.ico",
                 "/images/**",
                 "/icons/**",
@@ -89,8 +89,7 @@ public class VaadinSpringSecurity {
         http.authorizeRequests()
                 .requestMatchers(getDefaultHttpSecurityPermitMatcher()).permitAll()
                 // all other requests require authentication
-                .anyRequest().authenticated().
-                and().oauth2ResourceServer().jwt();
+                .anyRequest().authenticated();
     }
 
     /**
