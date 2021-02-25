@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.junit.After;
 import org.junit.Assert;
@@ -52,16 +53,27 @@ public class AppViewIT extends ChromeBrowserTest {
 
     @Test
     public void static_resources_accessible_without_login() throws Exception {
-        verifyResourceAvailable("/images/image.png");
-        verifyResourceAvailable("/icons/icon.png");
+        verifyResponseCode("/images/image.png", 200);
+        verifyResponseCode("/icons/icon.png", 200);
+        verifyResponseCode("/manifest.webmanifest", 200);
+        verifyResponseCode("/sw.js", 200);
+        verifyResponseCode("/sw-runtime-resources-precache.js", 200);
+        verifyResponseCode("/offline.html", 200);
     }
 
-    private void verifyResourceAvailable(String path) throws IOException {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+    @Test
+    public void other_static_resources_secured() throws Exception {
+        // expect redirect
+        verifyResponseCode("/secured.html", 302);
+    }
+
+    private void verifyResponseCode(String path, int expectedCode) throws IOException {
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableRedirectHandling().build();
         HttpGet httpGet = new HttpGet(getRootURL() + path);
         CloseableHttpResponse response = httpClient.execute(httpGet);
         try {
-            Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+            Assert.assertEquals(expectedCode, response.getStatusLine().getStatusCode());
         } finally {
             response.close();
         }
