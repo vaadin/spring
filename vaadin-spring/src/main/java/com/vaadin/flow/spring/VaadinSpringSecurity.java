@@ -68,7 +68,6 @@ public class VaadinSpringSecurity {
     public static RequestMatcher getDefaultWebSecurityIgnoreMatcher() {
         return new OrRequestMatcher(Stream
                 .of(SecurityHelper.PUBLIC_VAADIN_URLS)
-                .filter(pattern -> !pattern.equals("/VAADIN/**"))
                 .map(AntPathRequestMatcher::new)
                 .collect(Collectors.toList()));
     }
