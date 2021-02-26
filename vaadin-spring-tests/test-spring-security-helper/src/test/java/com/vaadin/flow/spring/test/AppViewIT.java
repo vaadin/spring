@@ -23,17 +23,24 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void root_page_should_load() {
-        // when the root is opened
-        getDriver().get(getRootURL());
+    public void root_page_should_require_login() {
+        // when the / route is opened
+        getDriver().get(getRootURL() + "/");
 
-        // then it contains an element and there are no client errors
+        // then it redirects to the default login page
+        waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/login"));
+
+        // when the user logs in
+        login();
+
+        // then it redirects to /secured and there are no client errors
+        waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/"));
         Assert.assertNotNull(findElement(By.id("root")));
         checkLogsForErrors();
     }
 
     @Test
-    public void secured_page_should_require_login() {
+    public void deep_page_should_require_login() {
         // when the /secured route is opened
         getDriver().get(getRootURL() + "/secured");
 
@@ -41,9 +48,7 @@ public class AppViewIT extends ChromeBrowserTest {
         waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/login"));
 
         // when the user logs in
-        findElement(By.id("username")).sendKeys("user");
-        findElement(By.id("password")).sendKeys("user");
-        findElement(By.tagName("button")).click();
+        login();
 
         // then it redirects to /secured and there are no client errors
         waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/secured"));
@@ -65,6 +70,12 @@ public class AppViewIT extends ChromeBrowserTest {
     public void other_static_resources_secured() throws Exception {
         // expect redirect
         verifyResponseCode("/secured.html", 302);
+    }
+
+    private void login() {
+        findElement(By.id("username")).sendKeys("user");
+        findElement(By.id("password")).sendKeys("user");
+        findElement(By.tagName("button")).click();
     }
 
     private void verifyResponseCode(String path, int expectedCode) throws IOException {

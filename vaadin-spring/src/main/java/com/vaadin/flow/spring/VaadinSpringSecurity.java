@@ -25,6 +25,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import com.vaadin.flow.internal.SecurityHelper;
 
 /**
  * Helpers for Spring Security configuration of Vaadin applications.
@@ -51,8 +52,8 @@ public class VaadinSpringSecurity {
      * @return default {@link HttpSecurity} bypass matcher
      */
     public static RequestMatcher getDefaultHttpSecurityPermitMatcher() {
+
         return new OrRequestMatcher(Stream.of(
-                "/",
                 "/vaadinServlet/**",
                 "/VAADIN/**")
                 .map(AntPathRequestMatcher::new)
@@ -65,14 +66,9 @@ public class VaadinSpringSecurity {
      * @return default {@link WebSecurity} ignore matcher
      */
     public static RequestMatcher getDefaultWebSecurityIgnoreMatcher() {
-        return new OrRequestMatcher(Stream.of(
-                "/favicon.ico",
-                "/images/**",
-                "/icons/**",
-                "/manifest.webmanifest",
-                "/sw.js",
-                "/sw-runtime-resources-precache.js",
-                "/offline.html")
+        return new OrRequestMatcher(Stream
+                .of(SecurityHelper.PUBLIC_VAADIN_URLS)
+                .filter(pattern -> !pattern.equals("/VAADIN/**"))
                 .map(AntPathRequestMatcher::new)
                 .collect(Collectors.toList()));
     }
