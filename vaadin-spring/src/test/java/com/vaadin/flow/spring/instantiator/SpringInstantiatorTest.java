@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.spring.instantiator;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -25,10 +29,6 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
@@ -48,6 +48,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.di.ResourceProvider;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.server.Constants;
@@ -164,12 +166,13 @@ public class SpringInstantiatorTest {
     }
 
     public static VaadinServletService getService(ApplicationContext context,
-            Properties configProperties ) throws ServletException {
+            Properties configProperties) throws ServletException {
         return getService(context, configProperties, false);
     }
 
     public static VaadinServletService getService(ApplicationContext context,
-            Properties configProperties, boolean rootMapping) throws ServletException {
+            Properties configProperties, boolean rootMapping)
+            throws ServletException {
         Properties properties = configProperties == null ? new Properties()
                 : configProperties;
 
@@ -199,12 +202,19 @@ public class SpringInstantiatorTest {
         ServletContext servletContext = Mockito.mock(ServletContext.class);
         Mockito.when(config.getServletContext()).thenReturn(servletContext);
 
-        Mockito.when(config.getInitParameterNames())
-                .thenReturn(Collections.enumeration(properties.stringPropertyNames()));
+        Lookup lookup = Mockito.mock(Lookup.class);
+        ResourceProvider provider = Mockito.mock(ResourceProvider.class);
+        Mockito.when(lookup.lookup(ResourceProvider.class))
+                .thenReturn(provider);
+        Mockito.when(servletContext.getAttribute(Lookup.class.getName()))
+                .thenReturn(lookup);
+
+        Mockito.when(config.getInitParameterNames()).thenReturn(
+                Collections.enumeration(properties.stringPropertyNames()));
         Mockito.when(config.getInitParameter(Mockito.anyString()))
                 .thenAnswer(iom -> properties
                         .getProperty(iom.getArgument(0, String.class)));
-            
+
         Mockito.when(servletContext.getInitParameterNames())
                 .thenReturn(Collections.emptyEnumeration());
         servlet.init(config);

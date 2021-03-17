@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.HandlesTypes;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +63,7 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.WebComponentExporter;
+import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.router.HasErrorParameter;
 import com.vaadin.flow.router.Route;
@@ -80,6 +82,7 @@ import com.vaadin.flow.server.startup.AnnotationValidator;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
 import com.vaadin.flow.server.startup.DevModeInitializer;
+import com.vaadin.flow.server.startup.LookupInitializer;
 import com.vaadin.flow.server.startup.ServletDeployer;
 import com.vaadin.flow.server.startup.ServletVerifier;
 import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializer;
@@ -166,6 +169,55 @@ public class VaadinServletContextInitializer
             return super.isCandidateComponent(beanDefinition)
                     || beanDefinition.getMetadata().isAbstract();
         }
+    }
+
+    private static class CompositeServletContextListener
+            implements ServletContextListener, Serializable {
+        private final List<ServletContextListener> listeners = new ArrayList<>();
+
+        @Override
+        public void contextInitialized(ServletContextEvent event) {
+            listeners.forEach(listener -> listener.contextInitialized(event));
+        }
+
+        @Override
+        public void contextDestroyed(ServletContextEvent event) {
+            listeners.forEach(listener -> listener.contextDestroyed(event));
+        }
+
+        private void addListener(ServletContextListener listener) {
+            listeners.add(listener);
+        }
+
+    }
+
+    private class LookupInitializerListener extends LookupInitializer
+            implements ServletContextListener {
+
+        @Override
+        public void contextInitialized(ServletContextEvent event) {
+            VaadinServletContext vaadinContext = new VaadinServletContext(
+                    event.getServletContext());
+            if (vaadinContext.getAttribute(Lookup.class) != null) {
+                return;
+            }
+
+            // intentionally make annotation unmodifiable empty list because
+            // LookupInitializer doesn't have annotations at the moment
+            List<Class<? extends Annotation>> annotations = Collections
+                    .emptyList();
+            List<Class<?>> types = new ArrayList<>();
+            collectHandleTypes(LookupInitializer.class, annotations, types);
+            Set<Class<?>> classes = findByAnnotationOrSuperType(
+                    getDefaultPackages(), appContext, Collections.emptyList(),
+                    types).collect(Collectors.toSet());
+            try {
+                process(classes, event.getServletContext());
+            } catch (ServletException exception) {
+                throw new RuntimeException(exception);
+            }
+        }
+
     }
 
     private class RouteServletContextListener extends
@@ -363,7 +415,8 @@ public class VaadinServletContextInitializer
 
             List<Class<? extends Annotation>> annotations = new ArrayList<>();
             List<Class<?>> superTypes = new ArrayList<>();
-            collectDevModeTypes(annotations, superTypes);
+            collectHandleTypes(DevModeInitializer.class, annotations,
+                    superTypes);
 
             Set<Class<?>> classes = findByAnnotationOrSuperType(basePackages,
                     customLoader, annotations, superTypes)
@@ -399,22 +452,6 @@ public class VaadinServletContextInitializer
                 npmPackages.addAll(customScanOnly);
             }
             return npmPackages;
-        }
-
-        @SuppressWarnings("unchecked")
-        private void collectDevModeTypes(
-                List<Class<? extends Annotation>> annotations,
-                List<Class<?>> superTypes) {
-            HandlesTypes handleTypes = DevModeInitializer.class
-                    .getAnnotation(HandlesTypes.class);
-            assert handleTypes != null;
-            for (Class<?> clazz : handleTypes.value()) {
-                if (clazz.isAnnotation()) {
-                    annotations.add((Class<? extends Annotation>) clazz);
-                } else {
-                    superTypes.add(clazz);
-                }
-            }
         }
 
         private boolean isScanOnlySet() {
@@ -503,12 +540,22 @@ public class VaadinServletContextInitializer
     @Override
     public void onStartup(ServletContext servletContext)
             throws ServletException {
+        VaadinServletContext vaadinContext = new VaadinServletContext(
+                servletContext);
+        servletContext.addListener(createCompositeListener(vaadinContext));
+    }
+
+    private CompositeServletContextListener createCompositeListener(
+            VaadinServletContext context) throws ServletException {
+        CompositeServletContextListener compositeListener = new CompositeServletContextListener();
+
+        compositeListener.addListener(new LookupInitializerListener());
 
         // Verify servlet version also for SpringBoot.
         ServletVerifier.verifyServletVersion();
 
         ApplicationRouteRegistry registry = ApplicationRouteRegistry
-                .getInstance(servletContext);
+                .getInstance(context);
         // If the registry is already initialized then RouteRegistryInitializer
         // has done its job already, skip the custom routes search
         if (registry.getRegisteredRoutes().isEmpty()) {
@@ -521,24 +568,25 @@ public class VaadinServletContextInitializer
              * because an RouteRegistryInitializer has not been executed (end
              * never will).
              */
-            servletContext.addListener(new RouteServletContextListener());
+            compositeListener.addListener(new RouteServletContextListener());
         }
 
-        servletContext.addListener(new ErrorParameterServletContextListener());
+        compositeListener
+                .addListener(new ErrorParameterServletContextListener());
 
-        servletContext
+        compositeListener
                 .addListener(new AnnotationValidatorServletContextListener());
 
-        servletContext.addListener(new DevModeServletContextListener());
+        compositeListener.addListener(new DevModeServletContextListener());
 
         // Skip custom web component builders search if registry already
         // initialized
-        if (!WebComponentConfigurationRegistry
-                .getInstance(new VaadinServletContext(servletContext))
+        if (!WebComponentConfigurationRegistry.getInstance(context)
                 .hasConfigurations()) {
-            servletContext
+            compositeListener
                     .addListener(new WebComponentServletContextListener());
         }
+        return compositeListener;
     }
 
     private Stream<Class<?>> findByAnnotation(Collection<String> packages,
@@ -626,6 +674,20 @@ public class VaadinServletContextInitializer
             packagesList = AutoConfigurationPackages.get(appContext);
         }
         return packagesList;
+    }
+
+    private static void collectHandleTypes(Class<?> clazz,
+            List<Class<? extends Annotation>> annotations,
+            List<Class<?>> superTypes) {
+        HandlesTypes handleTypes = clazz.getAnnotation(HandlesTypes.class);
+        assert handleTypes != null;
+        for (Class<?> type : handleTypes.value()) {
+            if (type.isAnnotation()) {
+                annotations.add((Class<? extends Annotation>) type);
+            } else {
+                superTypes.add(type);
+            }
+        }
     }
 
     /**

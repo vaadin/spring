@@ -66,6 +66,7 @@ public class SpringClassesSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$AnnotationValidatorServletContextListener",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$ErrorParameterServletContextListener",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$DevModeServletContextListener",
+                "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$LookupInitializerListener",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$WebComponentServletContextListener",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$SpringStubServletConfig",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinMVCWebAppInitializer",
@@ -122,11 +123,11 @@ public class SpringClassesSerializableTest extends ClassesSerializableTest {
 
     private TestBeanStore createStore() {
         final Properties initParameters = new Properties();
-        initParameters.setProperty(Constants.SERVLET_PARAMETER_COMPATIBILITY_MODE,
+        initParameters.setProperty(
+                Constants.SERVLET_PARAMETER_COMPATIBILITY_MODE,
                 Boolean.FALSE.toString());
         VaadinService service = new VaadinServletService(new VaadinServlet(),
-                new DefaultDeploymentConfiguration(getClass(),
-                        initParameters));
+                new DefaultDeploymentConfiguration(getClass(), initParameters));
         VaadinSession session = new TestSession(service);
 
         TestBeanStore store = new TestBeanStore(session);
