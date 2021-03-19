@@ -33,11 +33,11 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,13 +57,13 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.WebComponentExporter;
 import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.di.LookupInitializer;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.router.HasErrorParameter;
 import com.vaadin.flow.router.Route;
@@ -82,7 +82,7 @@ import com.vaadin.flow.server.startup.AnnotationValidator;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
 import com.vaadin.flow.server.startup.DevModeInitializer;
-import com.vaadin.flow.server.startup.LookupInitializer;
+import com.vaadin.flow.server.startup.LookupServletContainerInitializer;
 import com.vaadin.flow.server.startup.ServletDeployer;
 import com.vaadin.flow.server.startup.ServletVerifier;
 import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializer;
@@ -191,9 +191,9 @@ public class VaadinServletContextInitializer
 
     }
 
-    private class LookupInitializerListener extends LookupInitializer
+    private class LookupInitializerListener
+            extends LookupServletContainerInitializer
             implements ServletContextListener {
-
         @Override
         public void contextInitialized(ServletContextEvent event) {
             VaadinServletContext vaadinContext = new VaadinServletContext(
@@ -202,20 +202,29 @@ public class VaadinServletContextInitializer
                 return;
             }
 
-            // intentionally make annotation unmodifiable empty list because
-            // LookupInitializer doesn't have annotations at the moment
-            List<Class<? extends Annotation>> annotations = Collections
-                    .emptyList();
-            List<Class<?>> types = new ArrayList<>();
-            collectHandleTypes(LookupInitializer.class, annotations, types);
-            Set<Class<?>> classes = findByAnnotationOrSuperType(
-                    getDefaultPackages(), appContext, Collections.emptyList(),
-                    types).collect(Collectors.toSet());
+            Set<Class<?>> classes = Stream.concat(
+                    findByAnnotationOrSuperType(getLookupPackages(), appContext,
+                            Collections.emptyList(), getServiceTypes()),
+                    Stream.of(SpringLookupInitializer.class))
+                    .collect(Collectors.toSet());
             try {
                 process(classes, event.getServletContext());
             } catch (ServletException exception) {
                 throw new RuntimeException(exception);
             }
+        }
+
+        @Override
+        protected Collection<Class<?>> getServiceTypes() {
+            // intentionally make annotation unmodifiable empty list because
+            // LookupInitializer doesn't have annotations at the moment
+            List<Class<? extends Annotation>> annotations = Collections
+                    .emptyList();
+            List<Class<?>> types = new LinkedList<>();
+            collectHandleTypes(LookupServletContainerInitializer.class,
+                    annotations, types);
+            types.remove(LookupInitializer.class);
+            return types;
         }
 
     }
@@ -397,12 +406,6 @@ public class VaadinServletContextInitializer
                     || !config.enableDevServer()) {
                 return;
             }
-            Map<String, TaskExecutor> executors = appContext
-                    .getBeansOfType(TaskExecutor.class);
-            if (!executors.isEmpty()) {
-                config.getInitParameters().put(Executor.class,
-                        executors.values().iterator().next());
-            }
 
             Set<String> basePackages;
             if (isScanOnlySet()) {
@@ -556,7 +559,8 @@ public class VaadinServletContextInitializer
 
         ApplicationRouteRegistry registry = ApplicationRouteRegistry
                 .getInstance(context);
-        // If the registry is already initialized then RouteRegistryInitializer
+        // If the registry is already initialized then
+        // RouteRegistryInitializer
         // has done its job already, skip the custom routes search
         if (registry.getRegisteredRoutes().isEmpty()) {
             /*
@@ -655,6 +659,10 @@ public class VaadinServletContextInitializer
                         .of(HasErrorParameter.class.getPackage().getName()),
                         getDefaultPackages().stream())
                 .collect(Collectors.toSet());
+    }
+
+    private List<String> getLookupPackages() {
+        return getDefaultPackages();
     }
 
     private List<String> getDefaultPackages() {
