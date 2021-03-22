@@ -23,9 +23,6 @@ import com.vaadin.flow.spring.SpringLookupInitializer.SpringApplicationContextIn
 
 /**
  * Vaadin Application Spring configuration.
- * <p>
- * Registers a default {@link ApplicationConfigurationFactory} for Vaadin web
- * application if there is no developer provided factory available.
  * 
  * @author Vaadin Ltd
  * @since
