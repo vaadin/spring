@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.spring;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,6 +27,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import com.vaadin.flow.internal.SecurityHelper;
+import com.vaadin.flow.server.HandlerHelper;
 
 /**
  * Helpers for Spring Security configuration of Vaadin applications.
@@ -96,5 +98,18 @@ public class VaadinSpringSecurity {
      */
     public static void configure(WebSecurity web)  {
         web.ignoring().requestMatchers(getDefaultWebSecurityIgnoreMatcher());
+    }
+
+    /**
+     * Returns whether the servlet request is Vaadin internal, as decided by the
+     * presence of the {@code v-r} request parameter with a type matching a
+     * {@link HandlerHelper.RequestType}.
+     *
+     * @param request the servlet request
+     * @return {@code true} iff the request is Vaadin internal.
+     */
+    public static boolean isFrameworkInternalRequest(
+            HttpServletRequest request) {
+        return SecurityHelper.isFrameworkInternalRequest(request);
     }
 }
