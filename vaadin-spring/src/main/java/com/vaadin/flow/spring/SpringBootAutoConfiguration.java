@@ -18,6 +18,9 @@ package com.vaadin.flow.spring;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vaadin.flow.spring.security.RequestUtil;
+import com.vaadin.flow.spring.security.VaadinDefaultRequestCache;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -96,4 +99,23 @@ public class SpringBootAutoConfiguration {
         return new VaadinWebsocketEndpointExporter();
     }
 
+    /**
+     * Makes the default request cache available for security configuration.
+     * 
+     * @return the default request cache
+     */
+    @Bean
+    public VaadinDefaultRequestCache vaadinDefaultRequestCache() {
+        return new VaadinDefaultRequestCache();
+    }
+
+    /**
+     * Makes the request util available.
+     * 
+     * @return the request util
+     */
+    @Bean
+    public RequestUtil requestUtil() {
+        return new RequestUtil();
+    }
 }
