@@ -32,9 +32,6 @@ public class RequestUtil {
      */
     public boolean isFrameworkInternalRequest(HttpServletRequest request) {
         String vaadinMapping = configurationProperties.getUrlMapping();
-        if (vaadinMapping.endsWith("/*")) {
-            vaadinMapping = vaadinMapping.substring(0, vaadinMapping.length() - "/*".length());
-        }
         return HandlerHelper.isFrameworkInternalRequest(vaadinMapping, request);
     }
 
