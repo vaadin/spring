@@ -87,6 +87,7 @@ public class SpringClassesSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.spring\\.scopes\\.AbstractScope",
                 "com\\.vaadin\\.flow\\.spring\\.scopes\\.VaadinUIScope",
                 "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinDefaultRequestCache",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinWebSecurityConfigurerAdapter",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$ClassPathScanner",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$CustomResourceLoader"),
                 super.getExcludedPatterns());
