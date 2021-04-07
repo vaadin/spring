@@ -1,5 +1,7 @@
 package com.vaadin.flow.spring.security;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,6 +77,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter extends WebSecurityConf
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry urlRegistry = http
                 .authorizeRequests();
         urlRegistry.requestMatchers(getDefaultHttpSecurityPermitMatcher()).permitAll();
+
         // all other requests require authentication
         urlRegistry.anyRequest().authenticated();
     }
@@ -84,12 +87,19 @@ public abstract class VaadinWebSecurityConfigurerAdapter extends WebSecurityConf
      *
      * @return default {@link HttpSecurity} bypass matcher
      */
-    private static RequestMatcher getDefaultHttpSecurityPermitMatcher() {
-        Stream<String> flowProvided = Stream.of(HandlerHelper.getPublicResourcesRequiringSecurityContext());
-        Stream<String> other = Stream.of("/vaadinServlet/**");
+    private RequestMatcher getDefaultHttpSecurityPermitMatcher() {
+        List<RequestMatcher> matchers = new ArrayList<>();
+        for (String publicResource : HandlerHelper.getPublicResourcesRequiringSecurityContext()) {
+            matchers.add(new AntPathRequestMatcher(publicResource));
+        }
 
-        return new OrRequestMatcher(
-                Stream.concat(flowProvided, other).map(AntPathRequestMatcher::new).collect(Collectors.toList()));
+        matchers.add(new AntPathRequestMatcher("/vaadinServlet/**"));
+
+        // Vaadin internal requests must always be allowed to allow public Flow pages
+        // and/or login page implemented using Flow.
+        matchers.add(requestUtil::isFrameworkInternalRequest);
+
+        return new OrRequestMatcher(matchers);
     }
 
     /**
