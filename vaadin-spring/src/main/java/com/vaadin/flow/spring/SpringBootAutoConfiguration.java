@@ -100,16 +100,6 @@ public class SpringBootAutoConfiguration {
     }
 
     /**
-     * Makes the default request cache available for security configuration.
-     * 
-     * @return the default request cache
-     */
-    @Bean
-    public VaadinDefaultRequestCache vaadinDefaultRequestCache() {
-        return new VaadinDefaultRequestCache();
-    }
-
-    /**
      * Makes the request util available.
      * 
      * @return the request util
