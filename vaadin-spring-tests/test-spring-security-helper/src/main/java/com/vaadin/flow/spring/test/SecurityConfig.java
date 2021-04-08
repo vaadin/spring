@@ -1,9 +1,7 @@
 package com.vaadin.flow.spring.test;
 
-import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
-
-import com.vaadin.flow.spring.VaadinSpringSecurity;
 import com.vaadin.flow.spring.security.VaadinDefaultRequestCache;
+import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

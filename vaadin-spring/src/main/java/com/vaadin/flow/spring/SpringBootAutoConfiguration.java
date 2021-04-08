@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.vaadin.flow.spring.security.RequestUtil;
-import com.vaadin.flow.spring.security.VaadinDefaultRequestCache;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
