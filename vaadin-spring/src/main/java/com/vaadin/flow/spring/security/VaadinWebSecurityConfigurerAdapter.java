@@ -56,11 +56,11 @@ public abstract class VaadinWebSecurityConfigurerAdapter extends WebSecurityConf
     }
 
     /**
-     * Matcher for app shell (index page) and framework internal requests.
+     * Matcher for framework internal requests.
      *
      * @return default {@link HttpSecurity} bypass matcher
      */
-    private static RequestMatcher getDefaultHttpSecurityPermitMatcher() {
+    public static RequestMatcher getDefaultHttpSecurityPermitMatcher() {
         Stream<String> flowProvided = Stream.of(HandlerHelper.getPublicResourcesRequiringSecurityContext());
         Stream<String> other = Stream.of("/vaadinServlet/**");
 
@@ -69,11 +69,11 @@ public abstract class VaadinWebSecurityConfigurerAdapter extends WebSecurityConf
     }
 
     /**
-     * Matcher for Vaadin static resources.
+     * Matcher for Vaadin static (public) resources.
      *
      * @return default {@link WebSecurity} ignore matcher
      */
-    private static RequestMatcher getDefaultWebSecurityIgnoreMatcher() {
+    public static RequestMatcher getDefaultWebSecurityIgnoreMatcher() {
         return new OrRequestMatcher(Stream.of(HandlerHelper.getPublicResources()).map(AntPathRequestMatcher::new)
                 .collect(Collectors.toList()));
     }
