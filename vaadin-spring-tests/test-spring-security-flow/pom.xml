@@ -7,7 +7,7 @@
         <artifactId>vaadin-spring-tests</artifactId>
         <version>17.0-SNAPSHOT</version>
     </parent>
-    <artifactId>test-spring-secturity-flow</artifactId>
+    <artifactId>test-spring-security-flow</artifactId>
     <name>Integration tests for Vaadin Spring Security and Flow</name>
     <packaging>jar</packaging>
     <properties>
