@@ -39,8 +39,11 @@ public class UploadIT extends AbstractSpringTest {
     public void multiFileUpload() throws Exception {
         open();
 
-        waitUntil(driver -> isElementPresent(By.id("upload"))
-                && findElement(By.id("upload")).isDisplayed());
+        waitUntil(driver -> {
+            By selector = By.cssSelector("a[id=upload]");
+            return isElementPresent(selector)
+                    && findElement(selector).isDisplayed();
+        });
 
         File tempFile = createTempFile("foo");
 
