@@ -61,8 +61,8 @@ public class UploadIT extends AbstractSpringTest {
     public void uploadComponentIsInitialized() {
         open();
 
-        waitUntil(driver -> isElementPresent(By.id("upload"))
-                && findElement(By.id("upload")).isDisplayed());
+        waitUntil(driver -> isElementPresent(By.cssSelector("a[id=upload]"))
+                && findElement(By.cssSelector("a[id=upload]")).isDisplayed());
 
         List<TestBenchElement> inputs = $(TestBenchElement.class).id("upload")
                 .$("input").all();
