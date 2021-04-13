@@ -7,7 +7,6 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class AppViewIT extends ChromeBrowserTest {
@@ -26,26 +25,27 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void root_page_should_require_login() {
+    public void root_page_does_not_require_login() {
         // when the / route is opened
         open("");
-
-        // then it redirects to the default login page
-        waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/login"));
-
-        // when the user logs in
-        loginUser();
-
-        // then it redirects to /secured and there are no client errors
-        waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/"));
-        Assert.assertNotNull(findElement(By.id("root")));
+        Assert.assertEquals("Welcome to the Java Bank of Vaadin", $("h1").id("header").getText());
         checkLogsForErrors();
     }
 
     @Test
-    public void deep_page_should_require_login() {
-        // when the /secured route is opened
-        open("secured");
+    public void navigate_to_private_view_prevented() {
+        // when the /private route is opened
+        open("");
+        $("a").attribute("href", "private").first().click();
+
+        // TODO Currently view access control is missing
+        Assert.assertTrue(getDriver().getPageSource().contains("Error creating bean with name"));
+    }
+
+    @Test
+    public void private_page_should_require_login() {
+        // when the /private route is opened
+        open("private");
 
         // then it redirects to the default login page
         waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/login"));
@@ -53,9 +53,10 @@ public class AppViewIT extends ChromeBrowserTest {
         // when the user logs in
         loginUser();
 
-        // then it redirects to /secured and there are no client errors
-        waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/secured"));
-        Assert.assertNotNull(findElement(By.id("secured")));
+        // then it redirects to /private and there are no client errors
+        waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/private"));
+        String balance = $("span").id("balanceText").getText();
+        Assert.assertTrue(balance.startsWith("Hello John the User, your bank account balance is $"));
         checkLogsForErrors();
     }
 
@@ -72,6 +73,7 @@ public class AppViewIT extends ChromeBrowserTest {
         String userResult = getDriver().getPageSource();
         Assert.assertTrue(userResult.contains(contents));
         logout();
+        open("login");
         loginAdmin();
         open(path);
         String adminResult = getDriver().getPageSource();
@@ -95,6 +97,7 @@ public class AppViewIT extends ChromeBrowserTest {
         String userResult = getDriver().getPageSource();
         Assert.assertFalse(userResult.contains(contents));
         logout();
+        open("login");
         loginAdmin();
         open(path);
         String adminResult = getDriver().getPageSource();
@@ -110,7 +113,7 @@ public class AppViewIT extends ChromeBrowserTest {
         open("manifest.webmanifest");
         Assert.assertTrue(getDriver().getPageSource().contains("\"name\":\"Spring Security Helper Test Project\""));
         open("sw.js");
-        Assert.assertTrue(getDriver().getPageSource().contains("self.addEventListener(\"install\",this.install)"));
+        Assert.assertTrue(getDriver().getPageSource().contains("this._installAndActiveListenersAdded"));
         open("sw-runtime-resources-precache.js");
         Assert.assertTrue(getDriver().getPageSource().contains("self.additionalManifestEntries = ["));
     }
@@ -128,11 +131,11 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private void loginUser() {
-        login("user", "user");
+        login("john", "john");
     }
 
     private void loginAdmin() {
-        login("admin", "admin");
+        login("emma", "emma");
     }
 
     private void login(String username, String password) {
