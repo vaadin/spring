@@ -125,8 +125,7 @@ public class RequestUtilTest {
 
     static HttpServletRequest createRequest(String pathInfo, RequestType type,
             Map<String, String> headers) {
-        String uri = "http://localhost:8080"
-                + (pathInfo == null ? "/" : pathInfo);
+        String uri = (pathInfo == null ? "/" : pathInfo);
         MockHttpServletRequest r = new MockHttpServletRequest("GET", uri);
         r.setPathInfo(pathInfo);
         if (type != null) {
