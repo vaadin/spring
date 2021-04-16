@@ -1,11 +1,11 @@
-package com.vaadin.flow.spring.test.service;
+package com.vaadin.flow.spring.flowsecurity.service;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import com.vaadin.flow.spring.test.SecurityUtils;
-import com.vaadin.flow.spring.test.data.Account;
-import com.vaadin.flow.spring.test.data.AccountRepository;
+import com.vaadin.flow.spring.flowsecurity.SecurityUtils;
+import com.vaadin.flow.spring.flowsecurity.data.Account;
+import com.vaadin.flow.spring.flowsecurity.data.AccountRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

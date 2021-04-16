@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.test.data;
+package com.vaadin.flow.spring.flowsecurity.data;
 
 import java.util.Optional;
 

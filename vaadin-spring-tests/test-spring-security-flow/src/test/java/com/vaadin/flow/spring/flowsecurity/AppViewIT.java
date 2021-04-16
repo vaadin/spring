@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.test;
+package com.vaadin.flow.spring.flowsecurity;
 
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;

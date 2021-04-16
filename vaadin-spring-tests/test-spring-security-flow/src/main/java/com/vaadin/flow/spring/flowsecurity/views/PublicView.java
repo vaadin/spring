@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.test.views;
+package com.vaadin.flow.spring.flowsecurity.views;
 
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;

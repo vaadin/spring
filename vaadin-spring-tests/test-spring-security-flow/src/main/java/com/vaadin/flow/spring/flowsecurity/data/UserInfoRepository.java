@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.test.data;
+package com.vaadin.flow.spring.flowsecurity.data;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

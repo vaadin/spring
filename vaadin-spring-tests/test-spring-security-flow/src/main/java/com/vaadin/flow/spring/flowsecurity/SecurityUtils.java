@@ -1,8 +1,8 @@
-package com.vaadin.flow.spring.test;
+package com.vaadin.flow.spring.flowsecurity;
 
 import com.vaadin.flow.server.VaadinServletRequest;
-import com.vaadin.flow.spring.test.data.UserInfo;
-import com.vaadin.flow.spring.test.data.UserInfoRepository;
+import com.vaadin.flow.spring.flowsecurity.data.UserInfo;
+import com.vaadin.flow.spring.flowsecurity.data.UserInfoRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;

@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.test.views;
+package com.vaadin.flow.spring.flowsecurity.views;
 
 import java.util.Optional;
 
@@ -19,8 +19,8 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.spring.test.SecurityUtils;
-import com.vaadin.flow.spring.test.data.UserInfo;
+import com.vaadin.flow.spring.flowsecurity.SecurityUtils;
+import com.vaadin.flow.spring.flowsecurity.data.UserInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 

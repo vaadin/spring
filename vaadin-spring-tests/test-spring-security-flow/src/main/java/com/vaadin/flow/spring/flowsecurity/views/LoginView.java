@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.test.views;
+package com.vaadin.flow.spring.flowsecurity.views;
 
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.login.LoginOverlay;

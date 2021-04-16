@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.test.views;
+package com.vaadin.flow.spring.flowsecurity.views;
 
 import java.math.BigDecimal;
 
@@ -8,8 +8,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.spring.test.SecurityUtils;
-import com.vaadin.flow.spring.test.service.BankService;
+import com.vaadin.flow.spring.flowsecurity.SecurityUtils;
+import com.vaadin.flow.spring.flowsecurity.service.BankService;
 
 @Route(value = "private", layout = MainView.class)
 @PageTitle("Private View")

@@ -1,10 +1,10 @@
-package com.vaadin.flow.spring.test;
+package com.vaadin.flow.spring.flowsecurity;
 
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
-import com.vaadin.flow.spring.test.data.UserInfo;
-import com.vaadin.flow.spring.test.data.UserInfoRepository;
+import com.vaadin.flow.spring.flowsecurity.data.UserInfo;
+import com.vaadin.flow.spring.flowsecurity.data.UserInfoRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

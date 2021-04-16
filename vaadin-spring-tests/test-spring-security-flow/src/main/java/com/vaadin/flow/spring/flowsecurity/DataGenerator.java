@@ -1,12 +1,12 @@
-package com.vaadin.flow.spring.test;
+package com.vaadin.flow.spring.flowsecurity;
 
 import java.math.BigDecimal;
 
 import com.vaadin.flow.spring.annotation.SpringComponent;
-import com.vaadin.flow.spring.test.data.Account;
-import com.vaadin.flow.spring.test.data.AccountRepository;
-import com.vaadin.flow.spring.test.data.UserInfo;
-import com.vaadin.flow.spring.test.data.UserInfoRepository;
+import com.vaadin.flow.spring.flowsecurity.data.Account;
+import com.vaadin.flow.spring.flowsecurity.data.AccountRepository;
+import com.vaadin.flow.spring.flowsecurity.data.UserInfo;
+import com.vaadin.flow.spring.flowsecurity.data.UserInfoRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
