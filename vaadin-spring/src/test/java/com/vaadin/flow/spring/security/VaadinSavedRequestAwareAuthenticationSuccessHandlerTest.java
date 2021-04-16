@@ -43,7 +43,7 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandlerTest {
         Assert.assertEquals("success", loginResponse.getHeader("Result"));
         Assert.assertEquals(200, loginResponse.getStatus());
         Assert.assertNull(loginResponse.getHeader("Saved-url"));
-        Assert.assertEquals("/", loginResponse.getHeader("Target-url"));
+        Assert.assertEquals("/", loginResponse.getHeader("Default-url"));
     }
 
     @Test
@@ -63,7 +63,7 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandlerTest {
         Assert.assertEquals("success", loginResponse.getHeader("Result"));
         Assert.assertEquals(200, loginResponse.getStatus());
         Assert.assertEquals("http://localhost/the-saved-url", loginResponse.getHeader("Saved-url"));
-        Assert.assertEquals("/", loginResponse.getHeader("Target-url"));
+        Assert.assertEquals("/", loginResponse.getHeader("Default-url"));
     }
 
     @Test

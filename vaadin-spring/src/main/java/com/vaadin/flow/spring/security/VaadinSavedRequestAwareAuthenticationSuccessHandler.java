@@ -75,7 +75,7 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler extends SavedRe
             if (savedRequest != null) {
                 response.setHeader("Saved-url", savedRequest.getRedirectUrl());
             }
-            response.setHeader("Target-url", determineTargetUrl(request, response));
+            response.setHeader("Default-url", determineTargetUrl(request, response));
         }
         super.onAuthenticationSuccess(request, response, authentication);
     }
