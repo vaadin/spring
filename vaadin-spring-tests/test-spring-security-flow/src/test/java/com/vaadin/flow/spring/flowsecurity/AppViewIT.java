@@ -13,7 +13,9 @@ public class AppViewIT extends ChromeBrowserTest {
 
     @After
     public void tearDown() {
-        logout();
+        if (getDriver() != null) {
+            logout();
+        }
     }
 
     private void logout() {
@@ -22,6 +24,11 @@ public class AppViewIT extends ChromeBrowserTest {
 
     private void open(String path) {
         getDriver().get(getRootURL() + "/" + path);
+    }
+
+    @Override
+    protected String[] getAdditionalHeadlessChromeOptions() {
+        return new String[] { "--disable-dev-shm-usage" };
     }
 
     @Test
