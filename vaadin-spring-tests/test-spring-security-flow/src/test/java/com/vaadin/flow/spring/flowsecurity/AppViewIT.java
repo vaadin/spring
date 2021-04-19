@@ -7,6 +7,7 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class AppViewIT extends ChromeBrowserTest {
@@ -27,8 +28,9 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     @Override
-    protected String[] getAdditionalHeadlessChromeOptions() {
-        return new String[] { "--disable-dev-shm-usage" };
+    protected void updateHeadlessChromeOptions(ChromeOptions chromeOptions) {
+        super.updateHeadlessChromeOptions(chromeOptions);
+        chromeOptions.addArguments("--disable-dev-shm-usage");
     }
 
     @Test
