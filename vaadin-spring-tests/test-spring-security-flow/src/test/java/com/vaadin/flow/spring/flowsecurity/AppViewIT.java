@@ -1,18 +1,35 @@
 package com.vaadin.flow.spring.flowsecurity;
 
+import java.io.File;
+
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.junit.rules.TestName;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 
+@RunWith(BlockJUnit4ClassRunner.class)
 public class AppViewIT extends ChromeBrowserTest {
 
     private static final String USER_FULLNAME = "John the User";
+
+    @Rule
+    public TestName testName = new TestName();
+
+    @Override
+    public void setup() throws Exception {
+        new File("error-screenshots").mkdirs();
+        System.setProperty("webdriver.chrome.logfile", "error-screenshots/chromedriver.log");
+        System.setProperty("webdriver.chrome.verboseLogging", "true");
+
+        super.setup();
+    }
 
     @After
     public void tearDown() {
@@ -27,12 +44,6 @@ public class AppViewIT extends ChromeBrowserTest {
 
     private void open(String path) {
         getDriver().get(getRootURL() + "/" + path);
-    }
-
-    @Override
-    protected void updateHeadlessChromeOptions(ChromeOptions chromeOptions) {
-        super.updateHeadlessChromeOptions(chromeOptions);
-        chromeOptions.addArguments("--disable-dev-shm-usage");
     }
 
     @Test
