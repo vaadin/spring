@@ -12,6 +12,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class AppViewIT extends ChromeBrowserTest {
 
+    private static final String USER_FULLNAME = "John the User";
+
     @After
     public void tearDown() {
         if (getDriver() != null) {
@@ -52,21 +54,30 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void private_page_should_require_login() {
+    public void redirect_to_view_after_login() {
         // when the /private route is opened
         open("private");
 
         // then it redirects to the default login page
-        waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/login"));
+        assertPathShown("login");
 
         // when the user logs in
         loginUser();
 
         // then it redirects to /private and there are no client errors
-        waitUntil(ExpectedConditions.urlToBe(getRootURL() + "/private"));
-        String balance = $("span").id("balanceText").getText();
-        Assert.assertTrue(balance.startsWith("Hello John the User, your bank account balance is $"));
+        assertPrivatePageShown(USER_FULLNAME);
         checkLogsForErrors();
+    }
+
+    @Test
+    public void redirect_to_resource_after_login() {
+        String contents = "Secret document for admin";
+        String path = "admin-only/secret.txt";
+        open(path);
+        loginAdmin();
+        assertPathShown(path);
+        String result = getDriver().getPageSource();
+        Assert.assertTrue(result.contains(contents));
     }
 
     @Test
@@ -125,6 +136,16 @@ public class AppViewIT extends ChromeBrowserTest {
         Assert.assertTrue(getDriver().getPageSource().contains("this._installAndActiveListenersAdded"));
         open("sw-runtime-resources-precache.js");
         Assert.assertTrue(getDriver().getPageSource().contains("self.additionalManifestEntries = ["));
+    }
+
+    private void assertPathShown(String path) {
+        Assert.assertEquals(getRootURL() + "/" + path, driver.getCurrentUrl());
+    }
+
+    private void assertPrivatePageShown(String fullName) {
+        assertPathShown("private");
+        String balance = $("span").id("balanceText").getText();
+        Assert.assertTrue(balance.startsWith("Hello " + fullName + ", your bank account balance is $"));
     }
 
     @Test
