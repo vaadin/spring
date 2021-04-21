@@ -209,11 +209,17 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private void login(String username, String password) {
+        getLogger().info("login step 1, as " + username);
         LoginFormElement form = $(LoginOverlayElement.class).first().getLoginForm();
+        getLogger().info("login step 2");
         form.getUsernameField().setValue(username);
+        getLogger().info("login step 3");
         form.getPasswordField().setValue(password);
+        getLogger().info("login step 4");
         form.submit();
+        getLogger().info("login step 5");
         waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
+        getLogger().info("login step 6");
     }
 
 }
