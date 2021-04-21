@@ -140,8 +140,6 @@ public class AppViewIT extends ChromeBrowserTest {
         getLogger().info("access_restricted_to_admin step 7");
         open(path);
         getLogger().info("access_restricted_to_admin step 8");
-        assertPathShown("login");
-        getLogger().info("access_restricted_to_admin step 8b");
         String userResult = getDriver().getPageSource();
         getLogger().info("access_restricted_to_admin step 9");
         Assert.assertFalse(userResult.contains(contents));
@@ -150,6 +148,8 @@ public class AppViewIT extends ChromeBrowserTest {
         getLogger().info("access_restricted_to_admin step 11");
         open("login");
         getLogger().info("access_restricted_to_admin step 12");
+        assertPathShown("login");
+        getLogger().info("access_restricted_to_admin step 12b");
         loginAdmin();
         getLogger().info("access_restricted_to_admin step 13");
         open(path);
