@@ -9,6 +9,7 @@ import com.vaadin.flow.internal.AnnotationReader;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.server.HandlerHelper;
+import com.vaadin.flow.server.auth.ViewAccessChecker;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -52,6 +53,9 @@ public abstract class VaadinWebSecurityConfigurerAdapter
     @Autowired
     private RequestUtil requestUtil;
 
+    @Autowired
+    private ViewAccessChecker viewAccessChecker;
+
     /**
      * The paths listed as "ignoring" in this method are handled without any
      * Spring Security involvement. They have no access to any security context
@@ -94,6 +98,9 @@ public abstract class VaadinWebSecurityConfigurerAdapter
 
         // all other requests require authentication
         urlRegistry.anyRequest().authenticated();
+
+        // Enable view access control
+        viewAccessChecker.setEnabled(true);
     }
 
     /**
@@ -163,6 +170,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         formLogin.successHandler(
                 new VaadinSavedRequestAwareAuthenticationSuccessHandler());
         http.logout().logoutSuccessUrl(logoutUrl);
+        viewAccessChecker.setLoginView(fusionLoginViewPath);
     }
 
     /**
@@ -217,6 +225,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
                 new VaadinSavedRequestAwareAuthenticationSuccessHandler());
         http.csrf().ignoringAntMatchers(loginPath);
         http.logout().logoutSuccessUrl(logoutUrl);
+        viewAccessChecker.setLoginView(flowLoginView);
     }
 
 }

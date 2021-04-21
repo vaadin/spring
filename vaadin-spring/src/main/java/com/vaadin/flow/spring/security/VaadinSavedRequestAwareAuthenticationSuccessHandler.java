@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.auth.ViewAccessChecker;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -78,8 +79,16 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler
         @Override
         public void sendRedirect(HttpServletRequest request,
                 HttpServletResponse response, String url) throws IOException {
+            String redirectUrl;
+            if (response.getHeader(SAVED_URL_HEADER) != null) {
+                redirectUrl = response.getHeader(SAVED_URL_HEADER);
+            } else {
+                redirectUrl = url;
+            }
+
             if (!isTypescriptLogin(request)) {
-                super.sendRedirect(request, response, url);
+                response.setHeader(SAVED_URL_HEADER, null);
+                super.sendRedirect(request, response, redirectUrl);
                 return;
             }
 
@@ -123,15 +132,41 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler
             throws ServletException, IOException {
         SavedRequest savedRequest = this.requestCache.getRequest(request,
                 response);
+        String storedServerNavigation = getStoredServerNavigation(request);
+        if (storedServerNavigation != null) {
+            response.setHeader(SAVED_URL_HEADER, storedServerNavigation);
+        } else if (savedRequest != null) {
+            /*
+             * This is here instead of in sendRedirect as we do not want to
+             * fallback to the default URL but instead send that separately.
+             */
+            response.setHeader(SAVED_URL_HEADER, savedRequest.getRedirectUrl());
+        }
+
         if (isTypescriptLogin(request)) {
-            if (savedRequest != null) {
-                response.setHeader(SAVED_URL_HEADER,
-                        savedRequest.getRedirectUrl());
-            }
             response.setHeader(DEFAULT_URL_HEADER,
                     determineTargetUrl(request, response));
         }
+
         super.onAuthenticationSuccess(request, response, authentication);
+    }
+
+    /**
+     * Gets the target URL potentially stored by the server side view access
+     * control.
+     * 
+     * @return a URL if the login dialog was triggered by the user trying to
+     *         perform (server side) navigation to a protected server side view,
+     *         {@code null} otherwise
+     */
+    private static String getStoredServerNavigation(
+            HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return null;
+        }
+        return (String) session
+                .getAttribute(ViewAccessChecker.SESSION_STORED_REDIRECT);
     }
 
     static boolean isTypescriptLogin(HttpServletRequest request) {
