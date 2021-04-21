@@ -15,6 +15,7 @@ public class AppViewIT extends ChromeBrowserTest {
     private static final String ROOT_PAGE_HEADER_TEXT = "Welcome to the Java Bank of Vaadin";
     private static final int SERVER_PORT = 8888;
     private static final String USER_FULLNAME = "John the User";
+    private static final String ADMIN_FULLNAME = "Emma the Admin";
 
     @Override
     protected int getDeploymentPort() {
@@ -59,7 +60,15 @@ public class AppViewIT extends ChromeBrowserTest {
         open("");
         navigateTo("private", false);
         // TODO Currently view access control is missing
-        Assert.assertTrue(getDriver().getPageSource().contains("Error creating bean with name"));
+        // assertLoginViewShown();
+    }
+
+    @Test
+    public void navigate_to_admin_view_prevented() {
+        open("");
+        navigateTo("admin", false);
+        // TODO Currently view access control is missing
+        // assertLoginViewShown();
     }
 
     @Test
@@ -68,6 +77,14 @@ public class AppViewIT extends ChromeBrowserTest {
         assertPathShown("login");
         loginUser();
         assertPrivatePageShown(USER_FULLNAME);
+    }
+
+    @Test
+    public void redirect_to_admin_view_after_login() {
+        open("admin");
+        assertPathShown("login");
+        loginAdmin();
+        assertAdminPageShown(ADMIN_FULLNAME);
     }
 
     @Test
@@ -196,6 +213,13 @@ public class AppViewIT extends ChromeBrowserTest {
         waitUntil(driver -> $("span").attribute("id", "balanceText").exists());
         String balance = $("span").id("balanceText").getText();
         Assert.assertTrue(balance.startsWith("Hello " + fullName + ", your bank account balance is $"));
+    }
+
+    private void assertAdminPageShown(String fullName) {
+        assertPathShown("admin");
+        TestBenchElement welcome = waitUntil(driver -> $("*").id("welcome"));
+        String welcomeText = welcome.getText();
+        Assert.assertEquals("Welcome to the admin page, " + fullName, welcomeText);
     }
 
     private void assertPathShown(String path) {
