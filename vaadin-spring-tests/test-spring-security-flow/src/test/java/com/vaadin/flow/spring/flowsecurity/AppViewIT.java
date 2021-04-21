@@ -119,28 +119,53 @@ public class AppViewIT extends ChromeBrowserTest {
 
     }
 
+    private static Logger getLogger() {
+        return LoggerFactory.getLogger(AppViewIT.class);
+    }
+
     @Test
     public void access_restricted_to_admin() {
+        getLogger().info("Starting access_restricted_to_admin");
         String contents = "Secret document for admin";
+        getLogger().info("access_restricted_to_admin step 2");
         String path = "admin-only/secret.txt";
+        getLogger().info("access_restricted_to_admin step 3");
         open(path);
+        getLogger().info("access_restricted_to_admin step 4");
         String anonResult = getDriver().getPageSource();
+        getLogger().info("access_restricted_to_admin step 5");
         Assert.assertFalse(anonResult.contains(contents));
+        getLogger().info("access_restricted_to_admin step 6");
         loginUser();
+        getLogger().info("access_restricted_to_admin step 7");
         open(path);
+        getLogger().info("access_restricted_to_admin step 8");
         String userResult = getDriver().getPageSource();
+        getLogger().info("access_restricted_to_admin step 9");
         Assert.assertFalse(userResult.contains(contents));
+        getLogger().info("access_restricted_to_admin step 10");
         logout();
+        getLogger().info("access_restricted_to_admin step 11");
         open("login");
+        getLogger().info("access_restricted_to_admin step 12");
         assertPathShown("login");
+        getLogger().info("access_restricted_to_admin step 12b");
         loginAdmin();
+        getLogger().info("access_restricted_to_admin step 13");
         open(path);
+        getLogger().info("access_restricted_to_admin step 14");
         String adminResult = getDriver().getPageSource();
+        getLogger().info("access_restricted_to_admin step 15");
         Assert.assertTrue(adminResult.contains(contents));
+        getLogger().info("access_restricted_to_admin step 16");
         logout();
+        getLogger().info("access_restricted_to_admin step 17");
         open(path);
+        getLogger().info("access_restricted_to_admin step 18");
         String anonResult2 = getDriver().getPageSource();
+        getLogger().info("access_restricted_to_admin step 19");
         Assert.assertFalse(anonResult2.contains(contents));
+        getLogger().info("access_restricted_to_admin step 20");
     }
 
     @Test
@@ -184,16 +209,22 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private void login(String username, String password) {
+        getLogger().info("login step 1, as " + username);
         LoginFormElement form = $(LoginOverlayElement.class).first().getLoginForm();
+        getLogger().info("login step 2");
         form.getUsernameField().setValue(username);
+        getLogger().info("login step 3");
         form.getPasswordField().setValue(password);
+        getLogger().info("login step 4");
         form.submit();
+        getLogger().info("login step 5");
         try {
             // This is only to avoid a Chrome crash on the test cluster
             Thread.sleep(1000);
         } catch (InterruptedException e) {
         }
         waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
+        getLogger().info("login step 6");
     }
 
 }
