@@ -1,6 +1,7 @@
 package com.vaadin.flow.spring.flowsecurity;
 
 import java.io.File;
+import java.io.IOException;
 
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
@@ -222,6 +223,12 @@ public class AppViewIT extends ChromeBrowserTest {
             // This is only to avoid a Chrome crash on the test cluster
             Thread.sleep(1000);
         } catch (InterruptedException e) {
+        }
+        try {
+            testBench().compareScreen(testName.getMethodName() + "-login-finished-" + username);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
         getLogger().info("login step 6");
