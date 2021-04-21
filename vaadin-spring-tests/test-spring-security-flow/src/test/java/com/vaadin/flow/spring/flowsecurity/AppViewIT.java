@@ -218,6 +218,11 @@ public class AppViewIT extends ChromeBrowserTest {
         getLogger().info("login step 4");
         form.submit();
         getLogger().info("login step 5");
+        try {
+            // This is only to avoid a Chrome crash on the test cluster
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
         waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
         getLogger().info("login step 6");
     }
