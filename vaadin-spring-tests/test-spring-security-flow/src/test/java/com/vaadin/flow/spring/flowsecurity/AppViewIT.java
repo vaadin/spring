@@ -5,6 +5,7 @@ import java.io.File;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
+import com.vaadin.testbench.parallel.Browser;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -27,7 +28,7 @@ public class AppViewIT extends ChromeBrowserTest {
         new File("error-screenshots").mkdirs();
         System.setProperty("webdriver.chrome.logfile", "error-screenshots/chromedriver.log");
         System.setProperty("webdriver.chrome.verboseLogging", "true");
-
+        setDesiredCapabilities(Browser.CHROME.getDesiredCapabilities());
         super.setup();
     }
 
