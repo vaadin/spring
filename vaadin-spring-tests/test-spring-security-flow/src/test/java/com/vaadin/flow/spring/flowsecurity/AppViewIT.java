@@ -102,16 +102,14 @@ public class AppViewIT extends ChromeBrowserTest {
     public void navigate_to_private_view_prevented() {
         open("");
         navigateTo("private", false);
-        // TODO Currently view access control is missing
-        // assertLoginViewShown();
+        assertLoginViewShown();
     }
 
     @Test
     public void navigate_to_admin_view_prevented() {
         open("");
         navigateTo("admin", false);
-        // TODO Currently view access control is missing
-        // assertLoginViewShown();
+        assertLoginViewShown();
     }
 
     @Test
@@ -135,6 +133,16 @@ public class AppViewIT extends ChromeBrowserTest {
         open("login");
         loginUser();
         navigateTo("private");
+        clickLogout();
+        assertRootPageShown();
+    }
+
+    @Test
+    public void logout_redirects_to_root_page() {
+        open("login");
+        loginUser();
+        navigateTo("private");
+        assertPrivatePageShown(USER_FULLNAME);
         clickLogout();
         assertRootPageShown();
     }

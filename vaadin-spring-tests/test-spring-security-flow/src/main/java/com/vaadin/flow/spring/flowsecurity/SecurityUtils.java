@@ -1,7 +1,6 @@
 package com.vaadin.flow.spring.flowsecurity;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.spring.flowsecurity.data.UserInfo;
 import com.vaadin.flow.spring.flowsecurity.data.UserInfoRepository;
