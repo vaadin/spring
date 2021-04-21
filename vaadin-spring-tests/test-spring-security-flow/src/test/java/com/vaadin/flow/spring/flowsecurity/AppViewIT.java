@@ -14,6 +14,8 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 public class AppViewIT extends ChromeBrowserTest {
@@ -117,27 +119,51 @@ public class AppViewIT extends ChromeBrowserTest {
 
     }
 
+    private static Logger getLogger() {
+        return LoggerFactory.getLogger(AppViewIT.class);
+    }
+
     @Test
     public void access_restricted_to_admin() {
+        getLogger().info("Starting access_restricted_to_admin");
         String contents = "Secret document for admin";
+        getLogger().info("access_restricted_to_admin step 2");
         String path = "admin-only/secret.txt";
+        getLogger().info("access_restricted_to_admin step 3");
         open(path);
+        getLogger().info("access_restricted_to_admin step 4");
         String anonResult = getDriver().getPageSource();
+        getLogger().info("access_restricted_to_admin step 5");
         Assert.assertFalse(anonResult.contains(contents));
+        getLogger().info("access_restricted_to_admin step 6");
         loginUser();
+        getLogger().info("access_restricted_to_admin step 7");
         open(path);
+        getLogger().info("access_restricted_to_admin step 8");
         String userResult = getDriver().getPageSource();
+        getLogger().info("access_restricted_to_admin step 9");
         Assert.assertFalse(userResult.contains(contents));
+        getLogger().info("access_restricted_to_admin step 10");
         logout();
+        getLogger().info("access_restricted_to_admin step 11");
         open("login");
+        getLogger().info("access_restricted_to_admin step 12");
         loginAdmin();
+        getLogger().info("access_restricted_to_admin step 13");
         open(path);
+        getLogger().info("access_restricted_to_admin step 14");
         String adminResult = getDriver().getPageSource();
+        getLogger().info("access_restricted_to_admin step 15");
         Assert.assertTrue(adminResult.contains(contents));
+        getLogger().info("access_restricted_to_admin step 16");
         logout();
+        getLogger().info("access_restricted_to_admin step 17");
         open(path);
+        getLogger().info("access_restricted_to_admin step 18");
         String anonResult2 = getDriver().getPageSource();
+        getLogger().info("access_restricted_to_admin step 19");
         Assert.assertFalse(anonResult2.contains(contents));
+        getLogger().info("access_restricted_to_admin step 20");
     }
 
     @Test
