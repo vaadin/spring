@@ -28,9 +28,6 @@ public class AppViewIT extends ChromeBrowserTest {
 
     @Override
     public void setup() throws Exception {
-        new File("error-screenshots").mkdirs();
-        System.setProperty("webdriver.chrome.logfile", "error-screenshots/chromedriver.log");
-        System.setProperty("webdriver.chrome.verboseLogging", "true");
         setDesiredCapabilities(Browser.CHROME.getDesiredCapabilities());
         super.setup();
     }
@@ -53,9 +50,13 @@ public class AppViewIT extends ChromeBrowserTest {
     @Test
     public void root_page_does_not_require_login() {
         // when the / route is opened
+        getLogger().info("root_page_does_not_require_login step 1");
         open("");
+        getLogger().info("root_page_does_not_require_login step 2");
         Assert.assertEquals("Welcome to the Java Bank of Vaadin", $("h1").id("header").getText());
+        getLogger().info("root_page_does_not_require_login step 3");
         checkLogsForErrors();
+        getLogger().info("root_page_does_not_require_login step 4");
     }
 
     @Test
