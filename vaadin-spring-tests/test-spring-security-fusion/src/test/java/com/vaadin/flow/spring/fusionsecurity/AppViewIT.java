@@ -19,6 +19,10 @@ public class AppViewIT extends ChromeBrowserTest {
     @After
     public void tearDown() {
         if (getDriver() != null) {
+            checkLogsForErrors(msg -> {
+                return msg.contains(
+                        "admin-only/secret.txt - Failed to load resource: the server responded with a status of 403");
+            });
             logout();
         }
     }
@@ -39,7 +43,6 @@ public class AppViewIT extends ChromeBrowserTest {
     public void root_page_does_not_require_login() {
         open("");
         assertRootPageShown();
-        checkLogsForErrors();
     }
 
     @Test
@@ -59,6 +62,7 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private void navigateTo(String path, boolean assertPathShown) {
+        waitUntil(driver -> $("main-view").exists());
         $("main-view").first().$("a").attribute("href", path).first().click();
         if (assertPathShown) {
             assertPathShown(path);
@@ -66,7 +70,7 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private void assertPathShown(String path) {
-        Assert.assertEquals(getRootURL() + "/" + path, driver.getCurrentUrl());
+        waitUntil(driver -> driver.getCurrentUrl().equals(getRootURL() + "/" + path));
     }
 
     @Test
@@ -76,7 +80,6 @@ public class AppViewIT extends ChromeBrowserTest {
         loginUser();
         waitForPath("private");
         assertPrivatePageShown("John the User");
-        checkLogsForErrors();
     }
 
     @Test
@@ -86,14 +89,15 @@ public class AppViewIT extends ChromeBrowserTest {
         navigateTo("private");
         clickLogout();
         assertRootPageShown();
-        checkLogsForErrors();
     }
 
     private void assertRootPageShown() {
+        waitUntil(drive -> $("h1").attribute("id", "header").exists());
         Assert.assertEquals("Welcome to the TypeScript Bank of Vaadin", $("h1").id("header").getText());
     }
 
     private void assertPrivatePageShown(String fullName) {
+        waitUntil(driver -> $("span").attribute("id", "balanceText").exists());
         String balance = $("span").id("balanceText").getText();
         Assert.assertTrue(balance.startsWith("Hello " + fullName + ", your bank account balance is $"));
     }
@@ -105,7 +109,6 @@ public class AppViewIT extends ChromeBrowserTest {
         assertPrivatePageShown("John the User");
         refresh();
         assertPrivatePageShown("John the User");
-        checkLogsForErrors();
     }
 
     private void refresh() {
