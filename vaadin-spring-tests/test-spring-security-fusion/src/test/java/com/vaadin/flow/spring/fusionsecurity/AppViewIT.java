@@ -129,23 +129,20 @@ public class AppViewIT extends ChromeBrowserTest {
         String path = "all-logged-in/secret.txt";
 
         open(path);
-        String anonResult = getDriver().getPageSource();
-        Assert.assertFalse(anonResult.contains(contents));
+        assertLoginViewShown();
         loginUser();
-        open(path);
-        String userResult = getDriver().getPageSource();
-        Assert.assertTrue(userResult.contains(contents));
+        assertPageContains(contents);
         logout();
-        open("login");
-        loginAdmin();
-        open(path);
-        String adminResult = getDriver().getPageSource();
-        Assert.assertTrue(adminResult.contains(contents));
-        logout();
-        open(path);
-        String anonResult2 = getDriver().getPageSource();
-        Assert.assertFalse(anonResult2.contains(contents));
+        assertRootPageShown();
 
+        open(path);
+        loginAdmin();
+        assertPageContains(contents);
+        logout();
+        assertRootPageShown();
+
+        open(path);
+        assertLoginViewShown();
     }
 
     @Test
@@ -153,22 +150,29 @@ public class AppViewIT extends ChromeBrowserTest {
         String contents = "Secret document for admin";
         String path = "admin-only/secret.txt";
         open(path);
-        String anonResult = getDriver().getPageSource();
-        Assert.assertFalse(anonResult.contains(contents));
+        assertLoginViewShown();
         loginUser();
         open(path);
-        String userResult = getDriver().getPageSource();
-        Assert.assertFalse(userResult.contains(contents));
+        assertForbiddenPage();
         logout();
-        open("login");
-        loginAdmin();
+        assertRootPageShown();
+
         open(path);
+        loginAdmin();
         String adminResult = getDriver().getPageSource();
         Assert.assertTrue(adminResult.contains(contents));
         logout();
         open(path);
-        String anonResult2 = getDriver().getPageSource();
-        Assert.assertFalse(anonResult2.contains(contents));
+        assertLoginViewShown();
+    }
+
+    private void assertForbiddenPage() {
+        assertPageContains("There was an unexpected error (type=Forbidden, status=403).");
+    }
+
+    private void assertPageContains(String contents) {
+        String pageSource = getDriver().getPageSource();
+        Assert.assertTrue(pageSource.contains(contents));
     }
 
     @Test
