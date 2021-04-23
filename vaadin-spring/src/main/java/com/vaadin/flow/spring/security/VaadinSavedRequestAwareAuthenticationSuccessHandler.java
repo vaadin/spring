@@ -89,9 +89,9 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler extends SavedRe
                     response.setHeader(VAADIN_CSRF_HEADER, csrfToken);
                 }
             }
-            Object springCsrfTokenObject = request.getAttribute("_csrf");
-            if (springCsrfTokenObject != null
-                    && springCsrfTokenObject instanceof CsrfToken) {
+            Object springCsrfTokenObject = request
+                    .getAttribute(CsrfToken.class.getName());
+            if (springCsrfTokenObject instanceof CsrfToken) {
                 CsrfToken springCsrfToken = (CsrfToken) springCsrfTokenObject;
                 response.setHeader(SPRING_CSRF_HEADER,
                         springCsrfToken.getHeaderName());
