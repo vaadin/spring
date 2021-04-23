@@ -90,7 +90,6 @@ public class MainView extends AppLayout {
             logout.setId("logout");
             logout.addClickListener(e -> {
                 securityUtils.logout();
-
             });
             layout.add(logout);
         }
@@ -108,7 +107,7 @@ public class MainView extends AppLayout {
 
     private Component[] createMenuItems() {
         Tab[] tabs = new Tab[3];
-        tabs[0] = createTab("Public view", PublicView.class);
+        tabs[0] = createTab("Public", PublicView.class);
         if (userInfo != null) {
             tabs[1] = createTab("Private", PrivateView.class);
         } else {
