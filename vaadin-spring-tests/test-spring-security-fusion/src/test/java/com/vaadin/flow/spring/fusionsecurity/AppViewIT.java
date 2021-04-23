@@ -1,5 +1,10 @@
 package com.vaadin.flow.spring.fusionsecurity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
@@ -25,7 +30,6 @@ public class AppViewIT extends ChromeBrowserTest {
     public void tearDown() {
         if (getDriver() != null) {
             checkForBrowserErrors();
-            logout();
         }
     }
 
@@ -37,15 +41,55 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private void logout() {
-        open("logout");
+        if (!$(ButtonElement.class).attribute("id", "logout").exists()) {
+            open("");
+            assertRootPageShown();
+        }
+        clickLogout();
+        assertRootPageShown();
     }
 
     private void clickLogout() {
-        navigateTo("logout", false);
+        getMainView().$(ButtonElement.class).id("logout").click();
     }
 
     private void open(String path) {
         getDriver().get(getRootURL() + "/" + path);
+    }
+
+    @Test
+    public void menu_correct_for_anonymous() {
+        open("");
+        List<MenuItem> menuItems = getMenuItems();
+        List<MenuItem> expectedItems = new ArrayList<MenuItem>();
+        expectedItems.add(new MenuItem("", "Public", true));
+        expectedItems.add(new MenuItem("private", "Private", false));
+        expectedItems.add(new MenuItem("admin", "Admin", false));
+        Assert.assertEquals(expectedItems, menuItems);
+    }
+
+    @Test
+    public void menu_correct_for_user() {
+        open("login");
+        loginUser();
+        List<MenuItem> menuItems = getMenuItems();
+        List<MenuItem> expectedItems = new ArrayList<MenuItem>();
+        expectedItems.add(new MenuItem("", "Public", true));
+        expectedItems.add(new MenuItem("private", "Private", true));
+        expectedItems.add(new MenuItem("admin", "Admin", false));
+        Assert.assertEquals(expectedItems, menuItems);
+    }
+
+    @Test
+    public void menu_correct_for_admin() {
+        open("login");
+        loginAdmin();
+        List<MenuItem> menuItems = getMenuItems();
+        List<MenuItem> expectedItems = new ArrayList<MenuItem>();
+        expectedItems.add(new MenuItem("", "Public", true));
+        expectedItems.add(new MenuItem("private", "Private", true));
+        expectedItems.add(new MenuItem("admin", "Admin", true));
+        Assert.assertEquals(expectedItems, menuItems);
     }
 
     @Test
@@ -123,13 +167,11 @@ public class AppViewIT extends ChromeBrowserTest {
         loginUser();
         assertPageContains(contents);
         logout();
-        assertRootPageShown();
 
         open(path);
         loginAdmin();
         assertPageContains(contents);
         logout();
-        assertRootPageShown();
 
         open(path);
         assertLoginViewShown();
@@ -145,7 +187,6 @@ public class AppViewIT extends ChromeBrowserTest {
         open(path);
         assertForbiddenPage();
         logout();
-        assertRootPageShown();
 
         open(path);
         loginAdmin();
@@ -183,11 +224,14 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     private void navigateTo(String path, boolean assertPathShown) {
-        waitUntil(driver -> $("*").attribute("id", "main-view").exists());
-        $("*").attribute("id", "main-view").first().$("a").attribute("href", path).first().click();
+        getMainView().$("a").attribute("href", path).first().click();
         if (assertPathShown) {
             assertPathShown(path);
         }
+    }
+
+    private TestBenchElement getMainView() {
+        return waitUntil(driver -> $("*").id("main-view"));
     }
 
     private void assertLoginViewShown() {
@@ -248,6 +292,21 @@ public class AppViewIT extends ChromeBrowserTest {
     private void assertPageContains(String contents) {
         String pageSource = getDriver().getPageSource();
         Assert.assertTrue(pageSource.contains(contents));
+    }
+
+    private List<MenuItem> getMenuItems() {
+        List<TestBenchElement> anchors = getMainView().$("vaadin-tabs").first().$("a").all();
+
+        return anchors.stream().map(anchor -> {
+            String href = (String) anchor.callFunction("getAttribute", "href");
+            String text = anchor.getPropertyString("textContent");
+            boolean available = true;
+            if (text.endsWith((" (hidden)"))) {
+                text = text.replace(" (hidden)", "");
+                available = false;
+            }
+            return new MenuItem(href, text, available);
+        }).collect(Collectors.toList());
     }
 
 }
