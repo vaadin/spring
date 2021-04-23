@@ -19,12 +19,16 @@ public class AppViewIT extends ChromeBrowserTest {
     @After
     public void tearDown() {
         if (getDriver() != null) {
-            checkLogsForErrors(msg -> {
-                return msg.contains(
-                        "admin-only/secret.txt - Failed to load resource: the server responded with a status of 403");
-            });
+            checkForBrowserErrors();
             logout();
         }
+    }
+
+    private void checkForBrowserErrors() {
+        checkLogsForErrors(msg -> {
+            return msg.contains(
+                    "admin-only/secret.txt - Failed to load resource: the server responded with a status of 403");
+        });
     }
 
     private void logout() {
