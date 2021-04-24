@@ -85,6 +85,8 @@ public class SpringBootAutoConfiguration {
                 .setAsyncSupported(configurationProperties.isAsyncSupported());
         registration.setName(
                 ClassUtils.getShortNameAsProperty(SpringServlet.class));
+        registration.setLoadOnStartup(
+                configurationProperties.isLoadOnStartup() ? 1 : -1);
         return registration;
     }
 
