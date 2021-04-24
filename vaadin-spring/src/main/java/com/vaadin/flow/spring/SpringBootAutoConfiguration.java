@@ -85,6 +85,9 @@ public class SpringBootAutoConfiguration {
                 .setAsyncSupported(configurationProperties.isAsyncSupported());
         registration.setName(
                 ClassUtils.getShortNameAsProperty(SpringServlet.class));
+        // Load on startup is needed so a service if available in the servlet
+        // for the first incoming request to Spring Security filters
+        registration.setLoadOnStartup(1);
         return registration;
     }
 

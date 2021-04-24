@@ -3,8 +3,7 @@ package com.vaadin.flow.spring.security;
 import java.util.Collections;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
+import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.HandlerHelper.RequestType;
 import com.vaadin.flow.server.connect.VaadinConnectControllerConfiguration;
 import com.vaadin.flow.server.connect.VaadinEndpointProperties;
@@ -115,6 +114,11 @@ public class RequestUtilTest {
                 .thenReturn("/bar/*");
         Assert.assertFalse(requestUtil
                 .isFrameworkInternalRequest(createRequest("/foo", null)));
+    }
+
+    @Test
+    public void testAnonymousRouteRequest() {
+
     }
 
     static MockHttpServletRequest createRequest(String pathInfo) {

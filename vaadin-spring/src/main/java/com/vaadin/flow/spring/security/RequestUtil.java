@@ -3,12 +3,22 @@ package com.vaadin.flow.spring.security;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import com.vaadin.flow.router.Router;
+import com.vaadin.flow.router.internal.NavigationRouteTarget;
+import com.vaadin.flow.router.internal.RouteTarget;
 import com.vaadin.flow.server.HandlerHelper;
+import com.vaadin.flow.server.RouteRegistry;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.server.connect.EndpointUtil;
+import com.vaadin.flow.spring.SpringServlet;
 import com.vaadin.flow.spring.VaadinConfigurationProperties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +32,15 @@ public class RequestUtil {
     private ApplicationContext applicationContext;
 
     @Autowired
+    private AccessAnnotationChecker accessAnnotationChecker;
+
+    @Autowired
     private VaadinConfigurationProperties configurationProperties;
 
     private Object endpointUtil;
+
+    @Autowired
+    private ServletRegistrationBean<SpringServlet> springServletRegistration;
 
     @PostConstruct
     public void init() {
@@ -44,10 +60,11 @@ public class RequestUtil {
      * An internal request is one that is needed for all Vaadin applications to
      * function, e.g. UIDL or init requests.
      *
-     * Note that bootstrap requests for any route or static resource requests are
-     * not internal, neither are resource requests for the JS bundle.
+     * Note that bootstrap requests for any route or static resource requests
+     * are not internal, neither are resource requests for the JS bundle.
      *
-     * @param request the servlet request
+     * @param request
+     *            the servlet request
      * @return {@code true} if the request is Vaadin internal, {@code false}
      *         otherwise
      */
@@ -84,4 +101,57 @@ public class RequestUtil {
         }
         return false;
     }
+
+    public boolean isAnonymousRoute(HttpServletRequest request) {
+        String vaadinMapping = configurationProperties.getUrlMapping();
+        // TODO Take vaadinMapping into account if needed
+        String path = getRequestPathInsideContext(request);
+
+        SpringServlet servlet = springServletRegistration.getServlet();
+        VaadinService service = servlet.getService();
+        Router router = service.getRouter();
+        RouteRegistry routeRegistry = router.getRegistry();
+
+        NavigationRouteTarget target = routeRegistry
+                .getNavigationRouteTarget(path);
+        if (target == null) {
+            return false;
+        }
+        RouteTarget routeTarget = target.getRouteTarget();
+        if (routeTarget == null) {
+            return false;
+        }
+        Class<? extends com.vaadin.flow.component.Component> targetView = routeTarget
+                .getTarget();
+        if (targetView == null) {
+            return false;
+        }
+
+        // Check if a not authenticated user can access the view
+        boolean result = accessAnnotationChecker.hasAccess(targetView, null,
+                role -> false);
+        if (result) {
+            getLogger().debug(path + " refers to a public view");
+        }
+        return result;
+    }
+
+    private Logger getLogger() {
+        return LoggerFactory.getLogger(getClass());
+    }
+
+    private static String getRequestPathInsideContext(
+            HttpServletRequest request) {
+        String servletPath = request.getServletPath();
+        String pathInfo = request.getPathInfo();
+        String url = "";
+        if (servletPath != null) {
+            url += servletPath;
+        }
+        if (pathInfo != null) {
+            url += pathInfo;
+        }
+        return url;
+    }
+
 }

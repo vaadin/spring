@@ -93,6 +93,8 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         // Public endpoints are OK to access
         urlRegistry.requestMatchers(requestUtil::isAnonymousEndpoint)
                 .permitAll();
+        // Public routes are OK to access
+        urlRegistry.requestMatchers(requestUtil::isAnonymousRoute).permitAll();
         urlRegistry.requestMatchers(getDefaultHttpSecurityPermitMatcher())
                 .permitAll();
 
