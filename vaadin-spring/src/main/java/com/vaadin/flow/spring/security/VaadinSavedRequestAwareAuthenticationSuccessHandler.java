@@ -29,12 +29,13 @@ import org.springframework.security.web.savedrequest.SavedRequest;
  * the returned values. Additionally it sends the saved URL separately so the
  * client can decide where to redirect if no URL was saved.
  */
-public class VaadinSavedRequestAwareAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+public class VaadinSavedRequestAwareAuthenticationSuccessHandler
+        extends SavedRequestAwareAuthenticationSuccessHandler {
 
     /**
      * If this header is present with a value of "typescript" in login requests,
-     * this success handler is activated. Other requests are passed through to the
-     * parent class.
+     * this success handler is activated. Other requests are passed through to
+     * the parent class.
      */
     private static final String SOURCE_HEADER = "source";
 
@@ -45,15 +46,15 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler extends SavedRe
     private static final String VAADIN_CSRF_HEADER = "Vaadin-CSRF";
 
     /**
-     * This header contains the URL defined as the default URL to redirect to after
-     * login.
+     * This header contains the URL defined as the default URL to redirect to
+     * after login.
      */
     private static final String DEFAULT_URL_HEADER = "Default-url";
 
     /**
      * This header contains the last URL saved by Spring Security. If the user
-     * navigates to /private and is redirected to /login, this header will contain
-     * "/private" after the login succeeds.
+     * navigates to /private and is redirected to /login, this header will
+     * contain "/private" after the login succeeds.
      */
     private static final String SAVED_URL_HEADER = "Saved-url";
 
@@ -71,20 +72,24 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler extends SavedRe
      * Redirect strategy used by
      * {@link VaadinSavedRequestAwareAuthenticationSuccessHandler}.
      */
-    public static class TypeScriptClientRedirectStrategy extends DefaultRedirectStrategy {
+    public static class TypeScriptClientRedirectStrategy
+            extends DefaultRedirectStrategy {
 
         @Override
-        public void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url)
-                throws IOException {
+        public void sendRedirect(HttpServletRequest request,
+                HttpServletResponse response, String url) throws IOException {
             if (!isTypescriptLogin(request)) {
                 super.sendRedirect(request, response, url);
                 return;
             }
 
             response.setHeader(RESULT_HEADER, "success");
+            response.setHeader(SAVED_URL_HEADER, url);
+
             HttpSession session = request.getSession(false);
             if (session != null) {
-                String csrfToken = (String) session.getAttribute(VaadinService.getCsrfTokenAttributeName());
+                String csrfToken = (String) session.getAttribute(
+                        VaadinService.getCsrfTokenAttributeName());
                 if (csrfToken != null) {
                     response.setHeader(VAADIN_CSRF_HEADER, csrfToken);
                 }
@@ -102,12 +107,6 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler extends SavedRe
     }
 
     /**
-     * This needs to be stored only because the field in the super class is not
-     * accessible.
-     */
-    private RequestCache requestCache = new HttpSessionRequestCache();
-
-    /**
      * Creates a new instance.
      */
     public VaadinSavedRequestAwareAuthenticationSuccessHandler() {
@@ -115,14 +114,12 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler extends SavedRe
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-            Authentication authentication) throws ServletException, IOException {
-        SavedRequest savedRequest = this.requestCache.getRequest(request, response);
+    public void onAuthenticationSuccess(HttpServletRequest request,
+            HttpServletResponse response, Authentication authentication)
+            throws ServletException, IOException {
         if (isTypescriptLogin(request)) {
-            if (savedRequest != null) {
-                response.setHeader(SAVED_URL_HEADER, savedRequest.getRedirectUrl());
-            }
-            response.setHeader(DEFAULT_URL_HEADER, determineTargetUrl(request, response));
+            response.setHeader(DEFAULT_URL_HEADER,
+                    determineTargetUrl(request, response));
         }
         super.onAuthenticationSuccess(request, response, authentication);
     }
@@ -131,9 +128,4 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler extends SavedRe
         return "typescript".equals(request.getHeader(SOURCE_HEADER));
     }
 
-    @Override
-    public void setRequestCache(RequestCache requestCache) {
-        super.setRequestCache(requestCache);
-        this.requestCache = requestCache;
-    }
 }
