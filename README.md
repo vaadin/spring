@@ -18,12 +18,14 @@ See other branches for other framework versions:
 * 12.0 for Vaadin 14.0
 * 12.1 for Vaadin 14.1
 * 12.2 for Vaadin 14.2
-* 12.3 for Vaadin 14.3 and 14.4
+* 12.3 for Vaadin 14.3, 14.4 and 14.5
+* 12.4 for Vaadin 14.6 
 * 13.0 for Vaadin 16
 * 14.0 for Vaadin 17
 * 15.0 for Vaadin 18
 * 16.0 for Vaadin 19
-* master (currently 17.0) for upcoming major Vaadin versions
+* 17.0 for Vaadin 20 
+* master (currently 18.0) for upcoming major Vaadin versions
 
 Getting started
 ----
