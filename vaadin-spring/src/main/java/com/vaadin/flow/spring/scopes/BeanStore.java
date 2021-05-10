@@ -116,18 +116,21 @@ class BeanStore implements Serializable {
         return null;
     }
 
-    private Object doRemove(String name) {
+    protected Object doRemove(String name) {
         destructionCallbacks.remove(name);
         return objects.remove(name);
     }
 
-    private Object doGet(String name, ObjectFactory<?> objectFactory) {
+    protected Object doGet(String name, ObjectFactory<?> objectFactory) {
         Object bean = objects.get(name);
         if (bean == null) {
-            bean = objectFactory.getObject();
-            objects.put(name, bean);
+            storeBean(name, objectFactory.getObject());
         }
         return bean;
+    }
+
+    protected void storeBean(String name, Object bean) {
+        objects.put(name, bean);
     }
 
     private <T> T execute(Supplier<T> supplier) {
