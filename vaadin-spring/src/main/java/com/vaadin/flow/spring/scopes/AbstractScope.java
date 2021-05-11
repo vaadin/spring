@@ -18,7 +18,6 @@ package com.vaadin.flow.spring.scopes;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.Scope;
-import org.springframework.context.support.ApplicationObjectSupport;
 
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.VaadinSessionState;
@@ -33,8 +32,7 @@ import com.vaadin.flow.server.VaadinSessionState;
  * @author Vaadin Ltd
  *
  */
-abstract class AbstractScope extends ApplicationObjectSupport
-        implements Scope, BeanFactoryPostProcessor {
+abstract class AbstractScope implements Scope, BeanFactoryPostProcessor {
 
     @Override
     public Object resolveContextualObject(String key) {

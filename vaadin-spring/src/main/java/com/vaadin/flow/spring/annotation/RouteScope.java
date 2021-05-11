@@ -23,10 +23,25 @@ import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Scope;
 
+import com.vaadin.flow.router.HasErrorParameter;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.spring.scopes.VaadinRouteScope;
 
 /**
- * TODO: docs
+ * The lifecycle of a {@link RouteScope @RouteScope} component is controlled by
+ * route navigation.
+ * <p>
+ * Every scoped bean belongs to one router component owner. It can be a
+ * {@link Route @Route}, or a {@link RouterLayout}, or a
+ * {@link HasErrorParameter HasErrorParameter}. Beans are qualified by
+ * {@link RouteScopeOwner @RouteScopeOwner} to link with their owner.
+ * <p>
+ * Until owner remains active, all beans owned by it remain in the scope.
+ * <p>
+ * When a scoped bean is a router component, an owner can be any ancestor
+ * {@link RouterLayout}, or the bean itself. Without the {@link RouteScopeOwner}
+ * annotation the scope effectively behaves as prototype scope.
  * 
  * @author Vaadin Ltd
  * @since

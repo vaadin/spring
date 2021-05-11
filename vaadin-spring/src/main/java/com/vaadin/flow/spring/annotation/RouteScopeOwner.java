@@ -28,7 +28,10 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLayout;
 
 /**
- * TODO : docs
+ * Link a {@link RouteScope @RouteScope} bean to its owner.
+ * <p>
+ * Owner is a router component. A {@link Route @Route}, or a
+ * {@link RouterLayout}, or a {@link HasErrorParameter}.
  * 
  * @author Vaadin Ltd
  * @since
