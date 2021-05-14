@@ -37,7 +37,8 @@ import com.vaadin.flow.spring.scopes.VaadinRouteScope;
  * {@link HasErrorParameter HasErrorParameter}. Beans are qualified by
  * {@link RouteScopeOwner @RouteScopeOwner} to link with their owner.
  * <p>
- * Until owner remains active, all beans owned by it remain in the scope.
+ * As long as the owner component stays attached, all beans owned by it
+ * remain in the scope.
  * <p>
  * When a scoped bean is a router component, an owner can be any ancestor
  * {@link RouterLayout}, or the bean itself. Without the {@link RouteScopeOwner}
