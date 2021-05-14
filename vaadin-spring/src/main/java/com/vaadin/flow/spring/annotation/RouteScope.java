@@ -29,7 +29,7 @@ import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.spring.scopes.VaadinRouteScope;
 
 /**
- * The lifecycle of a {@link RouteScope @RouteScope} component is controlled by
+ * The lifecycle of a {@link RouteScope @RouteScope} bean is controlled by
  * route navigation.
  * <p>
  * Every scoped bean belongs to one router component owner. It can be a
