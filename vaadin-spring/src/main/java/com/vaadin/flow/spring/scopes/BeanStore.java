@@ -120,7 +120,7 @@ class BeanStore implements Serializable {
         return null;
     }
 
-    protected Object doRemove(String name) {
+    Object doRemove(String name) {
         Runnable destructionCallback = destructionCallbacks.remove(name);
         try {
             if (destructionCallback != null) {
@@ -132,7 +132,7 @@ class BeanStore implements Serializable {
         return objects.remove(name);
     }
 
-    protected Object doGet(String name, ObjectFactory<?> objectFactory) {
+    Object doGet(String name, ObjectFactory<?> objectFactory) {
         Object bean = objects.get(name);
         if (bean == null) {
             bean = objectFactory.getObject();
@@ -141,7 +141,7 @@ class BeanStore implements Serializable {
         return bean;
     }
 
-    protected void storeBean(String name, Object bean) {
+    void storeBean(String name, Object bean) {
         objects.put(name, bean);
     }
 

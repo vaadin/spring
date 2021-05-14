@@ -35,6 +35,7 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.page.ExtendedClientDetails;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationListener;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -98,7 +99,9 @@ public class VaadinRouteScope extends AbstractScope implements UIInitListener {
             }
             BeanStore beanStore = routeStores.get(key);
             if (beanStore == null) {
-                beanStore = new RouteBeanStore(ui, session);
+                beanStore = new RouteBeanStore(ui, session,
+                        uiInstance -> routeStores
+                                .remove(getUIStoreKey(uiInstance)));
                 routeStores.put(key, beanStore);
             }
             return beanStore;
@@ -108,7 +111,9 @@ public class VaadinRouteScope extends AbstractScope implements UIInitListener {
             assert session.hasLock();
             BeanStore beanStore = routeStores.remove(key);
             if (beanStore == null) {
-                // TODO
+                throw new IllegalStateException(
+                        "UI bean store is not found by the initial UI id via the key '"
+                                + key + "'.");
             } else {
                 routeStores.put(getUIStoreKey(ui), beanStore);
             }
@@ -244,10 +249,14 @@ public class VaadinRouteScope extends AbstractScope implements UIInitListener {
 
         private Registration uiDetachRegistration;
 
-        private RouteBeanStore(UI ui, VaadinSession session) {
+        private SerializableConsumer<UI> detachUiCallback;
+
+        private RouteBeanStore(UI ui, VaadinSession session,
+                SerializableConsumer<UI> detachUiCallback) {
             super(session);
             currentUI = ui;
             uiDetachRegistration = currentUI.addDetachListener(this);
+            this.detachUiCallback = detachUiCallback;
         }
 
         @Override
@@ -258,6 +267,7 @@ public class VaadinRouteScope extends AbstractScope implements UIInitListener {
                 uiDetachRegistration = currentUI.addDetachListener(this);
             } else {
                 destroy();
+                detachUiCallback.accept(currentUI);
             }
         }
 
