@@ -13,7 +13,8 @@
       "@vaadin/vaadin-tabs": "20.0.0-beta1",
       "@vaadin/vaadin-lumo-styles": "20.0.0-beta1",
       "@vaadin/vaadin-app-layout": "20.0.0-beta1",
-      "lit-html": "1.4.0"
+      "lit-html": "1.4.0",
+      "lit": "2.0.0-rc.1"
     },
     "devDependencies": {
       "css-loader": "4.2.1",
@@ -88,6 +89,7 @@
     "@vaadin/vaadin-tabs": "20.0.0-beta1",
     "lit-element": "2.5.0",
     "mobx": "^6.2.0",
-    "lit-html": "1.4.0"
+    "lit-html": "1.4.0",
+    "lit": "2.0.0-rc.1"
   }
 }
