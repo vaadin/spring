@@ -42,7 +42,10 @@ public class Elements {
     private String passwordField = "bar";
     private Integer integerField = 12;
     private Double numberField = 12.33d;
-    @Email  String emailField;
+    
+    @Email
+    @NotEmpty
+    private String emailField;
 
     private LocalDate datePicker = LocalDate.now().plusDays(1);
     private LocalDateTime dateTimePicker = LocalDateTime.now().plusDays(1).plusHours(1);

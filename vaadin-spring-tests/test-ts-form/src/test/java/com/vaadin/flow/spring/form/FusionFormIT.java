@@ -31,14 +31,16 @@ public class FusionFormIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void save_empty_values() {
+    public void save_empty_values_for_required_fields_no_runtime_errors() {
         open("");
         ButtonElement saveButton = $(ButtonElement.class).id("save");
         saveButton.click();
         NotificationElement notification = $(NotificationElement.class).id("notification");
         Assert.assertNotNull(notification);
         waitUntil(driver -> notification.isOpen());
-        Assert.assertEquals("saved", notification.getText());
+        System.out.println(notification.getText());
+        Assert.assertTrue(notification.getText().contains("must not be empty"));
+        Assert.assertFalse(notification.getText().contains("Expected string but received a undefined"));
     }
 
 }
