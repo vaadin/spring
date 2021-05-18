@@ -26,6 +26,11 @@ public class AppViewIT extends ChromeBrowserTest {
         return SERVER_PORT;
     }
 
+    @Override
+    protected String getRootURL() {
+        return super.getRootURL(); // + "/context";
+    }
+
     @After
     public void tearDown() {
         if (getDriver() != null) {
