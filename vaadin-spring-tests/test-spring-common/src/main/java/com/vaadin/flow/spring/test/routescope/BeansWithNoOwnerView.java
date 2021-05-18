@@ -26,7 +26,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 
 @Route("beans-no-owner")
-public class BeansWithNoWOnerView extends Div {
+public class BeansWithNoOwnerView extends Div {
 
     @Autowired
     private ApplicationContext context;

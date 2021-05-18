@@ -29,7 +29,7 @@ public class AnotherBeanNopOwnerView extends Div {
         add(childDiv);
 
         RouterLink link = new RouterLink("no-owner-view",
-                BeansWithNoWOnerView.class);
+                BeansWithNoOwnerView.class);
         link.getElement().getStyle().set("display", "block");
         link.setId("no-owner-view");
         add(link);
