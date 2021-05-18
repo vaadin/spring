@@ -88,8 +88,7 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler
      * Redirect strategy used by
      * {@link VaadinSavedRequestAwareAuthenticationSuccessHandler}.
      */
-    public static class TypeScriptClientRedirectStrategy
-            extends DefaultRedirectStrategy {
+    public static class RedirectStrategy extends DefaultRedirectStrategy {
 
         @Override
         public void sendRedirect(HttpServletRequest request,
@@ -139,7 +138,7 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler
      * Creates a new instance.
      */
     public VaadinSavedRequestAwareAuthenticationSuccessHandler() {
-        setRedirectStrategy(new TypeScriptClientRedirectStrategy());
+        setRedirectStrategy(new RedirectStrategy());
     }
 
     @Override
@@ -150,6 +149,10 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler
                 response);
         String storedServerNavigation = getStoredServerNavigation(request);
         if (storedServerNavigation != null) {
+            // The saved server navigation URL is relative to the context path
+            if (!"".equals(request.getContextPath())) {
+                storedServerNavigation = "/" + storedServerNavigation;
+            }
             response.setHeader(SAVED_URL_HEADER, storedServerNavigation);
         } else if (savedRequest != null) {
             /*
