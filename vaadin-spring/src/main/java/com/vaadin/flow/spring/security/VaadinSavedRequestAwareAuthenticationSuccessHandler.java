@@ -95,8 +95,9 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler
         public void sendRedirect(HttpServletRequest request,
                 HttpServletResponse response, String url) throws IOException {
             String redirectUrl;
-            if (response.getHeader(SAVED_URL_HEADER) != null) {
-                redirectUrl = response.getHeader(SAVED_URL_HEADER);
+            String savedRedirectUrl = response.getHeader(SAVED_URL_HEADER);
+            if (savedRedirectUrl != null) {
+                redirectUrl = savedRedirectUrl;
             } else {
                 redirectUrl = url;
             }
