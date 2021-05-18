@@ -29,20 +29,20 @@ import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.spring.scopes.VaadinRouteScope;
 
 /**
- * The lifecycle of a {@link RouteScope @RouteScope} bean is controlled by
- * route navigation.
+ * The lifecycle of a {@link RouteScope @RouteScope} bean is controlled by route
+ * navigation.
  * <p>
  * Every scoped bean belongs to one router component owner. It can be a
  * {@link Route @Route}, or a {@link RouterLayout}, or a
  * {@link HasErrorParameter HasErrorParameter}. Beans are qualified by
  * {@link RouteScopeOwner @RouteScopeOwner} to link with their owner.
  * <p>
- * As long as the owner component stays attached, all beans owned by it
- * remain in the scope.
+ * As long as the owner component stays attached, all beans owned by it remain
+ * in the scope.
  * <p>
- * When a scoped bean is a router component, an owner can be any ancestor
- * {@link RouterLayout}, or the bean itself. Without the {@link RouteScopeOwner}
- * annotation the scope effectively behaves as prototype scope.
+ * Without the {@link RouteScopeOwner} annotation the owner is the current route
+ * target (so it's dynamically calculated). In this case the beans are preserved
+ * as long as the navigation target stays the same.
  * 
  * @author Vaadin Ltd
  * @since
