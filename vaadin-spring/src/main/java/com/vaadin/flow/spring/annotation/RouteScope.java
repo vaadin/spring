@@ -41,8 +41,9 @@ import com.vaadin.flow.spring.scopes.VaadinRouteScope;
  * in the scope.
  * <p>
  * Without the {@link RouteScopeOwner} annotation the owner is the current route
- * target (so it's dynamically calculated). In this case the beans are preserved
- * as long as the navigation target stays the same.
+ * target component (dynamically calculated). With nested routing hierarchies, the
+ * target is the "leaf" or "bottom most" routing component. The beans are
+ * preserved as long as the navigation target stays the same.
  * 
  * @author Vaadin Ltd
  * @since
