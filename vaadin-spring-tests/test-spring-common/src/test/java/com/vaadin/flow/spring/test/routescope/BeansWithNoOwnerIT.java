@@ -22,7 +22,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.spring.test.AbstractSpringTest;
 
-public class BeansWithNoOWnerIT extends AbstractSpringTest {
+public class BeansWithNoOwnerIT extends AbstractSpringTest {
 
     @Override
     protected String getTestPath() {

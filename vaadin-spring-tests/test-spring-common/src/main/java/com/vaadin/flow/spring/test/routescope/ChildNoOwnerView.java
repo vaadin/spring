@@ -31,7 +31,7 @@ public class ChildNoOwnerView extends Div {
     protected void onAttach(AttachEvent attachEvent) {
         if (attachEvent.isInitialAttach()) {
             RouterLink link = new RouterLink("parent", ParentNoOwnerView.class);
-            link.setId("to-prent");
+            link.setId("to-parent");
             add(link);
 
             Div div = new Div();
