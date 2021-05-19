@@ -115,7 +115,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         urlRegistry.anyRequest().authenticated();
 
         // Enable view access control
-        viewAccessChecker.setEnabled(true);
+        viewAccessChecker.enable();
     }
 
     /**

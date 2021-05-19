@@ -102,7 +102,6 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler
             }
 
             if (!isTypescriptLogin(request)) {
-                response.setHeader(SAVED_URL_HEADER, null);
                 super.sendRedirect(request, response, redirectUrl);
                 return;
             }
