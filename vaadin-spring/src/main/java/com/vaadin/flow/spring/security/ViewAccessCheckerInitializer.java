@@ -33,9 +33,9 @@ public class ViewAccessCheckerInitializer implements VaadinServiceInitListener {
 
     @Override
     public void serviceInit(ServiceInitEvent serviceInitEvent) {
-        serviceInitEvent.getSource().addUIInitListener(uiInitEvent -> {
-            uiInitEvent.getUI().addBeforeEnterListener(viewAccessChecker);
-        });
+        serviceInitEvent.getSource()
+                .addUIInitListener(uiInitEvent -> uiInitEvent.getUI()
+                        .addBeforeEnterListener(viewAccessChecker));
     }
 
 }
