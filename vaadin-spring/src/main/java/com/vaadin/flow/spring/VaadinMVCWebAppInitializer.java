@@ -56,24 +56,13 @@ public abstract class VaadinMVCWebAppInitializer
         context.refresh();
 
         Environment env = context.getBean(Environment.class);
-        String mapping = env
-                .getProperty(RootMappedCondition.URL_MAPPING_PROPERTY, "/*");
-
-        boolean rootMapping = RootMappedCondition.isRootMapping(mapping);
+        String mapping = "/*";
 
         Dynamic registration = servletContext.addServlet(
                 ClassUtils.getShortNameAsProperty(SpringServlet.class),
-                new SpringServlet(context, rootMapping));
+                new SpringServlet(context));
 
         Map<String, String> initParameters = new HashMap<>();
-        if (rootMapping) {
-            Dynamic dispatcherRegistration = servletContext
-                    .addServlet("dispatcher", new DispatcherServlet(context));
-            dispatcherRegistration.addMapping("/*");
-            mapping = VaadinServletConfiguration.VAADIN_SERVLET_MAPPING;
-            initParameters.put(Constants.SERVLET_PARAMETER_PUSH_URL,
-                    makeContextRelative(mapping.replace("*", "")));
-        }
         registration.setInitParameters(initParameters);
         registration.addMapping(mapping);
         registration.setAsyncSupported(
@@ -111,7 +100,6 @@ public abstract class VaadinMVCWebAppInitializer
             AnnotationConfigWebApplicationContext context) {
         Stream<Class<? extends Object>> configs = Stream.concat(
                 Stream.of(VaadinScopesConfig.class,
-                        VaadinServletConfiguration.class,
                         VaadinApplicationConfiguration.class),
                 getConfigurationClasses().stream());
         context.register(configs.toArray(Class<?>[]::new));

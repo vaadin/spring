@@ -44,8 +44,7 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 @AutoConfigureBefore(WebMvcAutoConfiguration.class)
 @ConditionalOnClass(ServletContextInitializer.class)
 @EnableConfigurationProperties(VaadinConfigurationProperties.class)
-@Import({ VaadinApplicationConfiguration.class,
-        VaadinServletConfiguration.class })
+@Import({ VaadinApplicationConfiguration.class})
 public class SpringBootAutoConfiguration {
 
     @Autowired
@@ -74,12 +73,8 @@ public class SpringBootAutoConfiguration {
     public ServletRegistrationBean<SpringServlet> servletRegistrationBean() {
         String mapping = configurationProperties.getUrlMapping();
         Map<String, String> initParameters = new HashMap<>();
-        boolean rootMapping = RootMappedCondition.isRootMapping(mapping);
-        if (rootMapping) {
-            mapping = VaadinServletConfiguration.VAADIN_SERVLET_MAPPING;
-        }
         ServletRegistrationBean<SpringServlet> registration = new ServletRegistrationBean<>(
-                new SpringServlet(context, rootMapping), mapping);
+                new SpringServlet(context), mapping);
         registration.setInitParameters(initParameters);
         registration
                 .setAsyncSupported(configurationProperties.isAsyncSupported());

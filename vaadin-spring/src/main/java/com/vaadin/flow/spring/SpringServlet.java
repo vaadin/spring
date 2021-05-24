@@ -15,21 +15,11 @@
  */
 package com.vaadin.flow.spring;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.Environment;
-import org.springframework.web.servlet.mvc.ServletForwardingController;
 
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.server.InitParameters;
@@ -37,6 +27,10 @@ import com.vaadin.flow.server.ServiceException;
 import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.shared.util.SharedUtil;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
+import org.springframework.web.servlet.mvc.ServletForwardingController;
 
 /**
  * Spring application context aware Vaadin servlet implementation.
@@ -72,7 +66,6 @@ public class SpringServlet extends VaadinServlet {
             }).collect(Collectors.toList());
 
     private final ApplicationContext context;
-    private final boolean rootMapping;
 
     /**
      * Creates a new Vaadin servlet instance with the application
@@ -98,15 +91,8 @@ public class SpringServlet extends VaadinServlet {
      *            prefixed with
      *            {@link VaadinServletConfiguration#VAADIN_SERVLET_MAPPING}
      */
-    public SpringServlet(ApplicationContext context, boolean rootMapping) {
+    public SpringServlet(ApplicationContext context) {
         this.context = context;
-        this.rootMapping = rootMapping;
-    }
-
-    @Override
-    protected void service(HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException {
-        super.service(wrapRequest(request), response);
     }
 
     @Override
@@ -123,37 +109,7 @@ public class SpringServlet extends VaadinServlet {
     protected DeploymentConfiguration createDeploymentConfiguration(
             Properties initParameters) {
         Properties properties = config(initParameters);
-        if (rootMapping) {
-            // in the case of root mapping, push requests should go to
-            // /vaadinServlet/pushUrl
-            String customPushUrl = properties
-                    .getProperty(InitParameters.SERVLET_PARAMETER_PUSH_URL);
-            if (customPushUrl == null) {
-                customPushUrl = "";
-            }
-            final String mapping = VaadinServletConfiguration.VAADIN_SERVLET_MAPPING
-                    .replace("/*", "");
-            customPushUrl = customPushUrl.replaceFirst("context://", "/");
-            customPushUrl = customPushUrl.replaceFirst(Pattern.quote(mapping),
-                    ""); // if workaround "/vaadinServlet/myCustomUrl" used
-            customPushUrl = customPushUrl.replaceFirst("^/", "");
-            properties.setProperty(InitParameters.SERVLET_PARAMETER_PUSH_URL,
-                    VaadinMVCWebAppInitializer.makeContextRelative(
-                            mapping + "/" + customPushUrl));
-        }
         return super.createDeploymentConfiguration(properties);
-    }
-
-    private HttpServletRequest wrapRequest(HttpServletRequest request) {
-        if (rootMapping && request.getPathInfo() == null) {
-            /*
-             * We need to apply a workaround in case of forwarding
-             *
-             * see https://jira.spring.io/browse/SPR-17457
-             */
-            return new ForwardingRequestWrapper(request);
-        }
-        return request;
     }
 
     private Properties config(Properties initParameters) {

@@ -28,7 +28,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.VaadinApplicationConfiguration;
 import com.vaadin.flow.spring.VaadinScanPackagesRegistrar;
 import com.vaadin.flow.spring.VaadinScopesConfig;
-import com.vaadin.flow.spring.VaadinServletConfiguration;
 
 /**
  * Brings in the machinery to setup Spring + Vaadin applications. This
@@ -61,7 +60,7 @@ import com.vaadin.flow.spring.VaadinServletConfiguration;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Import({ VaadinScopesConfig.class, VaadinServletConfiguration.class,
+@Import({ VaadinScopesConfig.class, 
         VaadinScanPackagesRegistrar.class,
         VaadinApplicationConfiguration.class })
 public @interface EnableVaadin {
