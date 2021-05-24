@@ -100,13 +100,4 @@ public class SpringBootAutoConfiguration {
         return new VaadinWebsocketEndpointExporter();
     }
 
-    /**
-     * Makes the request util available.
-     * 
-     * @return the request util
-     */
-    @Bean
-    public RequestUtil requestUtil() {
-        return new RequestUtil();
-    }
 }
