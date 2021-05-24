@@ -17,6 +17,7 @@ import com.vaadin.flow.server.connect.VaadinConnectControllerConfiguration;
 import com.vaadin.flow.server.connect.VaadinEndpointProperties;
 import com.vaadin.flow.shared.ApplicationConstants;
 import com.vaadin.flow.spring.SpringBootAutoConfiguration;
+import com.vaadin.flow.spring.SpringSecurityAutoConfiguration;
 import com.vaadin.flow.spring.SpringServlet;
 import com.vaadin.flow.spring.SpringVaadinServletService;
 import com.vaadin.flow.spring.VaadinConfigurationProperties;
@@ -35,8 +36,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = { VaadinEndpointProperties.class })
-@ContextConfiguration(classes = { SpringBootAutoConfiguration.class,
-        VaadinConnectControllerConfiguration.class })
+@ContextConfiguration(classes = { VaadinConnectControllerConfiguration.class,
+        SpringBootAutoConfiguration.class,
+        SpringSecurityAutoConfiguration.class })
 public class RequestUtilTest {
 
     @Autowired
@@ -183,7 +185,7 @@ public class RequestUtilTest {
     @Test
     public void testAnonymousRouteRequest_fooMappedServlet_publicView() {
         Mockito.when(vaadinConfigurationProperties.getUrlMapping())
-                .thenReturn("/foo/");
+                .thenReturn("/foo/*");
         setupMockServlet("", PublicView.class);
 
         MockHttpServletRequest request = createRequest(null);
@@ -194,7 +196,7 @@ public class RequestUtilTest {
     @Test
     public void testAnonymousRouteRequest_fooMappedServlet_notAView() {
         Mockito.when(vaadinConfigurationProperties.getUrlMapping())
-                .thenReturn("/foo/");
+                .thenReturn("/foo/*");
         setupMockServlet("", PublicView.class);
 
         MockHttpServletRequest request = createRequest(null);
@@ -205,7 +207,7 @@ public class RequestUtilTest {
     @Test
     public void testAnonymousRouteRequest_fooMappedServlet_privateView() {
         Mockito.when(vaadinConfigurationProperties.getUrlMapping())
-                .thenReturn("/foo/");
+                .thenReturn("/foo/*");
         setupMockServlet("admin", AdminView.class);
 
         MockHttpServletRequest request = createRequest(null);
@@ -216,7 +218,7 @@ public class RequestUtilTest {
     @Test
     public void testAnonymousRouteRequest_fooMappedServlet_publicViewPathOutsideServlet() {
         Mockito.when(vaadinConfigurationProperties.getUrlMapping())
-                .thenReturn("/foo/");
+                .thenReturn("/foo/*");
         setupMockServlet("", PublicView.class);
 
         MockHttpServletRequest request = createRequest(null);
