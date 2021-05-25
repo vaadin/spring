@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.spring;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,8 +70,15 @@ public class SpringBootAutoConfiguration {
      */
     @Bean
     public ServletRegistrationBean<SpringServlet> servletRegistrationBean() {
+        // check if we have explicitly said that we do not want automatc servlet
+        // registration
+        if (configurationProperties.getDisableAutomaticServletRegistration() != null
+                && configurationProperties.getDisableAutomaticServletRegistration())
+            return null;
+
         String mapping = configurationProperties.getUrlMapping();
-        Map<String, String> initParameters = new HashMap<>();
+        Map<String, String> initParameters = ServletParametersBuilder
+                .buildInitParametersFromConfig(configurationProperties);
         boolean rootMapping = RootMappedCondition.isRootMapping(mapping);
         if (rootMapping) {
             mapping = VaadinServletConfiguration.VAADIN_SERVLET_MAPPING;
