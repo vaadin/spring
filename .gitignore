@@ -14,3 +14,9 @@ package*.json
 webpack.config.js
 webpack.generated.js
 **/frontend/generated/
+
+vaadin-spring-tests/**/.npmrc
+vaadin-spring-tests/**/pnpm-lock.yaml
+vaadin-spring-tests/**/pnpmfile.js
+vaadin-spring-tests/**/tsconfig.json
+vaadin-spring-tests/**/types.d.ts

@@ -17,28 +17,6 @@ These tests do not check if the configuration is
  */
 public class ConfigurationTest {
 
-    /*
-
-    **
-     * Property names that are read from the application.properties file
-     *
-    protected static final List<String> PROPERTY_NAMES = Arrays
-            .stream(InitParameters.class.getDeclaredFields())
-            // thanks to java code coverage which adds non-existent
-            // initially variables everywhere: we should skip this extra
-            // field
-            .filter(field -> !field.isSynthetic())
-            .map(field -> {
-                try {
-                    return (String) field.get(null);
-                } catch (IllegalAccessException e) {
-                    throw new IllegalStateException("unable to access field",
-                            e);
-                }
-            })
-            .collect(Collectors.toList());
-     */
-
     @Test
     public void hasConfiguration_productionMode_servletSet() {
         VaadinConfigurationProperties conf = new VaadinConfigurationProperties();
@@ -159,21 +137,5 @@ public class ConfigurationTest {
         Assert.assertEquals("true", initParams.get(InitParameters.SERVLET_PARAMETER_DEVMODE_ENABLE_LIVE_RELOAD));
     }
 
-    @Test
-    public void hasConfiguration_disableAutomaticServletRegistration_servletSet() {
-        VaadinConfigurationProperties conf = new VaadinConfigurationProperties();
-        conf.setDisableAutomaticServletRegistration(true);
-        Map<String, String> initParams = ServletParametersBuilder.buildInitParametersFromConfig(conf);
-        Assert.assertEquals("true", initParams.get(InitParameters.DISABLE_AUTOMATIC_SERVLET_REGISTRATION));
-    }
-
-
-    @Test
-    public void hasConfiguration_i18nProvider_servletSet() {
-        VaadinConfigurationProperties conf = new VaadinConfigurationProperties();
-        conf.setI18nProvider("akaka");
-        Map<String, String> initParams = ServletParametersBuilder.buildInitParametersFromConfig(conf);
-        Assert.assertEquals("akaka", initParams.get(InitParameters.I18N_PROVIDER));
-    }
 
 }

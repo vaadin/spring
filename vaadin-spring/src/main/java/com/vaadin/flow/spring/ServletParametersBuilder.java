@@ -21,8 +21,21 @@ import java.util.Map;
 
 import com.vaadin.flow.server.InitParameters;
 
+/**
+ * This class is used to build the initial parameters map for the
+ * VaadinServlet from a VaadinConfigurationProperties object, which is
+ * automatically filled by Spring Boot from the application.properties file,
+ * system or env properties.
+ */
 public class ServletParametersBuilder {
 
+    /**
+     * Creates a map with the initial parameters for the Vaadin servlet, from
+     * a VaadinConfigurationProperties object
+     *
+     * @param configurationProperties the configuration object filled by spring boot
+     * @return filled parameters map
+     */
     public static Map<String, String> buildInitParametersFromConfig(
             VaadinConfigurationProperties configurationProperties) {
         Map<String, String> initParameters = new HashMap<>();

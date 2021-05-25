@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.spring;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -30,9 +29,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +41,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.gentyref.GenericTypeReflector;
-import com.vaadin.flow.server.startup.ServletDeployer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
@@ -50,7 +48,6 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.env.Environment;
@@ -62,30 +59,35 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.WebComponentExporter;
-import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.di.LookupInitializer;
+import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.router.HasErrorParameter;
+import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.RouteNotFoundError;
 import com.vaadin.flow.server.AmbiguousRouteConfigurationException;
-import com.vaadin.flow.server.DeploymentConfigurationFactory;
 import com.vaadin.flow.server.DevModeHandler;
 import com.vaadin.flow.server.InvalidRouteConfigurationException;
 import com.vaadin.flow.server.RouteRegistry;
-import com.vaadin.flow.server.VaadinConfigurationException;
-import com.vaadin.flow.server.VaadinServletConfig;
 import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.startup.AbstractRouteRegistryInitializer;
 import com.vaadin.flow.server.startup.AnnotationValidator;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 import com.vaadin.flow.server.startup.ClassLoaderAwareServletContainerInitializer;
 import com.vaadin.flow.server.startup.DevModeInitializer;
+import com.vaadin.flow.server.startup.LookupServletContainerInitializer;
+import com.vaadin.flow.server.startup.ServletDeployer;
 import com.vaadin.flow.server.startup.ServletVerifier;
 import com.vaadin.flow.server.startup.VaadinAppShellInitializer;
 import com.vaadin.flow.server.startup.WebComponentConfigurationRegistryInitializer;
 import com.vaadin.flow.server.startup.WebComponentExporterAwareValidator;
 import com.vaadin.flow.server.webcomponent.WebComponentConfigurationRegistry;
 import com.vaadin.flow.spring.VaadinScanPackagesRegistrar.VaadinScanPackages;
+import com.vaadin.flow.spring.router.SpringRouteNotFoundError;
 import com.vaadin.flow.theme.Theme;
 
 /**
@@ -115,9 +117,10 @@ public class VaadinServletContextInitializer
             "com/h2database", "com/helger", "com/vaadin/external/atmosphere",
             "com/vaadin/webjar", "junit", "net/bytebuddy", "org/apache",
             "org/aspectj", "org/bouncycastle", "org/dom4j", "org/easymock",
-            "org/hamcrest", "org/hibernate", "org/javassist", "org/jboss",
-            "org/jsoup", "org/seleniumhq", "org/slf4j", "org/atmosphere",
-            "org/springframework", "org/webjars/bowergithub", "org/yaml",
+            "org/eclipse/persistence", "org/hamcrest", "org/hibernate",
+            "org/javassist", "org/jboss", "org/jsoup", "org/seleniumhq",
+            "org/slf4j", "org/atmosphere", "org/springframework",
+            "org/webjars/bowergithub", "org/yaml",
 
             "java/", "javax/", "javafx/", "com/sun/", "oracle/deploy",
             "oracle/javafx", "oracle/jrockit", "oracle/jvm", "oracle/net",
@@ -126,9 +129,9 @@ public class VaadinServletContextInitializer
 
             "com/intellij/", "org/jetbrains").collect(Collectors.toList());
 
-   /**
-     * Packages that should be scanned by default and can't be overriden by
-     * a custom list.
+    /**
+     * Packages that should be scanned by default and can't be overriden by a
+     * custom list.
      */
     private static final List<String> DEFAULT_SCAN_ONLY = Stream
             .of(Component.class.getPackage().getName(),
@@ -194,6 +197,69 @@ public class VaadinServletContextInitializer
 
         void failFastContextInitialized(ServletContextEvent event)
                 throws ServletException;
+
+    }
+
+    private static class CompositeServletContextListener
+            implements ServletContextListener, Serializable {
+        private final List<FailFastServletContextListener> listeners = new ArrayList<>();
+
+        @Override
+        public void contextInitialized(ServletContextEvent event) {
+            listeners.forEach(listener -> listener.contextInitialized(event));
+        }
+
+        @Override
+        public void contextDestroyed(ServletContextEvent event) {
+            listeners.forEach(listener -> listener.contextDestroyed(event));
+        }
+
+        private void addListener(FailFastServletContextListener listener) {
+            listeners.add(listener);
+        }
+
+    }
+
+    private class LookupInitializerListener
+            extends LookupServletContainerInitializer
+            implements FailFastServletContextListener {
+
+        @Override
+        public void failFastContextInitialized(ServletContextEvent event)
+                throws ServletException {
+            VaadinServletContext vaadinContext = new VaadinServletContext(
+                    event.getServletContext());
+            if (vaadinContext.getAttribute(Lookup.class) != null) {
+                return;
+            }
+
+            Set<Class<?>> classes = Stream.concat(
+                    findByAnnotationOrSuperType(getLookupPackages(), appContext,
+                            Collections.emptyList(), getServiceTypes()),
+                    // LookupInitializer is necessary here: it allows
+                    // identify Spring boot as a regular Web container (and run
+                    // LookupServletContainerInitializer logic) even though
+                    // LookupInitializer will be ignored because there
+                    // is its subclass SpringLookupInitializer provided
+                    Stream.of(LookupInitializer.class,
+                            SpringLookupInitializer.class))
+                    .collect(Collectors.toSet());
+            process(classes, event.getServletContext());
+        }
+
+        @Override
+        protected Collection<Class<?>> getServiceTypes() {
+            // intentionally make annotation unmodifiable empty list because
+            // LookupInitializer doesn't have annotations at the moment
+            List<Class<? extends Annotation>> annotations = Collections
+                    .emptyList();
+            List<Class<?>> types = new LinkedList<>();
+            collectHandleTypes(LookupServletContainerInitializer.class,
+                    annotations, types);
+            types.remove(LookupInitializer.class);
+            return types;
+        }
+
     }
 
     private class RouteServletContextListener
@@ -290,12 +356,27 @@ public class VaadinServletContextInitializer
                     .getInstance(new VaadinServletContext(
                             event.getServletContext()));
 
-            Stream<Class<? extends Component>> hasErrorComponents = findBySuperType(
+            Set<Class<? extends Component>> errorComponents = findBySuperType(
                     getErrorParameterPackages(), HasErrorParameter.class)
                             .filter(Component.class::isAssignableFrom)
-                            .map(clazz -> (Class<? extends Component>) clazz);
-            registry.setErrorNavigationTargets(
-                    hasErrorComponents.collect(Collectors.toSet()));
+                            // Replace Flow default with custom version for
+                            // Spring
+                            .filter(clazz -> clazz != RouteNotFoundError.class)
+                            .map(clazz -> (Class<? extends Component>) clazz)
+                            .collect(Collectors.toSet());
+
+            // If there is no custom HasErrorParameter<? super
+            // NotFoundException>
+            // add SpringRouteNotFoundError, with Spring Boot specific hints
+            if (errorComponents.stream().noneMatch(clazz -> {
+                Class<?> exceptionType = ReflectTools.getGenericInterfaceType(
+                        clazz, HasErrorParameter.class);
+                return exceptionType != null && exceptionType
+                        .isAssignableFrom(NotFoundException.class);
+            })) {
+                errorComponents.add(SpringRouteNotFoundError.class);
+            }
+            registry.setErrorNavigationTargets(errorComponents);
         }
     }
 
@@ -339,13 +420,13 @@ public class VaadinServletContextInitializer
         @Override
         public void failFastContextInitialized(ServletContextEvent event)
                 throws ServletException {
-            DeploymentConfiguration config = SpringStubServletConfig
-                    .createDeploymentConfiguration(this.getClass(), event,
-                            appContext);
 
-            if (config == null || config.isProductionMode() ||
-                    !config.enableDevServer() ||
-                    isDevModeAlreadyStarted(event.getServletContext())) {
+            ApplicationConfiguration config = ApplicationConfiguration
+                    .get(new VaadinServletContext(event.getServletContext()));
+
+            if (config == null || config.isProductionMode()
+                    || !config.enableDevServer()
+                    || isDevModeAlreadyStarted(event.getServletContext())) {
                 return;
             }
 
@@ -360,7 +441,8 @@ public class VaadinServletContextInitializer
 
             List<Class<? extends Annotation>> annotations = new ArrayList<>();
             List<Class<?>> superTypes = new ArrayList<>();
-            collectDevModeTypes(annotations, superTypes);
+            collectHandleTypes(DevModeInitializer.class, annotations,
+                    superTypes);
 
             Set<Class<?>> classes = findByAnnotationOrSuperType(basePackages,
                     customLoader, annotations, superTypes)
@@ -373,7 +455,7 @@ public class VaadinServletContextInitializer
 
             try {
                 DevModeInitializer.initDevModeHandler(classes,
-                        event.getServletContext(), config);
+                        event.getServletContext());
             } catch (ServletException e) {
                 throw new RuntimeException(
                         "Unable to initialize Vaadin DevModeHandler", e);
@@ -401,25 +483,8 @@ public class VaadinServletContextInitializer
             return npmPackages;
         }
 
-        @SuppressWarnings("unchecked")
-        private void collectDevModeTypes(
-                List<Class<? extends Annotation>> annotations,
-                List<Class<?>> superTypes) {
-            HandlesTypes handleTypes = DevModeInitializer.class
-                    .getAnnotation(HandlesTypes.class);
-            assert handleTypes != null;
-            for (Class<?> clazz : handleTypes.value()) {
-                if (clazz.isAnnotation()) {
-                    annotations.add((Class<? extends Annotation>) clazz);
-                } else {
-                    superTypes.add(clazz);
-                }
-            }
-        }
-
         private boolean isScanOnlySet() {
-            return customScanOnly != null
-                    && !customScanOnly.isEmpty();
+            return customScanOnly != null && !customScanOnly.isEmpty();
         }
 
         private boolean isDevModeAlreadyStarted(ServletContext servletContext) {
@@ -466,8 +531,8 @@ public class VaadinServletContextInitializer
         public void failFastContextInitialized(ServletContextEvent event) {
             long start = System.nanoTime();
 
-            DeploymentConfiguration config = SpringStubServletConfig
-                    .createDeploymentConfiguration(this, event, appContext);
+            ApplicationConfiguration config = ApplicationConfiguration
+                    .get(new VaadinServletContext(event.getServletContext()));
 
             if (config == null || config.useV14Bootstrap()) {
                 return;
@@ -482,8 +547,7 @@ public class VaadinServletContextInitializer
             long ms = (System.nanoTime() - start) / 1000000;
             getLogger().info("Search for VaadinAppShell took {} ms", ms);
 
-            VaadinAppShellInitializer.init(classes, event.getServletContext(),
-                    config);
+            VaadinAppShellInitializer.init(classes, event.getServletContext());
         }
     }
 
@@ -532,10 +596,21 @@ public class VaadinServletContextInitializer
         // Verify servlet version also for SpringBoot.
         ServletVerifier.verifyServletVersion();
 
-        servletContext.addListener(new VaadinAppShellContextListener());
+        VaadinServletContext vaadinContext = new VaadinServletContext(
+                servletContext);
+        servletContext.addListener(createCompositeListener(vaadinContext));
+    }
+
+    private CompositeServletContextListener createCompositeListener(
+            VaadinServletContext context) {
+        CompositeServletContextListener compositeListener = new CompositeServletContextListener();
+
+        compositeListener.addListener(new LookupInitializerListener());
+
+        compositeListener.addListener(new VaadinAppShellContextListener());
 
         ApplicationRouteRegistry registry = ApplicationRouteRegistry
-                .getInstance(new VaadinServletContext(servletContext));
+                .getInstance(context);
 
         // If the registry is already initialized then RouteRegistryInitializer
         // has done its job already, skip the custom routes search
@@ -549,24 +624,26 @@ public class VaadinServletContextInitializer
              * because an RouteRegistryInitializer has not been executed (end
              * never will).
              */
-            servletContext.addListener(new RouteServletContextListener());
+            compositeListener.addListener(new RouteServletContextListener());
         }
 
-        servletContext.addListener(new ErrorParameterServletContextListener());
+        compositeListener
+                .addListener(new ErrorParameterServletContextListener());
 
-        servletContext
+        compositeListener
                 .addListener(new AnnotationValidatorServletContextListener());
 
-        servletContext.addListener(new DevModeServletContextListener());
+        compositeListener.addListener(new DevModeServletContextListener());
 
         // Skip custom web component builders search if registry already
         // initialized
-        if (!WebComponentConfigurationRegistry
-                .getInstance(new VaadinServletContext(servletContext))
+        if (!WebComponentConfigurationRegistry.getInstance(context)
                 .hasConfigurations()) {
-            servletContext
+            compositeListener
                     .addListener(new WebComponentServletContextListener());
         }
+
+        return compositeListener;
     }
 
     private Stream<Class<?>> findByAnnotation(Collection<String> packages,
@@ -656,6 +733,27 @@ public class VaadinServletContextInitializer
         return packagesList;
     }
 
+    private List<String> getLookupPackages() {
+        return Stream.concat(getDefaultPackages().stream(),
+                Stream.of("com.vaadin.flow.server.frontend.fusion",
+                        "com.vaadin.flow.component.polymertemplate.rpc"))
+                .collect(Collectors.toList());
+    }
+
+    private static void collectHandleTypes(Class<?> clazz,
+            List<Class<? extends Annotation>> annotations,
+            List<Class<?>> superTypes) {
+        HandlesTypes handleTypes = clazz.getAnnotation(HandlesTypes.class);
+        assert handleTypes != null;
+        for (Class<?> type : handleTypes.value()) {
+            if (type.isAnnotation()) {
+                annotations.add((Class<? extends Annotation>) type);
+            } else {
+                superTypes.add(type);
+            }
+        }
+    }
+
     /**
      * For NPM we scan all packages. For performance reasons and due to problems
      * with atmosphere we skip known packaged from our resources collection.
@@ -665,10 +763,9 @@ public class VaadinServletContextInitializer
 
         private final PrefixTree scanNever = new PrefixTree(DEFAULT_SCAN_NEVER);
 
-        private final PrefixTree scanAlways = new PrefixTree(
-                DEFAULT_SCAN_ONLY.stream()
-                        .map(packageName -> packageName.replace('.', '/'))
-                        .collect(Collectors.toList()));
+        private final PrefixTree scanAlways = new PrefixTree(DEFAULT_SCAN_ONLY
+                .stream().map(packageName -> packageName.replace('.', '/'))
+                .collect(Collectors.toList()));
 
         public CustomResourceLoader(ResourceLoader resourceLoader,
                 List<String> addedScanNever) {
@@ -745,114 +842,7 @@ public class VaadinServletContextInitializer
         }
 
         private boolean shouldPathBeScanned(String path) {
-            return scanAlways.hasPrefix(path)
-                    || !scanNever.hasPrefix(path);
-        }
-    }
-
-    /**
-     * ServletConfig implementation for getting initial properties for building
-     * the DeploymentConfiguration.
-     */
-    protected static class SpringStubServletConfig implements ServletConfig {
-
-        private final ServletContext context;
-        private final ServletRegistrationBean<?> registration;
-        private final ApplicationContext appContext;
-
-        /**
-         * Constructor.
-         *
-         * @param context
-         *            the ServletContext
-         * @param registration
-         *            the ServletRegistration for this ServletConfig instance
-         */
-        private SpringStubServletConfig(ServletContext context,
-                ServletRegistrationBean<?> registration,
-                ApplicationContext appContext) {
-            this.context = context;
-            this.registration = registration;
-            this.appContext = appContext;
-        }
-
-        @Override
-        public String getServletName() {
-            return registration.getServletName();
-        }
-
-        @Override
-        public ServletContext getServletContext() {
-            return context;
-        }
-
-        @Override
-        public String getInitParameter(String name) {
-            Environment env = appContext.getBean(Environment.class);
-            String propertyValue = env.getProperty("vaadin." + name);
-            if (propertyValue != null) {
-                return propertyValue;
-            }
-
-            return registration.getInitParameters().get(name);
-        }
-
-        @Override
-        public Enumeration<String> getInitParameterNames() {
-            Environment env = appContext.getBean(Environment.class);
-            // Collect any vaadin.XZY properties from application.properties
-            List<String> initParameters = SpringServlet.PROPERTY_NAMES.stream()
-                    .filter(name -> env.getProperty("vaadin." + name) != null)
-                    .collect(Collectors.toList());
-            initParameters.addAll(registration.getInitParameters().keySet());
-            return Collections.enumeration(initParameters);
-        }
-
-        private static DeploymentConfiguration createDeploymentConfiguration(
-                Object listener, ServletContextEvent event,
-                ApplicationContext appContext) {
-
-            ServletRegistrationBean<?> servletRegistrationBean = appContext
-                    .getBean("servletRegistrationBean",
-                            ServletRegistrationBean.class);
-
-            if (servletRegistrationBean == null) {
-                getLogger().warn(
-                        "No servlet registration found. {} will not be started!",
-                        listener.getClass().getSimpleName());
-                return null;
-            }
-
-            return SpringStubServletConfig.createDeploymentConfiguration(
-                    event.getServletContext(), servletRegistrationBean,
-                    SpringServlet.class, appContext);
-        }
-
-        /**
-         * Creates a DeploymentConfiguration.
-         *
-         * @param context
-         *            the ServletContext
-         * @param registration
-         *            the ServletRegistrationBean to get servlet parameters from
-         * @param servletClass
-         *            the class to look for properties defined with annotations
-         * @return a DeploymentConfiguration instance
-         */
-        public static DeploymentConfiguration createDeploymentConfiguration(
-                ServletContext context, ServletRegistrationBean<?> registration,
-                Class<?> servletClass, ApplicationContext appContext) {
-            try {
-                ServletConfig servletConfig = new SpringStubServletConfig(
-                        context, registration, appContext);
-                return DeploymentConfigurationFactory
-                        .createPropertyDeploymentConfiguration(servletClass,
-                                new VaadinServletConfig(servletConfig));
-            } catch (VaadinConfigurationException e) {
-                throw new IllegalStateException(String.format(
-                        "Failed to get deployment configuration data for servlet with name '%s' and class '%s'",
-                        registration.getServletName(), servletClass), e);
-            }
+            return scanAlways.hasPrefix(path) || !scanNever.hasPrefix(path);
         }
     }
 

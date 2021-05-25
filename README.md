@@ -17,8 +17,15 @@ See other branches for other framework versions:
 * 11.0 for Vaadin 13 (End-of-line)
 * 12.0 for Vaadin 14.0
 * 12.1 for Vaadin 14.1
-* 12.2 for upcoming Vaadin 14.2
-* master (currently 13.0) for upcoming major Vaadin versions
+* 12.2 for Vaadin 14.2
+* 12.3 for Vaadin 14.3, 14.4 and 14.5
+* 12.4 for Vaadin 14.6 
+* 13.0 for Vaadin 16
+* 14.0 for Vaadin 17
+* 15.0 for Vaadin 18
+* 16.0 for Vaadin 19
+* 17.0 for Vaadin 20 
+* master (currently 18.0) for upcoming major Vaadin versions
 
 Getting started
 ----
@@ -33,20 +40,4 @@ Execute `mvn clean install` in the root directory.
 
 Contributions
 ----
-Contributions to the project can be done using pull requests.
-You will be asked to sign a contribution agreement after creating the first one.
-
-
-Copyright 2015-2018 Vaadin Ltd.
-
-Licensed under the Apache License, Version 2.0 (the "License"); you may not
-use this file except in compliance with the License. You may obtain a copy of
-the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-License for the specific language governing permissions and limitations under
-the License.
+The contributing docs can be found here: https://vaadin.com/docs-beta/latest/guide/contributing/overview/

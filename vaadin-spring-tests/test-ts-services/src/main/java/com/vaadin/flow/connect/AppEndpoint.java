@@ -1,6 +1,7 @@
 package com.vaadin.flow.connect;
 
 import javax.annotation.Nullable;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 
 import java.util.Optional;
@@ -10,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.connect.Endpoint;
-import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
  * Simple Vaadin Connect Service definition.
@@ -18,14 +19,20 @@ import com.vaadin.flow.server.connect.auth.AnonymousAllowed;
 @Endpoint
 public class AppEndpoint {
 
+    // DenyAll by default
+    public String denied() {
+        return "Will never be accessible";
+    }
+
+    @PermitAll
     public String hello(String name, @Nullable String title) {
         return "Hello, " + (title != null ? title + " " : "") + name + "!";
     }
 
     @AnonymousAllowed
     public String echoWithOptional(@Nullable String first,
-            @Nullable String second,
-            Optional<String> third, Optional<String> fourth) {
+            @Nullable String second, Optional<String> third,
+            Optional<String> fourth) {
         String result = "";
         if (first != null) {
             result += "1. " + first + " ";
@@ -57,8 +64,15 @@ public class AppEndpoint {
 
     @AnonymousAllowed
     public String checkUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext()
+                .getAuthentication();
         return auth == null ? null : auth.getName();
+    }
+
+    @PermitAll
+    public String checkUserFromVaadinRequest() {
+        return "Hello, "
+                + VaadinRequest.getCurrent().getUserPrincipal().getName() + "!";
     }
 
 }
