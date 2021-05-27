@@ -1,9 +1,30 @@
+/*
+ * Copyright 2000-2021 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.spring.security;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.internal.AnnotationReader;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.server.HandlerHelper;
+import com.vaadin.flow.server.auth.ViewAccessChecker;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -47,6 +68,9 @@ public abstract class VaadinWebSecurityConfigurerAdapter
     @Autowired
     private RequestUtil requestUtil;
 
+    @Autowired
+    private ViewAccessChecker viewAccessChecker;
+
     /**
      * The paths listed as "ignoring" in this method are handled without any
      * Spring Security involvement. They have no access to any security context
@@ -84,11 +108,16 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         // Public endpoints are OK to access
         urlRegistry.requestMatchers(requestUtil::isAnonymousEndpoint)
                 .permitAll();
+        // Public routes are OK to access
+        urlRegistry.requestMatchers(requestUtil::isAnonymousRoute).permitAll();
         urlRegistry.requestMatchers(getDefaultHttpSecurityPermitMatcher())
                 .permitAll();
 
         // all other requests require authentication
         urlRegistry.anyRequest().authenticated();
+
+        // Enable view access control
+        viewAccessChecker.enable();
     }
 
     /**
@@ -158,6 +187,62 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         formLogin.successHandler(
                 new VaadinSavedRequestAwareAuthenticationSuccessHandler());
         http.logout().logoutSuccessUrl(logoutUrl);
+        viewAccessChecker.setLoginView(fusionLoginViewPath);
+    }
+
+    /**
+     * Sets up login for the application using the given Flow login view.
+     * 
+     * @param http
+     *            the http security from {@link #configure(HttpSecurity)}
+     * @param flowLoginView
+     *            the login view to use
+     * @throws Exception
+     *             if something goes wrong
+     */
+    protected void setLoginView(HttpSecurity http,
+            Class<? extends Component> flowLoginView) throws Exception {
+        setLoginView(http, flowLoginView, "/");
+    }
+
+    /**
+     * Sets up login for the application using the given Flow login view.
+     * 
+     * @param http
+     *            the http security from {@link #configure(HttpSecurity)}
+     * @param flowLoginView
+     *            the login view to use
+     * @param logoutUrl
+     *            the URL to redirect the user to after logging out
+     * 
+     * @throws Exception
+     *             if something goes wrong
+     */
+    protected void setLoginView(HttpSecurity http,
+            Class<? extends Component> flowLoginView, String logoutUrl)
+            throws Exception {
+        Optional<Route> route = AnnotationReader.getAnnotationFor(flowLoginView,
+                Route.class);
+
+        if (!route.isPresent()) {
+            throw new IllegalArgumentException(
+                    "Unable find a @Route annotation on the login view "
+                            + flowLoginView.getName());
+        }
+
+        String loginPath = RouteUtil.getRoutePath(flowLoginView, route.get());
+        if (!loginPath.startsWith("/")) {
+            loginPath = "/" + loginPath;
+        }
+
+        // Actually set it up
+        FormLoginConfigurer<HttpSecurity> formLogin = http.formLogin();
+        formLogin.loginPage(loginPath).permitAll();
+        formLogin.successHandler(
+                new VaadinSavedRequestAwareAuthenticationSuccessHandler());
+        http.csrf().ignoringAntMatchers(loginPath);
+        http.logout().logoutSuccessUrl(logoutUrl);
+        viewAccessChecker.setLoginView(flowLoginView);
     }
 
 }
