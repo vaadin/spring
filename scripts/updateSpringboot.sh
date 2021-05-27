@@ -26,7 +26,11 @@ latestVersion=`getLatestVersion $baseVersion`
 echo project is using Spring-boot version $currentVersion
 echo the latest Spring-boot version under this minor is $latestVersion
 
-if [ $currentVersion != $latestVersion ]
+existPR=`curl -s "https://api.github.com/repos/vaadin/spring/pulls" | grep "title" | grep $latestVersion`
+
+[ -n "$existPR" ] && exist=true && echo "Found existing pull request" || exist=false 
+
+if [ $currentVersion != $latestVersion ] && [ !exist ]
 then
   echo "Updating the project to use the latest"
   updateBranch=update-vaadin-$latestVersion-$(date +%s)
@@ -36,6 +40,10 @@ then
   git commit -m "chore: update spring-boot to $latestVersion"
   git push -u origin HEAD 
   hub pull-request -b vaadin:$baseBranch -h vaadin:$updateBranch -m "Update Vaadin $latestVersion"
+elif [ exist ]
+then
+  echo "Version update PR is in the repo"
+  echo "##teamcity[buildStatus status='SUCCESS' text='Version update PR is in the repo']"
 else
   echo "project is using the latest Spring-Boot version, no need to update"
   echo "##teamcity[buildStatus status='SUCCESS' text='Spring boot $currentVersion is the latest. If necessary, you can check the major/minor update manually']"
