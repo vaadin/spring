@@ -57,6 +57,36 @@ public class VaadinConfigurationProperties {
      */
     private List<String> whitelistedPackages = new ArrayList<>();
 
+    /**
+     * Whether pnpm support is enabled
+     **/
+    private Pnpm pnpm = new Pnpm();
+
+    public static class Pnpm {
+        private boolean enable;
+
+        /**
+         * Returns if pnpm support is enabled.
+         *
+         * @return if pnpm is enabled
+         */
+        public boolean isEnable() {
+            return enable;
+        }
+
+        /**
+         * Enables/disabled pnp support.
+         *
+         * @param enable
+         *            if {@code true} then pnpm support is enabled, otherwise
+         *            it's disabled
+         *
+         */
+        public void setEnable(boolean enable) {
+            this.enable = enable;
+        }
+
+    }
 
     /**
      * Turns application to work in production mode. Production mode disables
@@ -160,33 +190,11 @@ public class VaadinConfigurationProperties {
     private Boolean devmodeOptimizeBundle;
 
     /**
-     * This flag can be used to enable pnpm instead of npm for resolving and
-     * downloading frontend dependencies. By default it is false and npm is
-     * used, but setting it to true enables pnpm. See how to switch between npm
-     * and pnpm.
-     */
-    private Boolean pnpmEnable;
-
-    /**
      * This is by default set to true, which means that if you are using some
      * live reload tool on the server side the browser is refreshed
      * automatically once code is reloaded on the server side.
      */
     private Boolean devmodeLiveReloadEnabled;
-
-    /**
-     * I18N provider property. To use localization and translation strings the
-     * application only needs to implement I18NProvider and define the fully
-     * qualified class name in the property i18n.provider. Please consult
-     * Localization documentation.
-     */
-    private String i18nProvider;
-
-    /**
-     * Configuration name for the parameter that determines if Vaadin should
-     * automatically register servlets needed for the application to work.
-     */
-    private Boolean disableAutomaticServletRegistration;
 
 
 
@@ -299,139 +307,275 @@ public class VaadinConfigurationProperties {
         this.whitelistedPackages = new ArrayList<>(whitelistedPackages);
     }
 
+    /**
+     * Returns if pnpm support is enabled.
+     *
+     * @return if pnpm is enabled
+     */
+    public boolean isPnpmEnabled() {
+        return pnpm.isEnable();
+    }
+
+    /**
+     * Enables/disabled pnpm support.
+     *
+     * @param enabled
+     *            if {@code true} then pnpm support is enabled, otherwise it's
+     *            disabled
+     *
+     */
+    public void setPnpmEnabled(boolean enabled) {
+        pnpm.setEnable(enabled);
+    }
+
+    /**
+     * Returns the production mode
+     *
+     * @return the production mode
+     */
     public Boolean getProductionMode() {
         return productionMode;
     }
 
+    /**
+     * Sets the production mode
+     *
+     * @param productionMode value for the production mode
+     */
     public void setProductionMode(Boolean productionMode) {
         this.productionMode = productionMode;
     }
 
+    /**
+     * Returns the useDeprecatedV14Bootstrapping parameter
+     *
+     * @return the useDeprecatedV14Bootstrapping parameter
+     */
     public Boolean getUseDeprecatedV14Bootstrapping() {
         return useDeprecatedV14Bootstrapping;
     }
 
+    /**
+     * Sets the useDeprecatedV14Bootstrapping parameter
+     *
+     * @param useDeprecatedV14Bootstrapping the useDeprecatedV14Bootstrapping parameter
+     */
     public void setUseDeprecatedV14Bootstrapping(Boolean useDeprecatedV14Bootstrapping) {
         this.useDeprecatedV14Bootstrapping = useDeprecatedV14Bootstrapping;
     }
 
+    /**
+     * Returns the request timing parameter
+     *
+     * @return the request timing parameter
+     */
     public Boolean getRequestTiming() {
         return requestTiming;
     }
 
+    /**
+     * Sets the request timing parameter
+     *
+     * @param requestTiming the request timing parameter
+     */
     public void setRequestTiming(Boolean requestTiming) {
         this.requestTiming = requestTiming;
     }
 
+    /**
+     * Gets the disable xsrf protection parameter
+     * @return the disable xsrf protection parameter
+     */
     public Boolean getDisableXsrfProtection() {
         return disableXsrfProtection;
     }
 
+    /**
+     * Sets the disable xsrf protection parameter
+     * @param disableXsrfProtection the disable xsrf protection parameter
+     */
     public void setDisableXsrfProtection(Boolean disableXsrfProtection) {
         this.disableXsrfProtection = disableXsrfProtection;
     }
 
+    /**
+     * Gets the heart beat interval parameter
+     *
+     * @return the heart beat interval parameter
+     */
     public Integer getHeartbeatInterval() {
         return heartbeatInterval;
     }
 
+    /**
+     * Sets the heart beat interval parameter
+     *
+     * @param heartbeatInterval the heart beat interval parameter
+     */
     public void setHeartbeatInterval(Integer heartbeatInterval) {
         this.heartbeatInterval = heartbeatInterval;
     }
 
+    /**
+     * Gets the close idle sessions parameter
+     *
+     * @return the close idle sessions parameter
+     */
     public Boolean getCloseIdleSessions() {
         return closeIdleSessions;
     }
 
+    /**
+     * Sets the close idle sessions parameter
+     *
+     * @param closeIdleSessions the close idle sessions parameter
+     */
     public void setCloseIdleSessions(Boolean closeIdleSessions) {
         this.closeIdleSessions = closeIdleSessions;
     }
 
+    /**
+     * Gets the push mode parameter
+     *
+     * @return the push mode parameter
+     */
     public String getPushMode() {
         return pushMode;
     }
 
+    /**
+     * Sets the push mode parameter
+     *
+     * @param pushMode the push mode parameter
+     */
     public void setPushMode(String pushMode) {
         this.pushMode = pushMode;
     }
 
+    /**
+     * Gets the push url parameter
+     *
+     * @return the push url parameter
+     */
     public String getPushURL() {
         return pushURL;
     }
 
+    /**
+     * Sets the push url parameter
+     *
+     * @param pushURL the push url parameter
+     */
     public void setPushURL(String pushURL) {
         this.pushURL = pushURL;
     }
 
+    /**
+     * Gets the sync id check parameter
+     *
+     * @return the sync id check parameter
+     */
     public Boolean getSyncIdCheck() {
         return syncIdCheck;
     }
 
+    /**
+     * Sets the sync id check parameter
+     * @param syncIdCheck the sync id check parameter
+     */
     public void setSyncIdCheck(Boolean syncIdCheck) {
         this.syncIdCheck = syncIdCheck;
     }
 
+    /**
+     * Gets the send url as parameters parameter
+     *
+     * @return the send url as parameters parameter
+     */
     public Boolean getSendUrlsAsParameters() {
         return sendUrlsAsParameters;
     }
 
+    /**
+     * Sets the send url as parameters parameter
+     *
+     * @param sendUrlsAsParameters the send url as parameters parameter
+     */
     public void setSendUrlsAsParameters(Boolean sendUrlsAsParameters) {
         this.sendUrlsAsParameters = sendUrlsAsParameters;
     }
 
+    /**
+     * Gets the push long polling suspend timeout parameter
+     *
+     * @return the push long polling suspend timeout parameter
+     */
     public Integer getPushLongPollingSuspendTimeout() {
         return pushLongPollingSuspendTimeout;
     }
 
+    /**
+     * Sets the push long polling suspend timeout parameter
+     *
+     * @param pushLongPollingSuspendTimeout the push long polling suspend
+     *                                      timeout parameter
+     */
     public void setPushLongPollingSuspendTimeout(Integer pushLongPollingSuspendTimeout) {
         this.pushLongPollingSuspendTimeout = pushLongPollingSuspendTimeout;
     }
 
+    /**
+     * Gets the max message suspend timeout parameter
+     *
+     * @return the max message suspend timeout parameter
+     */
     public Integer getMaxMessageSuspendTimeout() {
         return maxMessageSuspendTimeout;
     }
 
+    /**
+     * Sets the max message suspend timeout parameter
+     *
+     * @param maxMessageSuspendTimeout the max message suspend timeout parameter
+     */
     public void setMaxMessageSuspendTimeout(Integer maxMessageSuspendTimeout) {
         this.maxMessageSuspendTimeout = maxMessageSuspendTimeout;
     }
 
+    /**
+     * Gets the dev mode optimize bundle parameter
+     *
+     * @return the dev mode optimize bundle parameter
+     */
     public Boolean getDevmodeOptimizeBundle() {
         return devmodeOptimizeBundle;
     }
 
+    /**
+     * Sets the dev mode optimize bundle parameter
+     *
+     * @param devmodeOptimizeBundle the dev mode optimize bundle parameter
+     */
     public void setDevmodeOptimizeBundle(Boolean devmodeOptimizeBundle) {
         this.devmodeOptimizeBundle = devmodeOptimizeBundle;
     }
 
-    public Boolean getPnpmEnable() {
-        return pnpmEnable;
-    }
-
-    public void setPnpmEnable(Boolean pnpmEnable) {
-        this.pnpmEnable = pnpmEnable;
-    }
-
+    /**
+     * Gets the dev mode live reload enabled parameter
+     *
+     * @return the dev mode live reload enabled parameter
+     */
     public Boolean getDevmodeLiveReloadEnabled() {
         return devmodeLiveReloadEnabled;
     }
 
+    /**
+     * Sets the dev mode live reload enabled parameter
+     *
+     * @param devmodeLiveReloadEnabled the dev mode live reload enabled parameter
+     */
     public void setDevmodeLiveReloadEnabled(Boolean devmodeLiveReloadEnabled) {
         this.devmodeLiveReloadEnabled = devmodeLiveReloadEnabled;
     }
 
-    public String getI18nProvider() {
-        return i18nProvider;
-    }
-
-    public void setI18nProvider(String i18nProvider) {
-        this.i18nProvider = i18nProvider;
-    }
-
-    public Boolean getDisableAutomaticServletRegistration() {
-        return disableAutomaticServletRegistration;
-    }
-
-    public void setDisableAutomaticServletRegistration(Boolean disableAutomaticServletRegistration) {
-        this.disableAutomaticServletRegistration = disableAutomaticServletRegistration;
-    }
 }
