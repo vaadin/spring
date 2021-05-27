@@ -25,6 +25,8 @@ latestVersion=`getLatestVersion $baseVersion`
 
 echo project is using Spring-boot version $currentVersion
 echo the latest Spring-boot version under this minor is $latestVersion
+#set the TC parameter for further use
+echo "##teamcity[setParameter name='spring.boot.latest.version' value='$latestVersion']"
 
 existPR=`curl -s "https://api.github.com/repos/vaadin/spring/pulls" | grep "title" | grep $latestVersion`
 
