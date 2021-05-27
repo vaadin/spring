@@ -53,6 +53,12 @@
             <groupId>com.vaadin</groupId>
             <artifactId>test-spring-security-fusion</artifactId>
             <version>${project.version}</version>
+            <classifier>frontend</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>test-spring-security-fusion</artifactId>
+            <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -87,8 +93,9 @@
                                     <groupId>com.vaadin</groupId>
                                     <artifactId>test-spring-security-fusion</artifactId>
                                     <version>${project.version}</version>
-                                    <outputDirectory>${project.build.directory}/frontend</outputDirectory>
-                                    <includes>**\/frontend</includes>
+                                    <classifier>frontend</classifier>
+                                    <outputDirectory>${project.basedir}/frontend</outputDirectory>
+                                    <includes>**/*</includes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
