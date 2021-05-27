@@ -95,7 +95,6 @@
                                     <version>${project.version}</version>
                                     <classifier>frontend</classifier>
                                     <outputDirectory>${project.basedir}/frontend</outputDirectory>
-                                    <includes>**/*</includes>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>

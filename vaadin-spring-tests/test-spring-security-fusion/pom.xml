@@ -118,9 +118,7 @@
                         </goals>
                         <configuration>
                             <classifier>frontend</classifier>
-                            <includes>
-                                <include>${project.basedir}/frontend/*</include>
-                            </includes>
+                            <classesDirectory>${project.basedir}/frontend</classesDirectory>
                         </configuration>
                     </execution>
                 </executions>
