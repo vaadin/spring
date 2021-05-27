@@ -8,7 +8,7 @@
         <version>18.0-SNAPSHOT</version>
     </parent>
     <artifactId>test-spring-security-fusion-contextpath</artifactId>
-    <name>Integration tests for Vaadin Spring Security and Fusion Ssing a Context Path</name>
+    <name>Integration tests for Vaadin Spring Security and Fusion With Context Path</name>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>

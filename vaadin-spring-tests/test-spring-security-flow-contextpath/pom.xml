@@ -8,7 +8,7 @@
         <version>18.0-SNAPSHOT</version>
     </parent>
     <artifactId>test-spring-security-flow-contextpath</artifactId>
-    <name>Integration tests for Vaadin Spring Security and Flow</name>
+    <name>Integration tests for Vaadin Spring Security and Flow With Context Path</name>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
