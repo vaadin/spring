@@ -30,7 +30,7 @@ existPR=`curl -s "https://api.github.com/repos/vaadin/spring/pulls" | grep "titl
 
 [ -n "$existPR" ] && exist=true && echo "Found existing pull request" || exist=false 
 
-if [ $currentVersion != $latestVersion ] && [ !exist ]
+if [ $currentVersion != $latestVersion ] && [ ! exist ]
 then
   echo "Updating the project to use the latest"
   updateBranch=update-vaadin-$latestVersion-$(date +%s)
