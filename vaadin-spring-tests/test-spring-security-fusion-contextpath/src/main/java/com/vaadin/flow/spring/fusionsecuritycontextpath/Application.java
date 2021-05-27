@@ -1,15 +1,10 @@
-package com.vaadin.flow.spring.fusionsecurity;
+package com.vaadin.flow.spring.fusionsecuritycontextpath;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import com.vaadin.flow.component.page.AppShellConfigurator;
-import com.vaadin.flow.server.PWA;
-import com.vaadin.flow.theme.Theme;
 
-@PWA(name = "Spring Security Helper Test Project", shortName = "SSH Test")
 @SpringBootApplication
-@Theme("spring-security-test-app")
-public class Application implements AppShellConfigurator {
+public class Application extends com.vaadin.flow.spring.fusionsecurity.Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

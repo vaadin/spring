@@ -21,7 +21,7 @@
       "extra-watch-webpack-plugin": "1.0.3",
       "glob": "7.1.6",
       "validator": "13.1.17",
-      "lit-css-loader": "0.0.4",
+      "lit-css-loader": "0.1.0",
       "loader-utils": "2.0.0",
       "@types/validator": "13.1.0",
       "webpack": "4.46.0",
@@ -40,7 +40,7 @@
       "extract-loader": "5.1.0",
       "fork-ts-checker-webpack-plugin": "6.2.1"
     },
-    "hash": "691a949be9b3dcc9df719366e282e0c3b7b94eac0a8b39d0fb711c1264822aae"
+    "hash": "231ab29d17ba0709f723795d9c75a8dfae1ca8eaa2d51e89a3dd5a5720240772"
   },
   "devDependencies": {
     "@types/validator": "13.1.0",
@@ -56,7 +56,7 @@
     "file-loader": "6.2.0",
     "glob": "7.1.6",
     "html-webpack-plugin": "4.5.1",
-    "lit-css-loader": "0.0.4",
+    "lit-css-loader": "0.1.0",
     "loader-utils": "2.0.0",
     "ts-loader": "8.0.12",
     "typescript": "4.2.3",

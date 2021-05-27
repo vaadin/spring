@@ -29,7 +29,7 @@ devDependencies:
   fork-ts-checker-webpack-plugin: 6.2.1
   glob: 7.1.6
   html-webpack-plugin: 4.5.1_webpack@4.46.0
-  lit-css-loader: 0.0.4
+  lit-css-loader: 0.1.0
   loader-utils: 2.0.0
   ts-loader: 8.0.12_typescript@4.2.3+webpack@4.46.0
   typescript: 4.2.3
@@ -4778,10 +4778,12 @@ packages:
     dev: true
     resolution:
       integrity: sha1-HADHQ7QzzQpOgHWPe2SldEDZ/wA=
-  /lit-css-loader/0.0.4:
+  /lit-css-loader/0.1.0:
+    dependencies:
+      loader-utils: 2.0.0
     dev: true
     resolution:
-      integrity: sha512-oGWAIhlIa/qf792X5006kxxbVS9j1Z36oVZUyGnREfSw7oOQL2JjDs14ChTakSKSoVdQxdC808kFRtuktAafIQ==
+      integrity: sha512-b5k074E6UuzMGxHhm/bkw6DNdNxnpzAroNXd1Aejf3korc6NIHTaeivyrrbYHjjnyZD8eZ8TrKjQWJbB4ukRrw==
   /lit-element/3.0.0-rc.2:
     dependencies:
       '@lit/reactive-element': 1.0.0-rc.2
@@ -7635,7 +7637,7 @@ specifiers:
   glob: 7.1.6
   html-webpack-plugin: 4.5.1
   lit: 2.0.0-rc.1
-  lit-css-loader: 0.0.4
+  lit-css-loader: 0.1.0
   loader-utils: 2.0.0
   mobx: ^6.2.0
   ts-loader: 8.0.12
