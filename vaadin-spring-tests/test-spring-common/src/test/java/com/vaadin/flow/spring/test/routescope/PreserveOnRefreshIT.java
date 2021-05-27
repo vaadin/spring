@@ -35,7 +35,9 @@ public class PreserveOnRefreshIT extends AbstractSpringTest {
         String beanCall = findElement(By.id("preserve-on-refresh")).getText();
 
         // refresh
-        open();
+        String url = getTestURL(getRootURL(),
+                getContextPath() + "/preserve-pre-destroy");
+        getDriver().get(url);
 
         Assert.assertEquals("Bean is not preserved after refresh", beanCall,
                 findElement(By.id("preserve-on-refresh")).getText());

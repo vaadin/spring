@@ -30,6 +30,7 @@ public class MainPreDestroyView extends Div {
     private DestroyBean bean;
 
     public MainPreDestroyView() {
+        setId("main");
         RouterLink link = new RouterLink("navigate to not preserved view",
                 PreDestroyView.class);
         add(link);

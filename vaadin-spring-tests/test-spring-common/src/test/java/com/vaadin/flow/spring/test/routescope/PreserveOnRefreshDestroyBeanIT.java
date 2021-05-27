@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.spring.test.routescope;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
@@ -33,9 +34,21 @@ public class PreserveOnRefreshDestroyBeanIT extends AbstractSpringTest {
 
         navigateOut();
 
+        waitForElementPresent(By.id("main"));
+
+        // refresh
+        open();
+
+        waitForElementPresent(By.id("main"));
+
+        // navigate back
+        navigateOut();
+
+        Assert.assertTrue(isElementPresent(By.className("info")));
+
     }
 
     private void navigateOut() {
-        findElement(By.id("navigte-out")).click();
+        findElement(By.id("navigate-out")).click();
     }
 }
