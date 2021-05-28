@@ -6,7 +6,14 @@
       "@vaadin/router": "1.7.2",
       "@polymer/polymer": "3.2.0",
       "construct-style-sheets-polyfill": "2.4.16",
-      "lit": "2.0.0-rc.1"
+      "lit": "2.0.0-rc.1",
+      "@vaadin/vaadin-ordered-layout": "21.0.0-alpha2",
+      "@vaadin/vaadin-login": "21.0.0-alpha2",
+      "@vaadin/vaadin-avatar": "21.0.0-alpha2",
+      "@vaadin/vaadin-button": "21.0.0-alpha2",
+      "@vaadin/vaadin-tabs": "21.0.0-alpha2",
+      "@vaadin/vaadin-lumo-styles": "21.0.0-alpha2",
+      "@vaadin/vaadin-app-layout": "21.0.0-alpha2"
     },
     "devDependencies": {
       "css-loader": "4.2.1",
@@ -33,7 +40,7 @@
       "extract-loader": "5.1.0",
       "fork-ts-checker-webpack-plugin": "6.2.1"
     },
-    "hash": "1f9f751190306fb9a07eb524830fc200ed60f8e89f037b65c368cc3a88d5d7f7"
+    "hash": "231ab29d17ba0709f723795d9c75a8dfae1ca8eaa2d51e89a3dd5a5720240772"
   },
   "devDependencies": {
     "@types/validator": "13.1.0",
@@ -72,6 +79,13 @@
     "@vaadin/router": "1.7.2",
     "mobx": "^6.2.0",
     "construct-style-sheets-polyfill": "2.4.16",
-    "lit": "2.0.0-rc.1"
+    "lit": "2.0.0-rc.1",
+    "@vaadin/vaadin-ordered-layout": "21.0.0-alpha2",
+    "@vaadin/vaadin-login": "21.0.0-alpha2",
+    "@vaadin/vaadin-avatar": "21.0.0-alpha2",
+    "@vaadin/vaadin-button": "21.0.0-alpha2",
+    "@vaadin/vaadin-tabs": "21.0.0-alpha2",
+    "@vaadin/vaadin-lumo-styles": "21.0.0-alpha2",
+    "@vaadin/vaadin-app-layout": "21.0.0-alpha2"
   }
 }

@@ -4,6 +4,13 @@ dependencies:
   '@vaadin/flow-frontend': link:target/flow-frontend
   '@vaadin/form': link:target/flow-frontend/form
   '@vaadin/router': 1.7.2
+  '@vaadin/vaadin-app-layout': 21.0.0-alpha2
+  '@vaadin/vaadin-avatar': 21.0.0-alpha2
+  '@vaadin/vaadin-button': 21.0.0-alpha2
+  '@vaadin/vaadin-login': 21.0.0-alpha2
+  '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+  '@vaadin/vaadin-ordered-layout': 21.0.0-alpha2
+  '@vaadin/vaadin-tabs': 21.0.0-alpha2
   construct-style-sheets-polyfill: 2.4.16
   lit: 2.0.0-rc.1
   mobx: 6.3.2
@@ -1076,6 +1083,45 @@ packages:
       node: '>=10'
     resolution:
       integrity: sha512-1SUf/Cg2GzGDyaf15aR9St9TWlb+XvbZXWpDx8YKs7MLzMH/BCeopv+y9vzrzgkfykCGuWOlSu3mZhj2+FQcrg==
+  /@polymer/iron-a11y-announcer/3.2.0:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+    dev: false
+    resolution:
+      integrity: sha512-We+hyaFHcg7Ke8ovsoxUpYEXFIJLHxMCDaLehTB4dELS+C+K0zMnGSiqQvb/YzGS+nSYpAfkQIyg1msOCdHMtA==
+  /@polymer/iron-flex-layout/3.0.1:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+    dev: false
+    resolution:
+      integrity: sha512-7gB869czArF+HZcPTVSgvA7tXYFze9EKckvM95NB7SqYF+NnsQyhoXgKnpFwGyo95lUjUW9TFDLUwDXnCYFtkw==
+  /@polymer/iron-icon/3.0.1:
+    dependencies:
+      '@polymer/iron-flex-layout': 3.0.1
+      '@polymer/iron-meta': 3.0.1
+      '@polymer/polymer': 3.2.0
+    dev: false
+    resolution:
+      integrity: sha512-QLPwirk+UPZNaLnMew9VludXA4CWUCenRewgEcGYwdzVgDPCDbXxy6vRJjmweZobMQv/oVLppT2JZtJFnPxX6g==
+  /@polymer/iron-iconset-svg/3.0.1:
+    dependencies:
+      '@polymer/iron-meta': 3.0.1
+      '@polymer/polymer': 3.2.0
+    dev: false
+    resolution:
+      integrity: sha512-XNwURbNHRw6u2fJe05O5fMYye6GSgDlDqCO+q6K1zAnKIrpgZwf2vTkBd5uCcZwsN0FyCB3mvNZx4jkh85dRDw==
+  /@polymer/iron-meta/3.0.1:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+    dev: false
+    resolution:
+      integrity: sha512-pWguPugiLYmWFV9UWxLWzZ6gm4wBwQdDy4VULKwdHCqR7OP7u98h+XDdGZsSlDPv6qoryV/e3tGHlTIT0mbzJA==
+  /@polymer/iron-resizable-behavior/3.0.1:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+    dev: false
+    resolution:
+      integrity: sha512-FyHxRxFspVoRaeZSWpT3y0C9awomb4tXXolIJcZ7RvXhMP632V5lez+ch5G5SwK0LpnAPkg35eB0LPMFv+YMMQ==
   /@polymer/polymer/3.2.0:
     dependencies:
       '@webcomponents/shadycss': 1.9.6
@@ -1231,10 +1277,170 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Jcfd85W46k/kq1/1DtQEz7J3poZ+5gArfOYUMbNvPTpiYSvI7egXTIolkU0dvkpxWuSSAIj1RTIbzIqyIfPepA==
+  /@vaadin/vaadin-app-layout/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-button': 21.0.0-alpha2
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-material-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-+RFY579OpssbCskHaCR4jnZ9bZlfUJ6hHwjL/kmlzMjLK7edmMdJGbeoBoqxQoDeOkvdx4jcRHVcQdWsuBGTuQ==
+  /@vaadin/vaadin-avatar/21.0.0-alpha2:
+    dependencies:
+      '@polymer/iron-a11y-announcer': 3.2.0
+      '@polymer/iron-resizable-behavior': 3.0.1
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-item': 21.0.0-alpha2
+      '@vaadin/vaadin-list-box': 21.0.0-alpha2
+      '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-material-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-overlay': 21.0.0-alpha2
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-ODofZmBq3rpJPxHlHo8UpT2OTOHGeGGnFHQ7pIs6KEezPr0pKFKA8gUmeVxAvhVioZlkUhqUPD6Qbund1zwL3Q==
+  /@vaadin/vaadin-button/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-control-state-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-material-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-kYBwRZbiVDK7p56b74khBIL5CVS7Yi4rP+CRCp5eacK+s14gMx5OkeoKmBNXrsrRbe1UXSAsTfIHNFBLaOKyfQ==
+  /@vaadin/vaadin-control-state-mixin/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+    dev: false
+    resolution:
+      integrity: sha512-X6CJ5GDmRrYGNfLON77XFepuGZAJ3poYZ3W1DRt18eHJEsY6OiDysUv207o3FS5o97MLiXVka5QdApzJaQWZ3A==
   /@vaadin/vaadin-development-mode-detector/2.0.4:
     dev: false
     resolution:
       integrity: sha512-S+PaFrZpK8uBIOnIHxjntTrgumd5ztuCnZww96ydGKXgo9whXfZsbMwDuD/102a/IuPUMyF+dh/n3PbWzJ6igA==
+  /@vaadin/vaadin-element-mixin/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-development-mode-detector': 2.0.4
+      '@vaadin/vaadin-usage-statistics': 2.1.0
+    dev: false
+    resolution:
+      integrity: sha512-3vP2N3yFLqi43Pb7L/sjA7CR1dDjm9+/Pd1hxcGI7dV83nuENpeO+QqxjDSE2EUy+xg54mEQ3faUtD8hl0jh1w==
+  /@vaadin/vaadin-item/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-material-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-UABOiecIcbUJHJ2JAmkkGBs73T4iwzJwNWGwrkZYKJ3rhEcv+K7tyhqB+qx9cAns+7+x4PNJS5mpKWklRnKx/Q==
+  /@vaadin/vaadin-list-box/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-item': 21.0.0-alpha2
+      '@vaadin/vaadin-list-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-material-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-SPDSoqLwGuOrEAn9KRQ7y93KU9wFiEBzNtIvdFXnrXYohU6256CJZhHvl0eZcE8vBGah4lUVAAiG+lO7AvI+Ow==
+  /@vaadin/vaadin-list-mixin/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-SRmt+vkae+5G1tJSW4nt2VnXQesZoM1ul1uKRrjQm8498oekCmZfnmyYgjQaw+Zt7PB8pB8zQKgQz6V/gf2XRA==
+  /@vaadin/vaadin-login/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-button': 21.0.0-alpha2
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-material-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-overlay': 21.0.0-alpha2
+      '@vaadin/vaadin-text-field': 21.0.0-alpha2
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-Y8eEsau87ryZx6hpTetkFzc7b300UwZUhe9hkHNof8ZYJgUfe7VqQ657gQxKYGVclqEzw6jcK4EjX1le93rJlA==
+  /@vaadin/vaadin-lumo-styles/21.0.0-alpha2:
+    dependencies:
+      '@polymer/iron-icon': 3.0.1
+      '@polymer/iron-iconset-svg': 3.0.1
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-f/WmL9P8EkGYMTj80/vcI9KjCY3vM0kt0YH/0ipbvbPJhHfALw9+fqicNZnCHl0dEerb2UptRsF2eFjJtO35hQ==
+  /@vaadin/vaadin-material-styles/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-VOI4qVxFvyRFECcQTrs/o7sdeVKHGOBeRhsXLcpnmjNt5odUMb9AXV4s9iDZJGLmXzcrHh7QHWYdl8kLa3GDiA==
+  /@vaadin/vaadin-ordered-layout/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-material-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-Go4OUcVWLlKeDIaHB//5OWKSFHI512DINDeUHWc3vWyXOGlvgGzih0EiM5k/q+gut7qARbbMPgW0T2t1LIjhtQ==
+  /@vaadin/vaadin-overlay/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-material-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-68EagawSP36cfKcajh/8PePFxfsHXzxLhF4k8qTGuZGA9nJVl6pPYgEcFS/4QknbLE5tBZvmrrg1fRVXMQ4BZw==
+  /@vaadin/vaadin-tabs/21.0.0-alpha2:
+    dependencies:
+      '@polymer/iron-resizable-behavior': 3.0.1
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-item': 21.0.0-alpha2
+      '@vaadin/vaadin-list-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-material-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-ar8z9ZWc3nPuORwwJjoLSUAJNf0vSLWv5lDkUUwj7iPnpy+o+/EEQOM30AF7Ispi5Jxxz0l3SCLdPLlU1kTqbQ==
+  /@vaadin/vaadin-text-field/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      '@vaadin/vaadin-control-state-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-element-mixin': 21.0.0-alpha2
+      '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-material-styles': 21.0.0-alpha2
+      '@vaadin/vaadin-themable-mixin': 21.0.0-alpha2
+    dev: false
+    resolution:
+      integrity: sha512-UHn+8rvOu5NJV0B15NGvnqgSQjRgAYlk5guEHJZf4NR3wEOCMJ6IthBoHM0CM8EIM4b9ctAJWJGe6Ev5ihXIpQ==
+  /@vaadin/vaadin-themable-mixin/21.0.0-alpha2:
+    dependencies:
+      '@polymer/polymer': 3.2.0
+      lit: 2.0.0-rc.1
+    dev: false
+    resolution:
+      integrity: sha512-yWjHzgMG5H3QPJvIwK5LwcvjpMZNl3FJva8Z729yQeXzHQA8ULzyFL8wkXdwe2RQUOgTY63z6t8ZIgzpVbV7CQ==
   /@vaadin/vaadin-usage-statistics/2.1.0:
     dependencies:
       '@vaadin/vaadin-development-mode-detector': 2.0.4
@@ -7413,6 +7619,13 @@ specifiers:
   '@vaadin/stats-plugin': ./target/plugins/stats-plugin
   '@vaadin/theme-live-reload-plugin': ./target/plugins/theme-live-reload-plugin
   '@vaadin/theme-loader': ./target/plugins/theme-loader
+  '@vaadin/vaadin-app-layout': 21.0.0-alpha2
+  '@vaadin/vaadin-avatar': 21.0.0-alpha2
+  '@vaadin/vaadin-button': 21.0.0-alpha2
+  '@vaadin/vaadin-login': 21.0.0-alpha2
+  '@vaadin/vaadin-lumo-styles': 21.0.0-alpha2
+  '@vaadin/vaadin-ordered-layout': 21.0.0-alpha2
+  '@vaadin/vaadin-tabs': 21.0.0-alpha2
   chokidar: ^3.5.0
   compression-webpack-plugin: 4.0.1
   construct-style-sheets-polyfill: 2.4.16

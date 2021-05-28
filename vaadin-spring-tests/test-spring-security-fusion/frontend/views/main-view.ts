@@ -77,7 +77,7 @@ export class MainView extends Layout {
 
   private logout() {
     logout();
-    Router.go("");
+    window.location.href = '';
   }
   private getMenuRoutes(): RouteInfo[] {
     const views: RouteInfo[] = [
