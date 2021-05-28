@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.spring.test.AbstractSpringTest;
+import com.vaadin.flow.testutil.AbstractTestBenchTest;
 
 public class PreserveOnRefreshDestroyBeanIT extends AbstractSpringTest {
 
@@ -37,12 +38,15 @@ public class PreserveOnRefreshDestroyBeanIT extends AbstractSpringTest {
         waitForElementPresent(By.id("main"));
 
         // refresh
-        open();
+        getDriver().get(AbstractTestBenchTest.getTestURL(getRootURL(),
+                getContextPath() + "/preserve-pre-destroy"));
 
         waitForElementPresent(By.id("main"));
 
         // navigate back
         navigateOut();
+
+        waitForElementNotPresent(By.id("main"));
 
         Assert.assertTrue(isElementPresent(By.className("info")));
 
