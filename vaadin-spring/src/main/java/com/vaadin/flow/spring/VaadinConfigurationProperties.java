@@ -143,7 +143,7 @@ public class VaadinConfigurationProperties {
      * servers require a predefined URL to push. See Server Push for more
      * information.
      */
-    private String pushURL;
+    private String pushUrl;
 
     /**
      * Returns whether sync id checking is enabled. The sync id is used to
@@ -194,8 +194,43 @@ public class VaadinConfigurationProperties {
      * live reload tool on the server side the browser is refreshed
      * automatically once code is reloaded on the server side.
      */
-    private Boolean devmodeLiveReloadEnabled;
+    private Devmode devmode = new Devmode();
 
+    public Devmode getDevmode() {
+        return devmode;
+    }
+
+    public void setDevmode(Devmode devmode) {
+        this.devmode = devmode;
+    }
+
+    public static class Devmode {
+
+        private LiveReload liveReload = new LiveReload();
+
+        public LiveReload getLiveReload() {
+            return liveReload;
+        }
+
+        public void setLiveReload(LiveReload liveReload) {
+            this.liveReload = liveReload;
+        }
+
+        public static class LiveReload {
+
+            Boolean enabled;
+
+            public Boolean getEnabled() {
+                return enabled;
+            }
+
+            public void setEnabled(Boolean enabled) {
+                this.enabled = enabled;
+            }
+        }
+
+
+    }
 
 
 
@@ -312,20 +347,20 @@ public class VaadinConfigurationProperties {
      *
      * @return if pnpm is enabled
      */
-    public boolean isPnpmEnabled() {
+    public boolean isPnpmEnable() {
         return pnpm.isEnable();
     }
 
     /**
      * Enables/disabled pnpm support.
      *
-     * @param enabled
+     * @param enable
      *            if {@code true} then pnpm support is enabled, otherwise it's
      *            disabled
      *
      */
-    public void setPnpmEnabled(boolean enabled) {
-        pnpm.setEnable(enabled);
+    public void setPnpmEnable(boolean enable) {
+        pnpm.setEnable(enable);
     }
 
     /**
@@ -457,17 +492,17 @@ public class VaadinConfigurationProperties {
      *
      * @return the push url parameter
      */
-    public String getPushURL() {
-        return pushURL;
+    public String getPushUrl() {
+        return pushUrl;
     }
 
     /**
      * Sets the push url parameter
      *
-     * @param pushURL the push url parameter
+     * @param pushUrl the push url parameter
      */
-    public void setPushURL(String pushURL) {
-        this.pushURL = pushURL;
+    public void setPushUrl(String pushUrl) {
+        this.pushUrl = pushUrl;
     }
 
     /**
@@ -560,22 +595,5 @@ public class VaadinConfigurationProperties {
         this.devmodeOptimizeBundle = devmodeOptimizeBundle;
     }
 
-    /**
-     * Gets the dev mode live reload enabled parameter
-     *
-     * @return the dev mode live reload enabled parameter
-     */
-    public Boolean getDevmodeLiveReloadEnabled() {
-        return devmodeLiveReloadEnabled;
-    }
-
-    /**
-     * Sets the dev mode live reload enabled parameter
-     *
-     * @param devmodeLiveReloadEnabled the dev mode live reload enabled parameter
-     */
-    public void setDevmodeLiveReloadEnabled(Boolean devmodeLiveReloadEnabled) {
-        this.devmodeLiveReloadEnabled = devmodeLiveReloadEnabled;
-    }
 
 }
