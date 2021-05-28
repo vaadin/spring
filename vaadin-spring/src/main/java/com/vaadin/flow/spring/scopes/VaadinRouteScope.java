@@ -286,7 +286,7 @@ public class VaadinRouteScope extends AbstractScope implements UIInitListener {
         }
     }
 
-    private static class BeanNamesWrapper {
+    private static class BeanNamesWrapper implements Serializable {
 
         private Map<Class<?>, Set<String>> beanNamesByNavigationComponents = new HashMap<>();
     }
