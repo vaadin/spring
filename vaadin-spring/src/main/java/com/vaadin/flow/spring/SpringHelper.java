@@ -28,6 +28,10 @@ import org.springframework.core.env.PropertySource;
  */
 public class SpringHelper {
 
+    private SpringHelper() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * Gets the property name used after being parsed by Spring Boot, accepting
      * relaxed parsing
@@ -43,13 +47,21 @@ public class SpringHelper {
         while(it.hasNext() && storedPropertyName == null) {
             PropertySource propertySource = (PropertySource) it.next();
             if (propertySource instanceof MapPropertySource) {
-                for (String key : ((MapPropertySource) propertySource)
-                        .getSource().keySet()) {
-                        if (normalizePropertyName(key).equals(normalizedPropertyName)) {
-                            storedPropertyName = key;
-                            break;
-                        }
-                }
+                storedPropertyName = extractFromPropertySource(
+                        propertySource, normalizedPropertyName);
+            }
+        }
+        return storedPropertyName;
+    }
+
+    private static String extractFromPropertySource(
+            PropertySource propertySource, String normalizedPropertyName) {
+        String storedPropertyName = null;
+        for (String key : ((MapPropertySource) propertySource)
+                .getSource().keySet()) {
+            if (normalizePropertyName(key).equals(normalizedPropertyName)) {
+                storedPropertyName = key;
+                break;
             }
         }
         return storedPropertyName;
