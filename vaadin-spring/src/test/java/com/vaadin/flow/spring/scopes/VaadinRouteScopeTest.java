@@ -168,7 +168,7 @@ public class VaadinRouteScopeTest extends AbstractUIScopedTest {
 
         navigateTo(anotherUI, new AnotherNavigationTarget());
 
-        // the bean is not removed since there is a "preserved" UI
+        // the bean is removed since navigation away from it's owner navigation target
         Assert.assertEquals(1, count.get());
     }
 
