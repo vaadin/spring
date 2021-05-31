@@ -156,6 +156,9 @@ public class VaadinRouteScopeTest extends AbstractUIScopedTest {
         // close the first UI
         ui.getSession().removeUI(ui);
 
+        // the bean is not removed since there is a "preserved" UI
+        Assert.assertEquals(0, count.get());
+
         UI.setCurrent(anotherUI);
 
         scope = initScope(anotherUI);
@@ -167,6 +170,50 @@ public class VaadinRouteScopeTest extends AbstractUIScopedTest {
 
         // the bean is not removed since there is a "preserved" UI
         Assert.assertEquals(1, count.get());
+    }
+
+    @Test
+    public void detachUI_uiWithDifferentWindowName_beanInScopeIsDestroyedwhenUIIsDetached() {
+        UI ui = mockUI();
+
+        UI anotherUI = makeAnotherUI(ui);
+
+        ExtendedClientDetails details = Mockito
+                .mock(ExtendedClientDetails.class);
+        Mockito.when(details.getWindowName()).thenReturn("bar");
+        ui.getInternals().setExtendedClientDetails(details);
+
+        ui.getSession().addUI(ui);
+        ui.getSession().addUI(anotherUI);
+
+        mockServletContext(ui);
+
+        VaadinRouteScope scope = initScope(ui);
+
+        AtomicInteger count = new AtomicInteger();
+        scope.registerDestructionCallback("foo", () -> count.getAndIncrement());
+
+        scope.uiInit(new UIInitEvent(ui, ui.getSession().getService()));
+
+        navigateTo(ui, new NavigationTarget());
+
+        putObjectIntoScope(scope);
+
+        // close the first UI
+        ui.getSession().removeUI(ui);
+
+        // the bean is not removed since there is a "preserved" UI
+        Assert.assertEquals(1, count.get());
+        count.set(0);
+
+        UI.setCurrent(anotherUI);
+
+        scope = initScope(anotherUI);
+
+        navigateTo(anotherUI, new AnotherNavigationTarget());
+
+        // the bean is not removed since there is a "preserved" UI
+        Assert.assertEquals(0, count.get());
     }
 
     private void navigateTo(UI ui, Component component) {
