@@ -356,28 +356,12 @@ public class VaadinServletContextInitializer
             ApplicationRouteRegistry registry = ApplicationRouteRegistry
                     .getInstance(new VaadinServletContext(
                             event.getServletContext()));
-
-            Set<Class<? extends Component>> errorComponents = findBySuperType(
+            Stream<Class<? extends Component>> hasErrorComponents = findBySuperType(
                     getErrorParameterPackages(), HasErrorParameter.class)
                             .filter(Component.class::isAssignableFrom)
-                            // Replace Flow default with custom version for
-                            // Spring
-                            .filter(clazz -> clazz != RouteNotFoundError.class)
-                            .map(clazz -> (Class<? extends Component>) clazz)
-                            .collect(Collectors.toSet());
-
-            // If there is no custom HasErrorParameter<? super
-            // NotFoundException>
-            // add SpringRouteNotFoundError, with Spring Boot specific hints
-            if (errorComponents.stream().noneMatch(clazz -> {
-                Class<?> exceptionType = ReflectTools.getGenericInterfaceType(
-                        clazz, HasErrorParameter.class);
-                return exceptionType != null && exceptionType
-                        .isAssignableFrom(NotFoundException.class);
-            })) {
-                errorComponents.add(SpringRouteNotFoundError.class);
-            }
-            registry.setErrorNavigationTargets(errorComponents);
+                            .map(clazz -> (Class<? extends Component>) clazz);
+            registry.setErrorNavigationTargets(
+                    hasErrorComponents.collect(Collectors.toSet()));
         }
     }
 
@@ -429,6 +413,11 @@ public class VaadinServletContextInitializer
             ApplicationConfiguration config = ApplicationConfiguration
                     .get(new VaadinServletContext(event.getServletContext()));
 
+            if (config == null || config.isProductionMode() || !config
+                    .enableDevServer()) {
+                return;
+            }
+
             Lookup lookup = vaadinContext.getAttribute(Lookup.class);
             devModeHandlerManager = lookup.lookup(DevModeHandlerManager.class);
             if (devModeHandlerManager == null) {
@@ -439,10 +428,7 @@ public class VaadinServletContextInitializer
                                 + "run the build-frontend maven goal) or "
                                 + "include the vaadin-dev-server dependency");
             }
-
-            if (config == null || config.isProductionMode()
-                    || !config.enableDevServer()
-                    || isDevModeAlreadyStarted(event.getServletContext())) {
+            if (isDevModeAlreadyStarted(event.getServletContext())) {
                 return;
             }
 
