@@ -437,7 +437,7 @@ public class VaadinRouteScope extends AbstractScope implements UIInitListener {
     private static UI findPreservingUI(UI ui) {
         VaadinSession session = ui.getSession();
         for (UI sessionUi : session.getUIs()) {
-            String windowName = getWindowName(ui);
+            String windowName = getWindowName(sessionUi);
             if (sessionUi != ui && windowName != null
                     && windowName.equals(getWindowName(ui))) {
                 return sessionUi;
