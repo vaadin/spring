@@ -33,6 +33,7 @@ public class AppViewIT extends ChromeBrowserTest {
 
     @After
     public void tearDown() {
+        logout();
         if (getDriver() != null) {
             checkForBrowserErrors();
         }
