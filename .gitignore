@@ -4,6 +4,7 @@ bin/
 .project
 .settings/
 .idea
+.vscode
 *.iml
 driver/
 driver_zips/
