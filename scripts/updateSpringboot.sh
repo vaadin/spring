@@ -41,7 +41,7 @@ then
   git add pom.xml
   git commit -m "chore: update spring-boot to $latestVersion"
   git push -u origin HEAD 
-  hub pull-request -b vaadin:$baseBranch -h vaadin:$updateBranch -m "Update Vaadin $latestVersion"
+  hub pull-request -b vaadin:$baseBranch -h vaadin:$updateBranch -m "chore: update spring-boot to $latestVersion"
 elif [ "$exist" = true ]
 then
   echo "Version update PR is in the repo"
