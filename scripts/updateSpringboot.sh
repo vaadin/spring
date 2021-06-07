@@ -32,7 +32,7 @@ existPR=`curl -s "https://api.github.com/repos/vaadin/spring/pulls" | grep "titl
 
 [ -n "$existPR" ] && exist=true && echo "Found existing pull request" || exist=false 
 
-if [ $currentVersion != $latestVersion ] && [ ! exist ]
+if [ $currentVersion != $latestVersion ] && [ "$exist" = false ]
 then
   echo "Updating the project to use the latest"
   updateBranch=update-vaadin-$latestVersion-$(date +%s)
@@ -41,8 +41,8 @@ then
   git add pom.xml
   git commit -m "chore: update spring-boot to $latestVersion"
   git push -u origin HEAD 
-  hub pull-request -b vaadin:$baseBranch -h vaadin:$updateBranch -m "Update Vaadin $latestVersion"
-elif [ exist ]
+  hub pull-request -b vaadin:$baseBranch -h vaadin:$updateBranch -m "chore: update spring-boot to $latestVersion"
+elif [ "$exist" = true ]
 then
   echo "Version update PR is in the repo"
   echo "##teamcity[buildStatus status='SUCCESS' text='Version update PR is in the repo']"
