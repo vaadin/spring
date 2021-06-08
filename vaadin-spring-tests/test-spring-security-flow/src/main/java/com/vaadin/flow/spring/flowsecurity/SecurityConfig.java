@@ -2,6 +2,8 @@ package com.vaadin.flow.spring.flowsecurity;
 
 import java.util.stream.Collectors;
 
+import javax.servlet.ServletContext;
+
 import com.vaadin.flow.spring.flowsecurity.data.UserInfo;
 import com.vaadin.flow.spring.flowsecurity.data.UserInfoRepository;
 import com.vaadin.flow.spring.flowsecurity.views.LoginView;
@@ -24,28 +26,37 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
 
-    public static final String LOGOUT_SUCCESS_URL = "/";
     public static String ROLE_USER = "user";
     public static String ROLE_ADMIN = "admin";
     @Autowired
     private UserInfoRepository userInfoRepository;
+
+    @Autowired
+    private ServletContext servletContext;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    public String getLogoutSuccessUrl() {
+        String logoutSuccessUrl = "/";
+        String contextPath = servletContext.getContextPath();
+        if (!"".equals(contextPath)) {
+            logoutSuccessUrl = contextPath + logoutSuccessUrl;
+        }
+        return logoutSuccessUrl;
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // Public access for the given view
-        http.authorizeRequests().antMatchers("/").permitAll();
         // Admin only access for given resources
         http.authorizeRequests().antMatchers("/admin-only/**")
                 .hasAnyRole(ROLE_ADMIN);
 
         super.configure(http);
 
-        setLoginView(http, LoginView.class, LOGOUT_SUCCESS_URL);
+        setLoginView(http, LoginView.class, getLogoutSuccessUrl());
     }
 
     @Override
