@@ -49,8 +49,8 @@ public class RootMappedCondition implements Condition {
     }
 
     private String getUrlMappingParameter(Environment environment) {
-        String propertyName = SpringHelper.getActualPropertyName(environment, URL_MAPPING_PROPERTY);
-        return propertyName != null?environment.getProperty(propertyName):null;
+        String propertyName = SpringHelper.getStoredPropertyName(environment, URL_MAPPING_PROPERTY);
+        return propertyName == null ? null : environment.getProperty(propertyName);
     }
 
     /**

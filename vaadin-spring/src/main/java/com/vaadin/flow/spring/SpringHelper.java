@@ -17,6 +17,7 @@ package com.vaadin.flow.spring;
 
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Objects;
 
 import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.core.env.Environment;
@@ -29,36 +30,40 @@ import org.springframework.core.env.PropertySource;
 public class SpringHelper {
 
     private SpringHelper() {
-        throw new IllegalStateException("Utility class");
     }
 
     /**
      * Gets the property name used after being parsed by Spring Boot, accepting
      * relaxed parsing
      *
-     * @param env the environment
-     * @param propertyName the relaxed property name
-     * @return the actual property name
+     * @param env the environment, not {@code null}
+     * @param propertyName the relaxed property name, not {@code null}
+     * @return the stored property name. {@code null} if not found
      */
-    public static String getActualPropertyName(Environment env, String propertyName) {
+    public static String getStoredPropertyName(Environment env,
+                                               String propertyName) {
+        assert env != null;
+        assert propertyName != null;
+
         String storedPropertyName = null;
         String normalizedPropertyName = normalizePropertyName(propertyName);
-        Iterator it = ((AbstractEnvironment) env).getPropertySources().iterator();
-        while(it.hasNext() && storedPropertyName == null) {
-            PropertySource propertySource = (PropertySource) it.next();
-            if (propertySource instanceof MapPropertySource) {
-                storedPropertyName = extractFromPropertySource(
-                        propertySource, normalizedPropertyName);
+        if (env instanceof AbstractEnvironment) {
+            for (PropertySource<?> propertySource :
+                    ((AbstractEnvironment) env).getPropertySources()) {
+                if (propertySource instanceof MapPropertySource) {
+                    storedPropertyName = extractFromPropertySource(
+                            (MapPropertySource) propertySource,
+                            normalizedPropertyName);
+                }
             }
         }
         return storedPropertyName;
     }
 
     private static String extractFromPropertySource(
-            PropertySource propertySource, String normalizedPropertyName) {
+            MapPropertySource propertySource, String normalizedPropertyName) {
         String storedPropertyName = null;
-        for (String key : ((MapPropertySource) propertySource)
-                .getSource().keySet()) {
+        for (String key : propertySource.getSource().keySet()) {
             if (normalizePropertyName(key).equals(normalizedPropertyName)) {
                 storedPropertyName = key;
                 break;
@@ -70,8 +75,8 @@ public class SpringHelper {
     /**
      * Converts a property name to a normalized form, so it can be compared
      *
-     * @param propertyName the property name
-     * @return the normalized property name
+     * @param propertyName the property name, not {@code null}
+     * @return the normalized property name, not {@code null}
      */
     public static String normalizePropertyName(String propertyName) {
         assert propertyName != null;

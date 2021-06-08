@@ -65,7 +65,7 @@ public class SpringHelperTest {
     public void environment_extractRelaxedPropertyName_matches() {
         Environment env = mockEnv("vaadin.url-mapping");
         String actualPropertyName =
-                SpringHelper.getActualPropertyName(env,
+                SpringHelper.getStoredPropertyName(env,
                         "vaadin.urlMapping");
         Assert.assertEquals("vaadin.url-mapping", actualPropertyName);
     }
@@ -74,7 +74,7 @@ public class SpringHelperTest {
     public void environment_extractExactPropertyName_matches() {
         Environment env = mockEnv("vaadin.urlMapping");
         String actualPropertyName =
-                SpringHelper.getActualPropertyName(env,
+                SpringHelper.getStoredPropertyName(env,
                         "vaadin.urlMapping");
         Assert.assertEquals("vaadin.urlMapping", actualPropertyName);
     }
@@ -83,7 +83,7 @@ public class SpringHelperTest {
     public void environment_extractWrongPropertyName_returnsNull() {
         AbstractEnvironment env = mockEnv("vaadin.urlMapping");
         String actualPropertyName =
-                SpringHelper.getActualPropertyName(env,
+                SpringHelper.getStoredPropertyName(env,
                         "vaadin.urlwapping");
         Assert.assertNull(actualPropertyName);
     }

@@ -162,8 +162,8 @@ public class SpringServlet extends VaadinServlet {
         PROPERTY_NAMES.forEach(property -> setProperty(property, properties));
 
         // this property is reversed
-        if ("true".equalsIgnoreCase(
-                initParameters.getProperty("disable-xsrf-protection")))
+        if (Boolean.TRUE.toString().equalsIgnoreCase(
+                initParameters.getProperty(InitParameters.SERVLET_PARAMETER_DISABLE_XSRF_PROTECTION)))
             properties.put("xsrf-protection-enabled", false);
 
         // transfer non-string init parameters (such as
