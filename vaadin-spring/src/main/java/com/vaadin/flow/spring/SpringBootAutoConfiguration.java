@@ -17,6 +17,8 @@ package com.vaadin.flow.spring;
 
 import java.util.Map;
 
+import com.vaadin.flow.spring.security.RequestUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -31,8 +33,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
-import com.vaadin.flow.server.Constants;
-
 /**
  * Spring boot auto-configuration class for Flow.
  *
@@ -43,7 +43,8 @@ import com.vaadin.flow.server.Constants;
 @AutoConfigureBefore(WebMvcAutoConfiguration.class)
 @ConditionalOnClass(ServletContextInitializer.class)
 @EnableConfigurationProperties(VaadinConfigurationProperties.class)
-@Import({ VaadinServletConfiguration.class })
+@Import({ VaadinApplicationConfiguration.class,
+        VaadinServletConfiguration.class })
 public class SpringBootAutoConfiguration {
 
     @Autowired
@@ -82,9 +83,6 @@ public class SpringBootAutoConfiguration {
         boolean rootMapping = RootMappedCondition.isRootMapping(mapping);
         if (rootMapping) {
             mapping = VaadinServletConfiguration.VAADIN_SERVLET_MAPPING;
-            initParameters.put(Constants.SERVLET_PARAMETER_PUSH_URL,
-                    VaadinMVCWebAppInitializer
-                            .makeContextRelative(mapping.replace("*", "")));
         }
         ServletRegistrationBean<SpringServlet> registration = new ServletRegistrationBean<>(
                 new SpringServlet(context, rootMapping), mapping);
@@ -93,6 +91,8 @@ public class SpringBootAutoConfiguration {
                 .setAsyncSupported(configurationProperties.isAsyncSupported());
         registration.setName(
                 ClassUtils.getShortNameAsProperty(SpringServlet.class));
+        registration.setLoadOnStartup(
+                configurationProperties.isLoadOnStartup() ? 1 : -1);
         return registration;
     }
 

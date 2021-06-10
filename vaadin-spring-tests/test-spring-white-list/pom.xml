@@ -22,7 +22,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spring-tests</artifactId>
-        <version>14.0-SNAPSHOT</version>
+        <version>18.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-test-spring-white-list</artifactId>
 
@@ -39,6 +39,11 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev-server</artifactId>
+        </dependency>  
+		
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
@@ -115,6 +120,7 @@
                 <configuration>
                     <maxAttempts>100</maxAttempts>
                     <wait>2500</wait>
+                    <jmxPort>9009</jmxPort>
                 </configuration>
                 <executions>
                     <!-- start and stop application when running

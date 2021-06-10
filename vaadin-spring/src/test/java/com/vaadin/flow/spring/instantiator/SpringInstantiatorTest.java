@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.spring.instantiator;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,12 +43,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.di.Lookup;
+import com.vaadin.flow.di.ResourceProvider;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.i18n.I18NProvider;
-import com.vaadin.flow.server.Constants;
 import com.vaadin.flow.server.ServiceInitEvent;
+import com.vaadin.flow.server.StaticFileServer;
+import com.vaadin.flow.server.StaticFileHandlerFactory;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.VaadinServletService;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.spring.SpringInstantiator;
 import com.vaadin.flow.spring.SpringServlet;
 
@@ -157,9 +162,15 @@ public class SpringInstantiatorTest {
         Assert.assertNotEquals(component, anotherComponent);
     }
 
-    public static VaadinServletService getService(ApplicationContext context,
+    public static VaadinService getService(ApplicationContext context,
             Properties configProperties) throws ServletException {
-        SpringServlet servlet = new SpringServlet(context, false) {
+        return getService(context, configProperties, false);
+    }
+
+    public static VaadinService getService(ApplicationContext context,
+            Properties configProperties, boolean rootMapping)
+            throws ServletException {
+        SpringServlet servlet = new SpringServlet(context, rootMapping) {
             @Override
             protected DeploymentConfiguration createDeploymentConfiguration(
                     Properties initParameters) {
@@ -174,6 +185,27 @@ public class SpringInstantiatorTest {
 
         ServletConfig config = Mockito.mock(ServletConfig.class);
         ServletContext servletContext = Mockito.mock(ServletContext.class);
+
+        ApplicationConfiguration appConfig = Mockito
+                .mock(ApplicationConfiguration.class);
+        Mockito.when(appConfig.getPropertyNames())
+                .thenReturn(Collections.emptyEnumeration());
+        Mockito.when(servletContext
+                .getAttribute(ApplicationConfiguration.class.getName()))
+                .thenReturn(appConfig);
+
+        Lookup lookup = Mockito.mock(Lookup.class);
+        ResourceProvider provider = Mockito.mock(ResourceProvider.class);
+        Mockito.when(lookup.lookup(ResourceProvider.class))
+                .thenReturn(provider);
+
+        StaticFileHandlerFactory staticFileHandlerFactory = vaadinService -> new StaticFileServer(
+                (VaadinServletService) vaadinService);
+        Mockito.when(lookup.lookup(StaticFileHandlerFactory.class))
+                .thenReturn(staticFileHandlerFactory);
+
+        Mockito.when(servletContext.getAttribute(Lookup.class.getName()))
+                .thenReturn(lookup);
 
         Mockito.when(config.getServletContext()).thenReturn(servletContext);
 
