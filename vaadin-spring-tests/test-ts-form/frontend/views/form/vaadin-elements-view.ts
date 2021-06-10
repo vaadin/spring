@@ -16,6 +16,8 @@ import '@vaadin/vaadin-item';
 import '@vaadin/vaadin-radio-button';
 import '@vaadin/vaadin-radio-button/vaadin-radio-group';
 import '@vaadin/vaadin-text-field';
+import '@vaadin/vaadin-text-field/vaadin-integer-field';
+import '@vaadin/vaadin-text-field/vaadin-number-field';
 import '@vaadin/vaadin-text-field/vaadin-email-field';
 import '@vaadin/vaadin-rich-text-editor';
 import '@vaadin/vaadin-login';
@@ -70,7 +72,7 @@ export class VaadinElementsView extends LitElement {
         <vaadin-text-field ...="${field(this.binder.model.textField)}"  label="text-field"></vaadin-text-field>
         <vaadin-password-field ...="${field(this.binder.model.passwordField)}" label="password-field"></vaadin-password-field>
         <vaadin-integer-field ...="${field(this.binder.model.integerField)}" label="integer-field" has-controls></vaadin-integer-field>
-        <vaadin-number-field ...="${field(this.binder.model.numberField)}" label="number-field" has-controls></vaadin-number-field>
+        <vaadin-number-field ...="${field(this.binder.model.numberField)}" label="number-field" id="number-field"></vaadin-number-field>
         <vaadin-email-field ...="${field(this.binder.model.emailField)}" label="email-field"></vaadin-email-field>
         <vaadin-text-area ...="${field(this.binder.model.textArea)}" label="textarea"></vaadin-text-area>
         <vaadin-custom-field label="list-box">

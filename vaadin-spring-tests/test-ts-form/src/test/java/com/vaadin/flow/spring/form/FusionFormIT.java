@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
@@ -41,6 +42,21 @@ public class FusionFormIT extends ChromeBrowserTest {
         System.out.println(notification.getText());
         Assert.assertTrue(notification.getText().contains("must not be empty"));
         Assert.assertFalse(notification.getText().contains("Expected string but received a undefined"));
+    }
+
+    @Test
+    // https://github.com/vaadin/fusion/issues/13
+    public void no_validation_error_when_clearing_number_field() {
+        open("");
+        NumberFieldElement numberFieldElement = $(NumberFieldElement.class).id("number-field");
+        numberFieldElement.setValue("5");
+        blur();
+        Assert.assertFalse(numberFieldElement.hasAttribute("invalid"));
+        Assert.assertFalse(numberFieldElement.hasAttribute("has-error-message"));
+        numberFieldElement.setValue("");
+        blur();
+        Assert.assertFalse(numberFieldElement.hasAttribute("invalid"));
+        Assert.assertFalse(numberFieldElement.hasAttribute("has-error-message"));
     }
 
 }
