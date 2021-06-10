@@ -1,4 +1,5 @@
-import { css, customElement, LitElement, unsafeCSS, query, html} from 'lit-element';
+import { LitElement, html} from 'lit';
+import { customElement, query } from 'lit-element';
 import {until} from 'lit-html/directives/until.js';
 import {repeat} from 'lit-html/directives/repeat.js';
 
