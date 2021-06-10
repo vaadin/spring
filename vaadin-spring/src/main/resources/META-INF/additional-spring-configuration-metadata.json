@@ -1,0 +1,40 @@
+{
+  "properties": [
+    {
+      "name": "vaadin.productionMode",
+      "type": "java.lang.Boolean",
+      "description": "Turns application to work in production mode. Production mode disables most of the logged information that appears on the console because logging and other debug features can have a significant performance impact. In addition to this, development mode JS functions are not exported, push is given as a minified JS file instead of full size and static resources are cached.",
+      "defaultValue": false
+    },
+    {
+      "name": "vaadin.heartbeatInterval",
+      "type": "java.lang.Integer",
+      "description": "in seconds, after 3 missed heartbeats, the session will be closed. Vaadin UIs that are open on the client side send a regular heartbeat to the server to indicate they are still alive, even though there is no ongoing user interaction. When the server does not receive a valid heartbeat for a given UI, it will eventually remove that UI from the session.",
+      "defaultValue": 300
+    },
+    {
+      "name": "vaadin.closeIdleSessions",
+      "type": "java.lang.Boolean",
+      "description": "When it is set to true, the session will be closed if no UI is active. Heartbeat requests are just like any other request from the servlet container’s viewpoint. This means that as long as there is an open UI, the session never expires even though there is no user interaction. You can control this behavior by setting an init parameter named closeIdleSessions to true.",
+      "defaultValue": false
+    },
+    {
+      "name": "vaadin.compatibilityMode",
+      "type": "java.lang.Boolean",
+      "description": "When set to true, enables Vaadin 13 compatibility mode (Vaadin uses Bower and Webjars to handle frontend resources instead of npm and webpack). The purpose of this mode is to ease migration and it will no longer be supported in Vaadin 15. See Compatibility mode in Vaadin 14 Migration Guide for more information.",
+      "defaultValue": false
+    },
+    {
+      "name": "vaadin.devmode.transpile",
+      "type": "java.lang.Boolean",
+      "description": "This flag can be used to enable ES5 transpilation in development mode.",
+      "defaultValue": false
+    },
+    {
+      "name": "vaadin.pnpm.enable",
+      "type": "java.lang.Boolean",
+      "description": "This flag can be used to enable pnpm instead of npm for resolving and downloading frontend dependencies.",
+      "defaultValue": false
+    }
+    ]
+}
