@@ -1,13 +1,12 @@
-package com.vaadin.flow.spring.form.endpoints;
+package com.vaadin.flow.spring.fusionform;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.server.connect.Endpoint;
+import com.vaadin.flow.spring.fusionform.Elements.Options;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.spring.form.data.Elements;
-import com.vaadin.flow.spring.form.data.Elements.Options;
 
 @Endpoint
 @AnonymousAllowed

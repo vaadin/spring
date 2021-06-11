@@ -27,11 +27,12 @@ import '@vaadin/vaadin-notification';
 
 import { field, Binder } from '@vaadin/form';
 
-import ElementsModel from 'Frontend/generated/com/vaadin/flow/spring/form/data/ElementsModel';
+import { View } from '../view';
+import ElementsModel from 'Frontend/generated/com/vaadin/flow/spring/fusionform/ElementsModel';
 import { ElementsEndpoint } from 'Frontend/generated/ElementsEndpoint';
 
 @customElement('vaadin-elements-view')
-export class VaadinElementsView extends LitElement {
+export class VaadinElementsView extends View {
   private binder = new Binder(this, ElementsModel);
 
   private options = ElementsEndpoint.getOptions();
@@ -107,7 +108,4 @@ export class VaadinElementsView extends LitElement {
     this.notification.open();
   }
 
-  createRenderRoot() {
-    return this;
-  }
 }

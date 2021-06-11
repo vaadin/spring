@@ -155,7 +155,6 @@
         <module>test-spring-security-flow-contextpath</module>
         <module>test-spring-security-fusion</module>
         <module>test-spring-security-fusion-contextpath</module>
-        <module>test-ts-form</module>
 
         <!-- nexus-staging-maven-plugin requires the last module to be not skipped for deployment -->
         <module>dummy-module</module>

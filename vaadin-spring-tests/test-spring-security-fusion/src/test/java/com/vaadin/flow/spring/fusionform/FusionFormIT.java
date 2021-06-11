@@ -1,22 +1,12 @@
-package com.vaadin.flow.spring.form;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+package com.vaadin.flow.spring.fusionform;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
-import com.vaadin.flow.component.login.testbench.LoginFormElement;
-import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
-import com.vaadin.testbench.TestBenchElement;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-
-import org.openqa.selenium.By;
 
 public class FusionFormIT extends ChromeBrowserTest {
 
@@ -31,9 +21,16 @@ public class FusionFormIT extends ChromeBrowserTest {
         getDriver().get(getRootURL() + "/" + path);
     }
 
+    @Override
+    public void setup() throws Exception {
+        super.setup();
+        open("form");
+        assertPathShown("form");
+        waitUntil(driver -> $("vaadin-elements-view").exists());
+    }
+
     @Test
     public void save_empty_values_for_required_fields_no_runtime_errors() {
-        open("");
         ButtonElement saveButton = $(ButtonElement.class).id("save");
         saveButton.click();
         NotificationElement notification = $(NotificationElement.class).id("notification");
@@ -47,7 +44,6 @@ public class FusionFormIT extends ChromeBrowserTest {
     @Test
     // https://github.com/vaadin/fusion/issues/13
     public void no_validation_error_when_clearing_number_field() {
-        open("");
         NumberFieldElement numberFieldElement = $(NumberFieldElement.class).id("number-field");
         numberFieldElement.setValue("5");
         blur();
@@ -57,6 +53,11 @@ public class FusionFormIT extends ChromeBrowserTest {
         blur();
         Assert.assertFalse(numberFieldElement.hasAttribute("invalid"));
         Assert.assertFalse(numberFieldElement.hasAttribute("has-error-message"));
+    }
+
+    private void assertPathShown(String path) {
+        waitUntil(driver -> driver.getCurrentUrl()
+                .equals(getRootURL() + "/" + path));
     }
 
 }
