@@ -77,13 +77,17 @@ export class MainView extends Layout {
 
   private logout() {
     logout();
-    Router.go("");
+    Router.go(router.urlForName('public'));
   }
   private getMenuRoutes(): RouteInfo[] {
     const views: RouteInfo[] = [
       {
         path: "",
         title: "Public",
+      },
+      {
+        path: "form",
+        title: "Fusion Form",
       },
       {
         path: "private",

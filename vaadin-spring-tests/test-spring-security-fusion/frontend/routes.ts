@@ -10,9 +10,19 @@ export const views: ViewRoute[] = [
   {
     path: "",
     component: "public-view",
+    name: "public",
     title: "Public",
     action: async () => {
       await import("./views/public/public-view");
+    },
+  },
+  {
+    path: "form",
+    component: "vaadin-elements-view",
+    name: "form",
+    title: "Fusion Form",
+    action: async () => {
+      await import("./views/public/vaadin-elements-view");
     },
   },
   {
