@@ -42,6 +42,20 @@ public class FusionFormIT extends ChromeBrowserTest {
     }
 
     @Test
+    public void save_backend_loaded_empty_values_for_required_fields_no_runtime_errors() {
+        ButtonElement loadDataButton = $(ButtonElement.class).id("load-from-endpoint");
+        loadDataButton.click();
+        ButtonElement saveButton = $(ButtonElement.class).id("save");
+        saveButton.click();
+        NotificationElement notification = $(NotificationElement.class).id("notification");
+        Assert.assertNotNull(notification);
+        waitUntil(driver -> notification.isOpen());
+        System.out.println(notification.getText());
+        Assert.assertTrue(notification.getText().contains("must not be empty"));
+        Assert.assertFalse(notification.getText().contains("Expected string but received null"));
+    }
+
+    @Test
     // https://github.com/vaadin/fusion/issues/13
     public void no_validation_error_when_clearing_number_field() {
         NumberFieldElement numberFieldElement = $(NumberFieldElement.class).id("number-field");

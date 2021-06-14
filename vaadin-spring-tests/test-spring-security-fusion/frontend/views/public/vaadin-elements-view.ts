@@ -48,6 +48,7 @@ export class VaadinElementsView extends View {
       <vaadin-button @click="${() => this.submit()}" id="save">save</vaadin-button>
       <vaadin-button @click="${() => this.binder.clear()}">clear</vaadin-button>
       <vaadin-button @click="${() => this.binder.reset()}">reset</vaadin-button>
+      <vaadin-button @click="${() => this.loadDataFromEndpoint()}" id="load-from-endpoint">Load Data From Endpoint</vaadin-button>
       <vaadin-form-layout @click="${() => this.notification.close()}">
         <vaadin-checkbox ...="${field(this.binder.model.checkbox)}">checkbox</vaadin-checkbox>
         <vaadin-radio-button ...="${field(this.binder.model.radioButton)}">radio-button</vaadin-radio-button>
@@ -108,4 +109,8 @@ export class VaadinElementsView extends View {
     this.notification.open();
   }
 
+  async loadDataFromEndpoint() {
+    const data = await ElementsEndpoint.getElements();
+    this.binder.read(data!);
+  }
 }
