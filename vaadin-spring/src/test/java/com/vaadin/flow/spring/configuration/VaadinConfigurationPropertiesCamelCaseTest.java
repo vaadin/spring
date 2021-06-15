@@ -33,19 +33,20 @@ import com.vaadin.flow.spring.instantiator.SpringInstantiatorTest;
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = {
         "vaadin.urlMapping=/xxx",
-        "vaadin.productionMode=true",
+        "vaadin.productionMode=false",
+        "vaadin.enableDevServer=true",
         "vaadin.pnpm.enable=true",
         "vaadin.heartbeatInterval=500",
         "vaadin.closeIdleSessions=true",
-        "vaadin.devmode.live-reload.enabled=true",
-        "vaadin.disable-xsrf-protection=true",
-        "vaadin.eager-server-load=true",
-        "vaadin.max-message-suspend-timeout=500",
-        "vaadin.push-url=AAA",
-        "vaadin.request-timing=true",
-        "vaadin.sync-id-check=true",
-        "vaadin.use-deprecated-v14-bootstrapping=true",
-        "vaadin.send-urls-as-parameters=true"
+        "vaadin.devmode.liveReload.enabled=true",
+        "vaadin.disableXsrfProtection=true",
+        "vaadin.eagerServerLoad=true",
+        "vaadin.maxMessageSuspendTimeout=600",
+        "vaadin.pushUrl=AAA",
+        "vaadin.requestTiming=true",
+        "vaadin.syncIdCheck=true",
+        "vaadin.useDeprecatedV14Bootstrapping=true",
+        "vaadin.sendUrlsAsParameters=true"
 }, classes = { VaadinConfigurationProperties.class })
 public class VaadinConfigurationPropertiesCamelCaseTest extends VaadinConfigurationPropertiesTest {
 
