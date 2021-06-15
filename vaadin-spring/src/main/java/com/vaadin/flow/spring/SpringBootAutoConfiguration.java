@@ -84,12 +84,14 @@ public class SpringBootAutoConfiguration {
         registration
                 .setAsyncSupported(
                         configurationProperties.getAsyncSupported() == null ?
-                                false :
+                                true : // default value
                                 configurationProperties.getAsyncSupported());
         registration.setName(
                 ClassUtils.getShortNameAsProperty(SpringServlet.class));
         registration.setLoadOnStartup(
-                configurationProperties.getLoadOnStartup() ? 1 : -1);
+                configurationProperties.getLoadOnStartup() == null ||
+                        configurationProperties.getLoadOnStartup() ?
+                        1 : -1);
         return registration;
     }
 
