@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.spring;
 
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,11 +83,11 @@ public class SpringBootAutoConfiguration {
                 new SpringServlet(context, rootMapping), mapping);
         registration.setInitParameters(initParameters);
         registration
-                .setAsyncSupported(configurationProperties.isAsyncSupported());
+                .setAsyncSupported(configurationProperties.getAsyncSupported());
         registration.setName(
                 ClassUtils.getShortNameAsProperty(SpringServlet.class));
         registration.setLoadOnStartup(
-                configurationProperties.isLoadOnStartup() ? 1 : -1);
+                configurationProperties.getLoadOnStartup() ? 1 : -1);
         return registration;
     }
 
