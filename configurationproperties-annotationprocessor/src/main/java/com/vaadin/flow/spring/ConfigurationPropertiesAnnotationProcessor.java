@@ -6,11 +6,14 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
+import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
+import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -22,6 +25,7 @@ import java.util.Set;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.Utils;
@@ -48,12 +52,15 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
 
         final String type;
 
+        final String defaultValueSetter;
+
         String comments;
 
-        public FieldDescriptor(String formerPropertyName, String type, String comments) {
+        public FieldDescriptor(String formerPropertyName, String type, String defaultValueSetter, String comments) {
             assert formerPropertyName != null;
             assert type != null;
             this.formerPropertyName = formerPropertyName;
+            this.defaultValueSetter = defaultValueSetter;
             this.fieldName = toCamelCase(formerPropertyName, false);
             // we do not want primitives, as we want any property to be nullable
             // to know if the value has actually been set by the user
@@ -136,7 +143,7 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
                                 toStringLiteralExpr().get().
                                 getValue(),
                         fieldDeclaration.getElementType().toString(),
-                        null);
+                        null, null);
                 fieldDeclaration.getComment().ifPresent(c ->
                         fd.comments = cleanComment(c.getContent()));
                 arg.add(fd);
@@ -157,7 +164,7 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
 
     private String capitalize(String t) {
         assert t != null;
-        return t.isEmpty()?"":Utils.capitalize(t);
+        return t.isEmpty() ? "" : Utils.capitalize(t);
     }
 
     private String cleanComment(String comment) {
@@ -186,9 +193,53 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
                 .map(m -> (VariableElement) m)
                 .map(m -> new FieldDescriptor(m.getSimpleName().toString(),
                         m.asType().toString(),
+                        getinitialValue(m),
                         processingEnv.getElementUtils().getDocComment(m)))
                 .forEach(fields::add);
     }
+
+    private String getinitialValue(VariableElement m) {
+        String pkgName = processingEnv.getElementUtils().getPackageOf(m.getEnclosingElement()).toString();
+        String className = m.getEnclosingElement().getSimpleName().toString();
+        try {
+            FileObject source = processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, pkgName, className + ".java");
+            String value = getInitialValue(source.openInputStream(), m.getSimpleName());
+            return value;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String getInitialValue(InputStream openInputStream, Name fieldName) {
+        ParseResult<CompilationUnit> parsed = new JavaParser().parse(openInputStream);
+        if (parsed.getResult().isPresent()) {
+            CompilationUnit cu = parsed.getResult().get();
+
+            String[] value = new String[1];
+            cu.accept(new VoidVisitorAdapter<String[]>() {
+                @Override
+                public void visit(FieldDeclaration fieldDeclaration, String[] arg) {
+                    super.visit(fieldDeclaration, arg);
+
+                    if (fieldDeclaration.getVariables().size() > 0
+                            && fieldDeclaration.getVariable(0) != null
+                            && fieldDeclaration.getVariable(0).getNameAsString().equals(fieldName.toString())
+                            && fieldDeclaration.getVariable(0).getInitializer().isPresent()) {
+                        String sourceLine = fieldDeclaration.getVariable(0).toString();
+                        if (sourceLine.contains("=")) {
+                            String assignment = sourceLine.substring(sourceLine.indexOf("=") + 1);
+                            arg[0] = assignment;
+                        }
+                    }
+                }
+            }, value);
+            return value[0];
+        } else {
+            return null;
+        }
+    }
+
 
     private void writeFile(String annotatedClassName, String generatedClassName,
                            String prefix,
@@ -204,6 +255,9 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
 
             out.println("package " + packageName + ";");
             out.println();
+
+            out.println(getImportsString(annotatedClassName));
+
             out.println("import javax.annotation.PostConstruct;");
             out.println("import org.springframework.boot.context.properties." +
                     "ConfigurationProperties;");
@@ -224,6 +278,37 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
 
             out.println("}");
         }
+    }
+
+    private String getImportsString(String className) {
+        String pkgName = className.substring(0, className.lastIndexOf('.'));
+        className = className.substring(className.lastIndexOf('.') + 1);
+        try {
+            FileObject source = processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, pkgName, className + ".java");
+            String value = getImportsString(source.openInputStream());
+            return value;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private String getImportsString(InputStream openInputStream) {
+        StringBuffer value = new StringBuffer();
+        ParseResult<CompilationUnit> parsed = new JavaParser().parse(openInputStream);
+        if (parsed.getResult().isPresent()) {
+            CompilationUnit cu = parsed.getResult().get();
+
+            cu.accept(new VoidVisitorAdapter<StringBuffer>() {
+
+                @Override
+                public void visit(ImportDeclaration fieldDeclaration, StringBuffer arg) {
+                    super.visit(fieldDeclaration, arg);
+                    value.append(fieldDeclaration.toString());
+                }
+            }, value);
+        }
+        return value.toString();
     }
 
     private void writePostConstruct(PrintWriter out,
@@ -250,7 +335,10 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
             out.println("  */");
         }
         // write field
-        out.println("  private " + field.type + " " + field.fieldName + ";");
+        out.print("  private " + field.type + " " + field.fieldName);
+        if (field.defaultValueSetter != null)
+            out.print(" = " + field.defaultValueSetter);
+        out.println(";");
 
         out.println();
         // write getter
