@@ -17,7 +17,6 @@ package com.vaadin.flow.spring;
 
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
-import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -44,13 +43,8 @@ public class RootMappedCondition implements Condition {
     @Override
     public boolean matches(ConditionContext context,
             AnnotatedTypeMetadata metadata) {
-        String mapping = getUrlMappingParameter(context.getEnvironment());
-        return isRootMapping(mapping);
-    }
-
-    private String getUrlMappingParameter(Environment environment) {
-        String propertyName = SpringHelper.getStoredPropertyName(environment, URL_MAPPING_PROPERTY);
-        return propertyName == null ? null : environment.getProperty(propertyName);
+        return isRootMapping(
+                context.getEnvironment().getProperty(URL_MAPPING_PROPERTY));
     }
 
     /**
