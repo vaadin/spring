@@ -46,6 +46,7 @@ public class FusionFormIT extends ChromeBrowserTest {
         ButtonElement loadDataButton = $(ButtonElement.class).id("load-from-endpoint");
         loadDataButton.click();
         ButtonElement saveButton = $(ButtonElement.class).id("save");
+        waitUntil(driver -> saveButton.isEnabled());
         saveButton.click();
         NotificationElement notification = $(NotificationElement.class).id("notification");
         Assert.assertNotNull(notification);
