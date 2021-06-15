@@ -229,7 +229,6 @@
     <modules>
         <module>configurationproperties-annotationprocessor</module>
         <module>vaadin-spring</module>
-        <module>configurationproperties</module>
     </modules>
     <repositories>
         <!-- The order of definitions matters. Explicitly defining central here to make sure it has the highest priority. -->
