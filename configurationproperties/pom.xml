@@ -29,7 +29,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>configuration-properties-annotation-processor</artifactId>
             <version>${version}</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

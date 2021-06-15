@@ -41,7 +41,7 @@ import com.vaadin.flow.spring.instantiator.SpringInstantiatorTest;
         "vaadin.devmode.live-reload.enabled=true",
         "vaadin.disable-xsrf-protection=true",
         "vaadin.eager-server-load=true",
-        "vaadin.max-message-suspend-timeout=500",
+        "vaadin.max-message-suspend-timeout=600",
         "vaadin.push-url=AAA",
         "vaadin.request-timing=true",
         "vaadin.sync-id-check=true",
@@ -165,7 +165,7 @@ public class VaadinConfigurationPropertiesTest {
                 new Properties());
         int maxMessageSuspendTimeout = service.getDeploymentConfiguration()
                 .getMaxMessageSuspendTimeout();
-        Assert.assertEquals(500, maxMessageSuspendTimeout);
+        Assert.assertEquals(600, maxMessageSuspendTimeout);
     }
 
     @Test
