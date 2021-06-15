@@ -67,8 +67,8 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
             // we do not want primitives, as we want any property to be nullable
             // to know if the value has actually been set by the user
             if ("int".equals(type)) type = "Integer";
-            if ("double".equals(type)) type = "Double";
-            if ("boolean".equals(type)) type = "Boolean";
+            else if ("double".equals(type)) type = "Double";
+            else if ("boolean".equals(type)) type = "Boolean";
             this.type = type;
             this.comments = comments;
         }
@@ -87,47 +87,52 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
 
     private void processAnnotation(RoundEnvironment roundEnv, TypeElement annotation) {
         roundEnv.getElementsAnnotatedWith(annotation).forEach(e -> {
-            messager.printMessage(Diagnostic.Kind.NOTE,
-                    "annotated element is " + e.getSimpleName());
             Elements elementUtils = processingEnv.getElementUtils();
             String comment = elementUtils.getDocComment(e);
-            messager.printMessage(Diagnostic.Kind.NOTE,
-                    "comment is " + comment);
 
             List<FieldDescriptor> fields = new ArrayList<>();
 
             // SpringConfigurationPropertiesGenerator is restricted to Types, so it's safe to cast the element
             addFieldsFromTypeElement((TypeElement) e, fields);
 
-            String pathToInitParameters = "/" + INITPARAMETERS_CLASS_NAME
-                    .replaceAll("\\.", "/") + ".java";
-            InputStream r = getClass().getResourceAsStream(pathToInitParameters);
-            ParseResult<CompilationUnit> parsed = new JavaParser().parse(r);
-            if (parsed.getResult().isPresent()) {
-                addFieldsFromCompilationUnit(parsed.getResult().get(), fields);
-            } else {
-                messager.printMessage(Diagnostic.Kind.ERROR,
-                        pathToInitParameters
-                                + " is missing. Please check if the flow-server sources are available as a dependency");
-            }
+            addFieldsFromInitParametersClass(fields);
 
             // same package, VaadinConfigurationProperties as class name
             String annotatedClassName = e.toString();
             String generatedClassName = e.getEnclosingElement().toString()
                     + "." + "VaadinConfigurationProperties";
 
-            SpringConfigurationPropertiesGenerator annotationInstance =
-                    ((TypeElement) e).getAnnotation(
-                            SpringConfigurationPropertiesGenerator.class);
-            String prefix = annotationInstance.prefix();
+            String prefix = getPrefix((TypeElement) e);
 
             try {
                 writeJavaCodeToFile(annotatedClassName, generatedClassName,
                         prefix, fields);
             } catch (IOException ioException) {
-                ioException.printStackTrace();
+                messager.printMessage(Diagnostic.Kind.ERROR, ioException.getClass().getSimpleName() + ": " + ioException.getMessage());
             }
         });
+    }
+
+    private String getPrefix(TypeElement e) {
+        SpringConfigurationPropertiesGenerator annotationInstance =
+                e.getAnnotation(
+                        SpringConfigurationPropertiesGenerator.class);
+        String prefix = annotationInstance.prefix();
+        return prefix;
+    }
+
+    private void addFieldsFromInitParametersClass(List<FieldDescriptor> fields) {
+        String pathToInitParameters = "/" + INITPARAMETERS_CLASS_NAME
+                .replaceAll("\\.", "/") + ".java";
+        InputStream r = getClass().getResourceAsStream(pathToInitParameters);
+        ParseResult<CompilationUnit> parsed = new JavaParser().parse(r);
+        if (parsed.getResult().isPresent()) {
+            addFieldsFromCompilationUnit(parsed.getResult().get(), fields);
+        } else {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    pathToInitParameters
+                            + " is missing. Please check if the flow-server sources are available as a dependency");
+        }
     }
 
     private void addFieldsFromCompilationUnit(CompilationUnit cu,
@@ -138,16 +143,18 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
                               List<FieldDescriptor> arg) {
                 super.visit(fieldDeclaration, arg);
 
-                FieldDescriptor fd = new FieldDescriptor(
-                        fieldDeclaration.getVariable(0).
-                                getInitializer().get().
-                                toStringLiteralExpr().get().
-                                getValue(),
-                        fieldDeclaration.getElementType().toString(),
-                        null, null);
-                fieldDeclaration.getComment().ifPresent(c ->
-                        fd.comments = cleanComment(c.getContent()));
-                arg.add(fd);
+                if (hasInitialValue(fieldDeclaration)) {
+                    FieldDescriptor fd = new FieldDescriptor(
+                            fieldDeclaration.getVariable(0).
+                                    getInitializer().get().
+                                    toStringLiteralExpr().get().
+                                    getValue(),
+                            fieldDeclaration.getElementType().toString(),
+                            null, null);
+                    fieldDeclaration.getComment().ifPresent(c ->
+                            fd.comments = cleanComment(c.getContent()));
+                    arg.add(fd);
+                }
             }
         }, fields);
     }
@@ -201,32 +208,37 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
         assert fieldName != null;
 
             String[] value = new String[1];
-            if (cu != null) cu.accept(new VoidVisitorAdapter<String[]>() {
-                @Override
-                public void visit(FieldDeclaration fieldDeclaration,
-                                  String[] arg) {
-                    super.visit(fieldDeclaration, arg);
+            if (cu != null) {
+                cu.accept(new VoidVisitorAdapter<String[]>() {
+                    @Override
+                    public void visit(FieldDeclaration fieldDeclaration,
+                                      String[] arg) {
+                        super.visit(fieldDeclaration, arg);
 
-                    if (matchesAndHasinitialValue(fieldDeclaration, fieldName)) {
-                        String sourceLine = fieldDeclaration.
-                                getVariable(0).toString();
-                        if (sourceLine.contains("=")) {
-                            String assignment = sourceLine.substring(
-                                    sourceLine.indexOf("=") + 1);
-                            arg[0] = assignment;
+                        if (matchesAndHasInitialValue(fieldDeclaration, fieldName)) {
+                            String sourceLine = fieldDeclaration.
+                                    getVariable(0).toString();
+                            if (sourceLine.contains("=")) {
+                                String assignment = sourceLine.substring(
+                                        sourceLine.indexOf("=") + 1);
+                                arg[0] = assignment;
+                            }
                         }
                     }
-                }
-            }, value);
+                }, value);
+            }
             return value[0];
     }
 
-    private boolean matchesAndHasinitialValue(FieldDeclaration fieldDeclaration,
+    private boolean matchesAndHasInitialValue(FieldDeclaration fieldDeclaration,
                                               String fieldName) {
+        return hasInitialValue(fieldDeclaration) && fieldDeclaration.getVariable(0).
+                getNameAsString().equals(fieldName);
+    }
+
+    private boolean hasInitialValue(FieldDeclaration fieldDeclaration) {
         return fieldDeclaration.getVariables().size() > 0
                 && fieldDeclaration.getVariable(0) != null
-                && fieldDeclaration.getVariable(0).
-                    getNameAsString().equals(fieldName)
                 && fieldDeclaration.getVariable(0).
                     getInitializer().isPresent();
     }
@@ -275,18 +287,20 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
     }
 
     private String getImportsAsString(String className) {
-        StringBuffer value = new StringBuffer();
+        StringBuilder value = new StringBuilder();
         CompilationUnit cu = getCompilationUnit(className);
-        if (cu != null) cu.accept(new VoidVisitorAdapter<StringBuffer>() {
+        if (cu != null) {
+            cu.accept(new VoidVisitorAdapter<StringBuilder>() {
 
-            @Override
-            public void visit(ImportDeclaration fieldDeclaration, 
-                              StringBuffer arg) {
-                super.visit(fieldDeclaration, arg);
-                value.append(fieldDeclaration.toString());
-            }
-            
-        }, value);
+                @Override
+                public void visit(ImportDeclaration fieldDeclaration,
+                                  StringBuilder arg) {
+                    super.visit(fieldDeclaration, arg);
+                    value.append(fieldDeclaration.toString());
+                }
+
+            }, value);
+        }
         return value.toString();
     }
 
