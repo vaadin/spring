@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.spring;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.vaadin.flow.spring.security.RequestUtil;
