@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.fusionsecurity.endpoints;
+package com.vaadin.flow.spring.fusionsecurityjwt.endpoints;
 
 import java.util.List;
 import java.util.stream.Collectors;
