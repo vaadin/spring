@@ -8,8 +8,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 
 @SpringBootApplication
-@ComponentScan(excludeFilters = 
-        {@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value = SecurityConfig.class)})
+@ComponentScan(basePackages = {"com.vaadin.flow.flow.fusionsecurity"}, 
+    excludeFilters = 
+        {@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, value = SecurityConfig.class),
+        @ComponentScan.Filter(type=FilterType.REGEX,
+            pattern="com\\.vaadin\\.flow\\.flow\\.fusionsecurity\\.endpoints\\..*")})
 public class Application extends com.vaadin.flow.spring.fusionsecurity.Application {
 
     public static void main(String[] args) {
