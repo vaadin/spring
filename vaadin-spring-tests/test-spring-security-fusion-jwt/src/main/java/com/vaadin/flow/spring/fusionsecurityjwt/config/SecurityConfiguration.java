@@ -44,8 +44,7 @@ public class SecurityConfiguration extends VaadinStatelessWebSecurityConfig {
         super.configure(http);
 
         http
-                .csrf().disable()
-                .sessionManagement()
+            .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         setJwtSplitCookieAuthentication(http, "statelessapp", 3600,
