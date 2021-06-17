@@ -41,23 +41,13 @@ public class VaadinStatelessWebSecurityConfig
         // @formatter:on
     }
 
-    protected void setLoginView(HttpSecurity http, String fusionLoginViewPath) throws Exception {
-        // super.setLoginView(http, fusionLoginViewPath);
-        // http.logout().addLogoutHandler(((request, response, authentication) -> {
-        //     JwtSplitCookieUtils.removeJwtSplitCookies(request, response);
-        // }));
-        // @formatter:off
-        http
-                .formLogin()
-                    .loginPage(fusionLoginViewPath).permitAll()
-                    .successHandler(new VaadinStatelessSavedRequestAwareAuthenticationSuccessHandler())
-                    .and()
-                .logout()
-                    .addLogoutHandler(((request, response, authentication) -> {
-                        JwtSplitCookieUtils.removeJwtSplitCookies(request, response);
-                    }))
-                    .logoutSuccessUrl("/");
-        // @formatter:on
+    @Override
+    protected void setLoginView(HttpSecurity http, String fusionLoginViewPath, String logoutUrl) throws Exception {
+        super.setLoginView(http, fusionLoginViewPath, logoutUrl);
+        http.formLogin().successHandler(new VaadinStatelessSavedRequestAwareAuthenticationSuccessHandler());
+        http.logout().addLogoutHandler((request, response, authentication) -> {
+            JwtSplitCookieUtils.removeJwtSplitCookies(request, response);
+        });
     }
 
     @Bean
