@@ -32,6 +32,7 @@
             <artifactId>configuration-properties-annotation-processor</artifactId>
             <version>${version}</version>
             <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
