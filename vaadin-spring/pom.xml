@@ -94,7 +94,7 @@
 
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>configuration-properties-annotation-processor</artifactId>
+            <artifactId>configuration-properties</artifactId>
             <version>${version}</version>
         </dependency>
 

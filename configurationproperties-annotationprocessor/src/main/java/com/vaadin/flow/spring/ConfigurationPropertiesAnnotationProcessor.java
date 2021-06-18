@@ -16,6 +16,7 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -102,7 +103,7 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
             String generatedClassName = e.getEnclosingElement().toString()
                     + "." + "VaadinConfigurationProperties";
 
-            String prefix = getPrefix((TypeElement) e);
+            String prefix = "vaadin";
 
             try {
                 writeJavaCodeToFile(annotatedClassName, generatedClassName,
@@ -111,14 +112,6 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
                 messager.printMessage(Diagnostic.Kind.ERROR, ioException.getClass().getSimpleName() + ": " + ioException.getMessage());
             }
         });
-    }
-
-    private String getPrefix(TypeElement e) {
-        SpringConfigurationPropertiesGenerator annotationInstance =
-                e.getAnnotation(
-                        SpringConfigurationPropertiesGenerator.class);
-        String prefix = annotationInstance.prefix();
-        return prefix;
     }
 
     private void addFieldsFromInitParametersClass(List<FieldDescriptor> fields) {
@@ -131,7 +124,8 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
         } else {
             messager.printMessage(Diagnostic.Kind.ERROR,
                     pathToInitParameters
-                            + " is missing. Please check if the flow-server sources are available as a dependency");
+                            + " is missing. Please check if the flow-server " +
+                            "sources are available as a dependency");
         }
     }
 
