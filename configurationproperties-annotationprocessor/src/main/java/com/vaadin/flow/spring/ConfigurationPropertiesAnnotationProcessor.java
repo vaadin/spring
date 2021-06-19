@@ -88,9 +88,6 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
 
     private void processAnnotation(RoundEnvironment roundEnv, TypeElement annotation) {
         roundEnv.getElementsAnnotatedWith(annotation).forEach(e -> {
-            Elements elementUtils = processingEnv.getElementUtils();
-            String comment = elementUtils.getDocComment(e);
-
             List<FieldDescriptor> fields = new ArrayList<>();
 
             // SpringConfigurationPropertiesGenerator is restricted to Types, so it's safe to cast the element
@@ -192,7 +189,8 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
                     cu = parsed.getResult().get();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                messager.printMessage(Diagnostic.Kind.ERROR,
+                        "Unable to parse InitParameters.java ");
             }
             return cu;
         });
