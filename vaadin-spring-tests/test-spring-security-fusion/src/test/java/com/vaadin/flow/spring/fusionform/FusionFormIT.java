@@ -33,7 +33,10 @@ public class FusionFormIT extends ChromeBrowserTest {
     @After
     public void tearDown() {
         if (getDriver() != null) {
-            checkLogsForErrors();
+            checkLogsForErrors(msg -> {
+                // form validation errors
+                return msg.contains("the server responded with a status of 400 ()");
+            });
         }
     }
 
@@ -58,7 +61,6 @@ public class FusionFormIT extends ChromeBrowserTest {
         NotificationElement notification = $(NotificationElement.class).id("notification");
         Assert.assertNotNull(notification);
         waitUntil(driver -> notification.isOpen());
-        System.out.println(notification.getText());
         Assert.assertTrue(notification.getText().contains("must not be empty"));
         Assert.assertFalse(notification.getText().contains("Expected string but received null"));
     }
