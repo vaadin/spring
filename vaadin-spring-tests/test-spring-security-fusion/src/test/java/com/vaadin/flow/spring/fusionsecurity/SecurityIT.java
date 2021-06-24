@@ -12,6 +12,7 @@ import com.vaadin.testbench.TestBenchElement;
 
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class SecurityIT extends ChromeBrowserTest {
@@ -102,6 +103,7 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     @Test
+    @Ignore
     public void navigate_to_private_view_prevented() {
         open("");
         navigateTo("private", false);
@@ -109,6 +111,7 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     @Test
+    @Ignore
     public void navigate_to_admin_view_prevented() {
         open("");
         navigateTo("admin", false);

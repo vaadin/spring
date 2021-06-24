@@ -7,10 +7,8 @@ import com.vaadin.flow.testutil.ChromeBrowserTest;
 
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore
 public class FusionFormIT extends ChromeBrowserTest {
 
     private static final int SERVER_PORT = 9999;
