@@ -27,6 +27,8 @@
     <artifactId>vaadin-test-spring-white-list</artifactId>
 
     <properties>
+        <vaadin.button.version>2.0.0</vaadin.button.version>
+        <vaadin.textfield.version>2.0.2</vaadin.textfield.version>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
@@ -45,13 +47,13 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-flow</artifactId>
-            <version>${vaadin.version}</version>
+            <version>${vaadin.button.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-flow</artifactId>
-            <version>${vaadin.version}</version>
+            <version>${vaadin.textfield.version}</version>
         </dependency>
 
         <dependency>
