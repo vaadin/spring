@@ -201,6 +201,9 @@ public class SpringInstantiatorTest {
         ServletConfig config = Mockito.mock(ServletConfig.class);
         ServletContext servletContext = Mockito.mock(ServletContext.class);
         Mockito.when(config.getServletContext()).thenReturn(servletContext);
+        
+        Mockito.when(servletContext.getClassLoader())
+                .thenReturn(servlet.getClass().getClassLoader());
 
         Lookup lookup = Mockito.mock(Lookup.class);
         ResourceProvider provider = Mockito.mock(ResourceProvider.class);
