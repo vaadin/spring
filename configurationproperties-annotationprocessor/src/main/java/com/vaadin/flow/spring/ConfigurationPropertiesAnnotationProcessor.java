@@ -5,10 +5,10 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
@@ -16,7 +16,6 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,6 +36,7 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
 {
 
     private static final String INITPARAMETERS_CLASS_NAME = "com.vaadin.flow.server.InitParameters";
+    private static final String GENERATED_CLASS_NAME = "VaadinConfigurationProperties";
     private Messager messager;
     private Map<String, CompilationUnit> compilationUnitCache = new HashMap<>();
 
@@ -44,10 +44,9 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         messager = processingEnv.getMessager();
-        messager.printMessage(Diagnostic.Kind.WARNING, "hola!");
     }
 
-    class FieldDescriptor {
+    private class FieldDescriptor {
         final String fieldName;
 
         final String formerPropertyName;
@@ -65,11 +64,6 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
             this.formerPropertyName = formerPropertyName;
             this.defaultValueSetter = defaultValueSetter;
             this.fieldName = toCamelCase(formerPropertyName, false);
-            // we do not want primitives, as we want any property to be nullable
-            // to know if the value has actually been set by the user
-            if ("int".equals(type)) type = "Integer";
-            else if ("double".equals(type)) type = "Double";
-            else if ("boolean".equals(type)) type = "Boolean";
             this.type = type;
             this.comments = comments;
         }
@@ -87,35 +81,40 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
     }
 
     private void processAnnotation(RoundEnvironment roundEnv, TypeElement annotation) {
-        roundEnv.getElementsAnnotatedWith(annotation).forEach(e -> {
-            List<FieldDescriptor> fields = new ArrayList<>();
-
-            // SpringConfigurationPropertiesGenerator is restricted to Types, so it's safe to cast the element
-            addFieldsFromTypeElement((TypeElement) e, fields);
-
-            addFieldsFromInitParametersClass(fields);
-
-            // same package, VaadinConfigurationProperties as class name
-            String annotatedClassName = e.toString();
-            String generatedClassName = e.getEnclosingElement().toString()
-                    + "." + "VaadinConfigurationProperties";
-
-            String prefix = "vaadin";
-
-            try {
-                writeJavaCodeToFile(annotatedClassName, generatedClassName,
-                        prefix, fields);
-            } catch (IOException ioException) {
-                messager.printMessage(Diagnostic.Kind.ERROR, ioException.getClass().getSimpleName() + ": " + ioException.getMessage());
-            }
-        });
+        roundEnv.getElementsAnnotatedWith(annotation).forEach(this::processElement);
     }
+
+    private void processElement(Element element) {
+        List<FieldDescriptor> fields = new ArrayList<>();
+
+        // SpringConfigurationPropertiesGenerator is restricted to Types, so it's safe to cast the element
+        addFieldsFromTypeElement((TypeElement) element, fields);
+
+        addFieldsFromInitParametersClass(fields);
+
+        // same package, VaadinConfigurationProperties as class name
+        String annotatedClassName = element.toString();
+        String generatedClassName = element.getEnclosingElement().toString()
+                + "." + GENERATED_CLASS_NAME;
+
+        String prefix = "vaadin";
+
+        try {
+            writeJavaCodeToFile(annotatedClassName, generatedClassName,
+                    prefix, fields);
+        } catch (IOException ioException) {
+            messager.printMessage(Diagnostic.Kind.ERROR,
+                    ioException.getClass().getSimpleName() +
+                            ": " + ioException.getMessage());
+        }
+    }
+
 
     private void addFieldsFromInitParametersClass(List<FieldDescriptor> fields) {
         String pathToInitParameters = "/" + INITPARAMETERS_CLASS_NAME
                 .replaceAll("\\.", "/") + ".java";
-        InputStream r = getClass().getResourceAsStream(pathToInitParameters);
-        ParseResult<CompilationUnit> parsed = new JavaParser().parse(r);
+        InputStream resourceAsStream = getClass().getResourceAsStream(pathToInitParameters);
+        ParseResult<CompilationUnit> parsed = new JavaParser().parse(resourceAsStream);
         if (parsed.getResult().isPresent()) {
             addFieldsFromCompilationUnit(parsed.getResult().get(), fields);
         } else {
@@ -126,50 +125,33 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
         }
     }
 
-    private void addFieldsFromCompilationUnit(CompilationUnit cu,
+    private void addFieldsFromCompilationUnit(CompilationUnit compilationUnit,
                                               List<FieldDescriptor> fields) {
-        cu.accept(new VoidVisitorAdapter<List<FieldDescriptor>>() {
-            @Override
-            public void visit(FieldDeclaration fieldDeclaration,
-                              List<FieldDescriptor> arg) {
-                super.visit(fieldDeclaration, arg);
-
-                if (hasInitialValue(fieldDeclaration)) {
-                    FieldDescriptor fd = new FieldDescriptor(
-                            fieldDeclaration.getVariable(0).
-                                    getInitializer().get().
-                                    toStringLiteralExpr().get().
-                                    getValue(),
-                            fieldDeclaration.getElementType().toString(),
-                            null, null);
-                    fieldDeclaration.getComment().ifPresent(c ->
-                            fd.comments = cleanComment(c.getContent()));
-                    arg.add(fd);
-                }
-            }
-        }, fields);
+        compilationUnit.accept(new FieldDescriptorCreator(), fields);
     }
 
 
     private void addFieldsFromTypeElement(TypeElement initParams,
                                           List<FieldDescriptor> fields) {
         processingEnv.getElementUtils().getAllMembers(initParams).stream()
-                .filter(m -> ElementKind.FIELD.equals(m.getKind()))
-                .filter(m -> m instanceof VariableElement) // in theory all fields are VariableElements
-                .map(m -> (VariableElement) m)
-                .map(m -> new FieldDescriptor(m.getSimpleName().toString(),
-                        m.asType().toString(),
-                        getInitialValueAssignmentCode(m),
-                        processingEnv.getElementUtils().getDocComment(m)))
+                .filter(memeber -> ElementKind.FIELD.equals(memeber.getKind()))
+                .filter(member -> member instanceof VariableElement) // in theory all fields are VariableElements
+                .map(member -> (VariableElement) member)
+                .map(variableElement ->
+                        new FieldDescriptor(variableElement.getSimpleName().toString(),
+                        variableElement.asType().toString(),
+                        getInitialValueAssignmentCode(variableElement),
+                        processingEnv.getElementUtils().getDocComment(variableElement)))
                 .forEach(fields::add);
     }
 
-    private String getInitialValueAssignmentCode(VariableElement m) {
-        String className = m.getEnclosingElement().toString();
+    private String getInitialValueAssignmentCode(VariableElement variableElement) {
+        String className = variableElement.getEnclosingElement().toString();
 
         CompilationUnit cu = getCompilationUnit(className);
 
-        String value = getInitialValueAssignmentCode(cu, m.getSimpleName().toString());
+        String value = getInitialValueAssignmentCode(cu,
+                variableElement.getSimpleName().toString());
 
         return value;
     }
@@ -178,7 +160,7 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
         return compilationUnitCache.computeIfAbsent(className, key -> {
             String pkgName = key.substring(0, key.lastIndexOf('.'));
             String simpleClassName = key.substring(key.lastIndexOf('.') + 1);
-            CompilationUnit cu = null;
+            CompilationUnit compilationUnit = null;
             try {
                 FileObject source = processingEnv.getFiler()
                         .getResource(StandardLocation.SOURCE_PATH, pkgName,
@@ -186,26 +168,27 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
                 ParseResult<CompilationUnit> parsed = new JavaParser()
                         .parse(source.openInputStream());
                 if (parsed.getResult().isPresent()) {
-                    cu = parsed.getResult().get();
+                    compilationUnit = parsed.getResult().get();
                 }
             } catch (IOException e) {
                 messager.printMessage(Diagnostic.Kind.ERROR,
                         "Unable to parse InitParameters.java ");
             }
-            return cu;
+            return compilationUnit;
         });
     }
 
-    private String getInitialValueAssignmentCode(CompilationUnit cu, String fieldName) {
+    private String getInitialValueAssignmentCode(CompilationUnit compilationUnit,
+                                                 String fieldName) {
         assert fieldName != null;
 
             String[] value = new String[1];
-            if (cu != null) {
-                cu.accept(new VoidVisitorAdapter<String[]>() {
+            if (compilationUnit != null) {
+                compilationUnit.accept(new VoidVisitorAdapter<String[]>() {
                     @Override
                     public void visit(FieldDeclaration fieldDeclaration,
-                                      String[] arg) {
-                        super.visit(fieldDeclaration, arg);
+                                      String[] valueHolder) {
+                        super.visit(fieldDeclaration, valueHolder);
 
                         if (matchesAndHasInitialValue(fieldDeclaration, fieldName)) {
                             String sourceLine = fieldDeclaration.
@@ -213,7 +196,7 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
                             if (sourceLine.contains("=")) {
                                 String assignment = sourceLine.substring(
                                         sourceLine.indexOf("=") + 1);
-                                arg[0] = assignment;
+                                valueHolder[0] = assignment;
                             }
                         }
                     }
@@ -300,38 +283,62 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
                                     List<FieldDescriptor> fields) {
         out.println(" @PostConstruct");
         out.println(" public void transferValuesToSystem() {");
-        fields.forEach(f -> {
-            out.println("  if (" + f.fieldName + " != null) " +
-                    "System.setProperty(\"vaadin." + f.formerPropertyName
-                    + "\", " + f.fieldName + ".toString());");
+        fields.forEach(field -> {
+            String code = "  if (" + field.fieldName + " != null) " +
+                    "System.setProperty(\"vaadin." + field.formerPropertyName
+                    + "\", " + field.fieldName + ".toString());";
+            if (isPrimitive(field)) {
+                code = "  System.setProperty(\"vaadin." + field.formerPropertyName
+                        + "\", \"\" + " + field.fieldName + ");";
+            }
+            out.println(code);
         });
         out.println(" }");
     }
 
+    private boolean isPrimitive(FieldDescriptor f) {
+        boolean primitive = boolean.class.toString().equals(f.type)
+                || int.class.toString().equals(f.type)
+                || float.class.toString().equals(f.type)
+                || double.class.toString().equals(f.type);
+        return primitive;
+    }
+
     private void writeField(PrintWriter out, FieldDescriptor field) {
         out.println();
+
+        String effectiveType = getEffectiveType(field);
 
         // write comment
         String comment = field.comments;
         if (comment != null && !"".equals(comment)) {
             out.println("  /**");
             Arrays.stream(comment.split("\n")).
-                    forEach(l -> out.println("  * " + l));
+                    forEach(line -> out.println("  * " + line));
             out.println("  */");
         }
         // write field
         out.print("  private " + field.type + " " + field.fieldName);
-        if (field.defaultValueSetter != null)
+        if (field.defaultValueSetter != null) {
             out.print(" = " + field.defaultValueSetter);
+        }
         out.println(";");
 
         out.println();
+
         // write getter
-        out.println("  public " + field.type + " get" +
+        String prefix = "get";
+        if (boolean.class.getName().equals(effectiveType)) {
+            prefix = "is";
+        }
+
+        out.println("  public " + field.type + " " + prefix +
                 capitalize(field.fieldName) + "() {");
         out.println("    return " + field.fieldName + ";");
         out.println("  };");
+
         out.println();
+
         // write setter
         out.println("  public void set" + capitalize(field.fieldName)
                 + "(" + field.type + " " + field.fieldName + ") {");
@@ -341,38 +348,77 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
 
     }
 
+    private String getEffectiveType(FieldDescriptor field) {
+        String type = field.type;
+
+        if (field.defaultValueSetter == null) {
+            // unless the value is already initialized in the annotated class
+            // we do not want primitives, as we want any property to be nullable
+            // to know if the value has actually been set by the user
+            if ("int".equals(type)) type = "Integer";
+            else if ("double".equals(type)) type = "Double";
+            else if ("boolean".equals(type)) type = "Boolean";
+        }
+
+        return type;
+    }
+
     private String toCamelCase(String value, boolean firstUppercase) {
-        if (value == null) return null;
-        StringBuffer camelized = new StringBuffer();
+        if (value == null) {
+            return null;
+        }
+        StringBuilder camelized = new StringBuilder();
         Arrays.stream(value
                 .replaceAll("([A-Z])", "\\-$1")
                 .split("[\\.\\-_)]"))
-                .forEach(t -> camelized.append(capitalize(t)));
+                .forEach(token -> camelized.append(capitalize(token)));
         return firstUppercase ? Utils.capitalize(camelized.toString()) :
                 Utils.decapitalize(camelized.toString());
     }
 
-    private String capitalize(String t) {
-        assert t != null;
-        return t.isEmpty() ? "" : Utils.capitalize(t);
+    private String capitalize(String token) {
+        assert token != null;
+        return token.isEmpty() ? "" : Utils.capitalize(token);
     }
 
     private String cleanComment(String comment) {
         /*
-        comments from t compilation unit come with initial asterisks and spaces
+        comments from the compilation unit come with initial asterisks and spaces
         so we want to remove them and have the clean comment text
         */
-        StringBuffer clean = new StringBuffer();
+        StringBuilder clean = new StringBuilder();
         if (comment != null) {
             Arrays.stream(comment.split("\n")).
-                    filter(l -> !"".equals(comment.trim()))
-                    .forEach(l ->
+                    filter(line -> !line.isEmpty())
+                    .forEach(line ->
                             clean.append(
-                                    ("".equals(clean.toString()) ? "" : "\n")
-                                            + l.replaceAll("^[\\* ]+",
+                                    (clean.toString().isEmpty() ? "" : "\n")
+                                            + line.replaceAll("^[\\* ]+",
                                             "")));
         }
         return clean.toString();
+    }
+
+    private class FieldDescriptorCreator extends
+            VoidVisitorAdapter<List<FieldDescriptor>> {
+        @Override
+        public void visit(FieldDeclaration fieldDeclaration,
+                          List<FieldDescriptor> fieldDescriptorList) {
+            super.visit(fieldDeclaration, fieldDescriptorList);
+
+            if (hasInitialValue(fieldDeclaration)) {
+                FieldDescriptor fieldDescriptor = new FieldDescriptor(
+                        fieldDeclaration.getVariable(0).
+                                getInitializer().get().
+                                toStringLiteralExpr().get().
+                                getValue(),
+                        fieldDeclaration.getElementType().toString(),
+                        null, null);
+                fieldDeclaration.getComment().ifPresent(c ->
+                        fieldDescriptor.comments = cleanComment(c.getContent()));
+                fieldDescriptorList.add(fieldDescriptor);
+            }
+        }
     }
 
 }
