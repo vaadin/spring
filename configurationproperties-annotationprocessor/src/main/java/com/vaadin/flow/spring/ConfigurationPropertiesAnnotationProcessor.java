@@ -41,21 +41,21 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
     private Map<String, CompilationUnit> compilationUnitCache = new HashMap<>();
 
     @Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
+    public void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         messager = processingEnv.getMessager();
     }
 
     private class FieldDescriptor {
-        final String fieldName;
+        private final String fieldName;
 
-        final String formerPropertyName;
+        private final String formerPropertyName;
 
-        final String type;
+        private final String type;
 
-        final String defaultValueSetter;
+        private final String defaultValueSetter;
 
-        String comments;
+        private String comments;
 
         public FieldDescriptor(String formerPropertyName, String type,
                                String defaultValueSetter, String comments) {
@@ -296,11 +296,13 @@ public class ConfigurationPropertiesAnnotationProcessor extends AbstractProcesso
         out.println(" }");
     }
 
-    private boolean isPrimitive(FieldDescriptor f) {
-        boolean primitive = boolean.class.toString().equals(f.type)
-                || int.class.toString().equals(f.type)
-                || float.class.toString().equals(f.type)
-                || double.class.toString().equals(f.type);
+    private boolean isPrimitive(FieldDescriptor fieldDescriptor) {
+        boolean primitive = false;
+        try {
+            primitive = Class.forName(fieldDescriptor.type).isPrimitive();
+        } catch (ClassNotFoundException e) {
+            // expected. Nothing to be done
+        }
         return primitive;
     }
 
