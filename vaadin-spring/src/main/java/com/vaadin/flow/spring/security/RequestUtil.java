@@ -109,6 +109,11 @@ public class RequestUtil {
     public boolean isAnonymousRoute(HttpServletRequest request) {
         String vaadinMapping = configurationProperties.getUrlMapping();
         String requestedPath = getRequestPathInsideContext(request);
+        if (requestedPath.startsWith("/")) {
+            // Requested path includes a beginning "/" but route mapping is done
+            // without one
+            requestedPath = requestedPath.substring(1);
+        }
         Optional<String> maybePath = HandlerHelper
                 .getPathIfInsideServlet(vaadinMapping, requestedPath);
         if (!maybePath.isPresent()) {
