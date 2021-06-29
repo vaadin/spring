@@ -5,6 +5,7 @@ import com.vaadin.flow.component.notification.testbench.NotificationElement;
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,6 +30,16 @@ public class FusionFormIT extends ChromeBrowserTest {
         waitUntil(driver -> $("vaadin-elements-view").exists());
     }
 
+    @After
+    public void tearDown() {
+        if (getDriver() != null) {
+            checkLogsForErrors(msg -> {
+                // form validation errors
+                return msg.contains("the server responded with a status of 400 ()");
+            });
+        }
+    }
+
     @Test
     public void save_empty_values_for_required_fields_no_runtime_errors() {
         ButtonElement saveButton = $(ButtonElement.class).id("save");
@@ -36,9 +47,22 @@ public class FusionFormIT extends ChromeBrowserTest {
         NotificationElement notification = $(NotificationElement.class).id("notification");
         Assert.assertNotNull(notification);
         waitUntil(driver -> notification.isOpen());
-        System.out.println(notification.getText());
         Assert.assertTrue(notification.getText().contains("must not be empty"));
         Assert.assertFalse(notification.getText().contains("Expected string but received a undefined"));
+    }
+
+    @Test
+    public void save_backend_loaded_empty_values_for_required_fields_no_runtime_errors() {
+        ButtonElement loadDataButton = $(ButtonElement.class).id("load-from-endpoint");
+        loadDataButton.click();
+        ButtonElement saveButton = $(ButtonElement.class).id("save");
+        waitUntil(driver -> saveButton.isEnabled());
+        saveButton.click();
+        NotificationElement notification = $(NotificationElement.class).id("notification");
+        Assert.assertNotNull(notification);
+        waitUntil(driver -> notification.isOpen());
+        Assert.assertTrue(notification.getText().contains("must not be empty"));
+        Assert.assertFalse(notification.getText().contains("Expected string but received null"));
     }
 
     @Test

@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.connect.Endpoint;
+import com.vaadin.fusion.Endpoint;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 /**
@@ -73,6 +73,11 @@ public class AppEndpoint {
     public String checkUserFromVaadinRequest() {
         return "Hello, "
                 + VaadinRequest.getCurrent().getUserPrincipal().getName() + "!";
+    }
+
+    @AnonymousAllowed
+    public ObjectWithNullValues getObjectWithNullValues() {
+        return new ObjectWithNullValues();
     }
 
 }
