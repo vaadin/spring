@@ -227,6 +227,8 @@
     </profiles>
 
     <modules>
+        <module>configurationproperties-annotationprocessor</module>
+        <module>configurationproperties</module>
         <module>vaadin-spring</module>
     </modules>
     <repositories>
