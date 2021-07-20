@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spring-tests</artifactId>
-        <version>14.0-SNAPSHOT</version>
+        <version>18.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-test-spring-boot-prepare</artifactId>
     <name>Vaadin Spring Boot integration tests with only prepare goal</name>
@@ -22,6 +22,11 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-dev-server</artifactId>
+        </dependency>  
+		
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-test-spring-common</artifactId>

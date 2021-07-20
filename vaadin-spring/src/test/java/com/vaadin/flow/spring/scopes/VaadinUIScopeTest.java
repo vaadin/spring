@@ -15,16 +15,9 @@
  */
 package com.vaadin.flow.spring.scopes;
 
-import javax.servlet.ServletContext;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import net.jcip.annotations.NotThreadSafe;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.ObjectFactory;
@@ -32,37 +25,15 @@ import org.springframework.beans.factory.config.Scope;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.router.Router;
-import com.vaadin.flow.server.Constants;
-import com.vaadin.flow.server.DefaultDeploymentConfiguration;
-import com.vaadin.flow.server.VaadinContext;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinServletContext;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.SpringVaadinSession;
 
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@NotThreadSafe
-public class VaadinUIScopeTest extends AbstractScopeTest {
-
-    private UI ui;
-
-    @Before
-    public void setUp() {
-        VaadinSession.setCurrent(null);
-        UI.setCurrent(null);
-        ui = null;
-    }
-
-    @After
-    public void clearUI() {
-        ui = null;
-    }
+public class VaadinUIScopeTest extends AbstractUIScopedTest {
 
     @Test
     public void get_currentUiIsSet_objectIsStored() {
@@ -192,41 +163,4 @@ public class VaadinUIScopeTest extends AbstractScopeTest {
         return new VaadinUIScope();
     }
 
-    private UI mockUI() {
-        VaadinSession session = mockSession();
-
-        Router router = mock(Router.class);
-        VaadinService service = session.getService();
-        when(service.getRouter()).thenReturn(router);
-
-        Properties initParameters = new Properties();
-        when(service.getDeploymentConfiguration())
-                .thenReturn(new DefaultDeploymentConfiguration(getClass(),
-                        initParameters));
-
-        when(service.getMainDivId(Mockito.any(), Mockito.any()))
-                .thenReturn(" - ");
-
-        final Map<String, Object> attributeMap = new HashMap<>();
-
-        ServletContext servletContext = Mockito.mock(ServletContext.class);
-        Mockito.when(servletContext.getAttribute(Mockito.anyString())).then(invocationOnMock -> attributeMap.get(invocationOnMock.getArguments()[0].toString()));
-        Mockito.doAnswer(invocationOnMock -> attributeMap.put(
-                invocationOnMock.getArguments()[0].toString(),
-                invocationOnMock.getArguments()[1]
-        )).when(servletContext).setAttribute(Mockito.anyString(), Mockito.any());
-
-        VaadinServletContext context = new VaadinServletContext(servletContext);
-        Mockito.when(service.getContext()).thenReturn(context);
-
-        UI ui = new UI();
-        ui.getInternals().setSession(session);
-        ui.doInit(null, 1);
-
-        UI.setCurrent(ui);
-
-        // prevent UI from being GCed.
-        this.ui = ui;
-        return ui;
-    }
 }

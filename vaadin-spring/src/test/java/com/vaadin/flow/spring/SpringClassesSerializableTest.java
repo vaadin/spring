@@ -16,19 +16,22 @@
 package com.vaadin.flow.spring;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
-import com.vaadin.flow.server.Constants;
 import com.vaadin.flow.server.DefaultDeploymentConfiguration;
+import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinServletService;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.startup.ApplicationConfiguration;
 import com.vaadin.flow.spring.scopes.TestBeanStore;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
@@ -60,6 +63,7 @@ public class SpringClassesSerializableTest extends ClassesSerializableTest {
     protected Stream<String> getExcludedPatterns() {
         return Stream.concat(Stream.of(
                 "com\\.vaadin\\.flow\\.spring\\.ForwardingRequestWrapper",
+                "com\\.vaadin\\.flow\\.spring\\.VaadinConfigurationProperties\\$Pnpm",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinScanPackagesRegistrar",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinScanPackagesRegistrar\\$VaadinScanPackages",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer",
@@ -72,13 +76,22 @@ public class SpringClassesSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.spring\\.RootMappedCondition",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinWebsocketEndpointExporter",
                 "com\\.vaadin\\.flow\\.spring\\.DispatcherServletRegistrationBeanConfig",
+                "com\\.vaadin\\.flow\\.spring\\.VaadinApplicationConfiguration",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletConfiguration",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinScopesConfig",
+                "com\\.vaadin\\.flow\\.spring\\.VaadinSpringSecurity",
                 "com\\.vaadin\\.flow\\.spring\\.SpringBootAutoConfiguration",
+                "com\\.vaadin\\.flow\\.spring\\.SpringSecurityAutoConfiguration",
+                "com\\.vaadin\\.flow\\.spring\\.SpringApplicationConfigurationFactory(\\$.*)?",
+                "com\\.vaadin\\.flow\\.spring\\.SpringLookupInitializer(\\$.*)?",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinConfigurationProperties",
                 "com\\.vaadin\\.flow\\.spring\\.scopes\\.VaadinSessionScope",
                 "com\\.vaadin\\.flow\\.spring\\.scopes\\.AbstractScope",
                 "com\\.vaadin\\.flow\\.spring\\.scopes\\.VaadinUIScope",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinWebSecurityConfigurerAdapter",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinDefaultRequestCache",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinSavedRequestAwareAuthenticationSuccessHandler",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinSavedRequestAwareAuthenticationSuccessHandler\\$RedirectStrategy",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$ClassPathScanner",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$CustomResourceLoader"),
                 super.getExcludedPatterns());
@@ -122,9 +135,22 @@ public class SpringClassesSerializableTest extends ClassesSerializableTest {
 
     private TestBeanStore createStore() {
         final Properties initParameters = new Properties();
+        ApplicationConfiguration appConfig = Mockito
+                .mock(ApplicationConfiguration.class);
+        Mockito.when(appConfig.getPropertyNames())
+                .thenReturn(Collections.emptyEnumeration());
+        VaadinContext context = Mockito.mock(VaadinContext.class);
+        Mockito.when(context.getAttribute(
+                Mockito.eq(ApplicationConfiguration.class), Mockito.any()))
+                .thenReturn(appConfig);
         VaadinService service = new VaadinServletService(new VaadinServlet(),
-                new DefaultDeploymentConfiguration(getClass(),
-                        initParameters));
+                new DefaultDeploymentConfiguration(appConfig, getClass(),
+                        initParameters)) {
+            @Override
+            public VaadinContext getContext() {
+                return context;
+            }
+        };
         VaadinSession session = new TestSession(service);
 
         TestBeanStore store = new TestBeanStore(session);

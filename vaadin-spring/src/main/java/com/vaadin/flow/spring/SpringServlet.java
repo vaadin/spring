@@ -22,7 +22,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationContext;
@@ -34,6 +36,7 @@ import com.vaadin.flow.server.InitParameters;
 import com.vaadin.flow.server.ServiceException;
 import com.vaadin.flow.server.VaadinServlet;
 import com.vaadin.flow.server.VaadinServletService;
+import com.vaadin.flow.shared.util.SharedUtil;
 
 /**
  * Spring application context aware Vaadin servlet implementation.
@@ -59,19 +62,17 @@ public class SpringServlet extends VaadinServlet {
             // thanks to java code coverage which adds non-existent
             // initially variables everywhere: we should skip this extra
             // field
-            .filter(field -> !field.isSynthetic())
-            .map(field -> {
+            .filter(field -> !field.isSynthetic()).map(field -> {
                 try {
                     return (String) field.get(null);
                 } catch (IllegalAccessException e) {
                     throw new IllegalStateException("unable to access field",
                             e);
                 }
-            })
-            .collect(Collectors.toList());
+            }).collect(Collectors.toList());
 
     private final ApplicationContext context;
-    private final boolean forwardingEnforced;
+    private final boolean rootMapping;
 
     /**
      * Creates a new Vaadin servlet instance with the application
@@ -91,14 +92,15 @@ public class SpringServlet extends VaadinServlet {
      *
      * @param context
      *            the Spring application context
-     * @param forwardingEnforced
+     * @param rootMapping
      *            the incoming HttpServletRequest is wrapped in
-     *            ForwardingRequestWrapper if {@code true}
+     *            ForwardingRequestWrapper if {@code true} and push URL is
+     *            prefixed with
+     *            {@link VaadinServletConfiguration#VAADIN_SERVLET_MAPPING}
      */
-    public SpringServlet(ApplicationContext context,
-            boolean forwardingEnforced) {
+    public SpringServlet(ApplicationContext context, boolean rootMapping) {
         this.context = context;
-        this.forwardingEnforced = forwardingEnforced;
+        this.rootMapping = rootMapping;
     }
 
     @Override
@@ -120,13 +122,30 @@ public class SpringServlet extends VaadinServlet {
     @Override
     protected DeploymentConfiguration createDeploymentConfiguration(
             Properties initParameters) {
-        Properties properties = new Properties(initParameters);
-        config(properties);
+        Properties properties = config(initParameters);
+        if (rootMapping) {
+            // in the case of root mapping, push requests should go to
+            // /vaadinServlet/pushUrl
+            String customPushUrl = properties
+                    .getProperty(InitParameters.SERVLET_PARAMETER_PUSH_URL);
+            if (customPushUrl == null) {
+                customPushUrl = "";
+            }
+            final String mapping = VaadinServletConfiguration.VAADIN_SERVLET_MAPPING
+                    .replace("/*", "");
+            customPushUrl = customPushUrl.replaceFirst("context://", "/");
+            customPushUrl = customPushUrl.replaceFirst(Pattern.quote(mapping),
+                    ""); // if workaround "/vaadinServlet/myCustomUrl" used
+            customPushUrl = customPushUrl.replaceFirst("^/", "");
+            properties.setProperty(InitParameters.SERVLET_PARAMETER_PUSH_URL,
+                    VaadinMVCWebAppInitializer.makeContextRelative(
+                            mapping + "/" + customPushUrl));
+        }
         return super.createDeploymentConfiguration(properties);
     }
 
     private HttpServletRequest wrapRequest(HttpServletRequest request) {
-        if (forwardingEnforced && request.getPathInfo() == null) {
+        if (rootMapping && request.getPathInfo() == null) {
             /*
              * We need to apply a workaround in case of forwarding
              *
@@ -137,14 +156,19 @@ public class SpringServlet extends VaadinServlet {
         return request;
     }
 
-    private void config(Properties properties) {
-        setProperties(PROPERTY_NAMES, properties);
-    }
+    private Properties config(Properties initParameters) {
+        Properties properties = new Properties();
+        properties.putAll(initParameters);
+        PROPERTY_NAMES.forEach(property -> setProperty(property, properties));
 
-    private void setProperties(List<String> propertyNames,
-            Properties properties) {
-        propertyNames.stream()
-                .forEach(property -> setProperty(property, properties));
+        // transfer non-string init parameters (such as
+        // DeploymentConfigurationFactory.FALLBACK_CHUNK)
+        initParameters.forEach((key, value) -> {
+            if (!(key instanceof String)) {
+                properties.put(key, value);
+            }
+        });
+        return properties;
     }
 
     private void setProperty(String property, Properties properties) {
@@ -154,10 +178,24 @@ public class SpringServlet extends VaadinServlet {
     private void setProperty(String envProperty, String initParam,
             Properties properties) {
         Environment env = context.getBean(Environment.class);
-        String value = env.getProperty(envProperty);
+        String value = env.getProperty(upperCaseToDashSeparated(envProperty));
+        if (value == null) {
+            value = env.getProperty(envProperty);
+        }
         if (value != null) {
             properties.put(initParam, value);
         }
+    }
+
+    private String upperCaseToDashSeparated(String value) {
+        String result = value;
+        if (result == null) {
+            return null;
+        }
+        while (!result.equals(result.toLowerCase(Locale.ENGLISH))) {
+            result = SharedUtil.camelCaseToDashSeparated(result);
+        }
+        return result;
     }
 
 }

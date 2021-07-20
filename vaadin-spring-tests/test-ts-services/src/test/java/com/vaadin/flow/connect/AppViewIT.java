@@ -38,17 +38,18 @@ public class AppViewIT extends ChromeBrowserTest {
     private TestBenchElement testComponent;
     private WebElement content;
 
+    @Override
     @Before
     public void setup() throws Exception {
         super.setup();
-        openTestUrl("/");
-        testComponent = $("test-component").first();
-        content = testComponent.$(TestBenchElement.class).id("content");
+        load();
     }
 
     @After
     public void tearDown() {
-        openTestUrl("/logout");
+        if (getDriver() != null) {
+            logout();
+        }
     }
 
     /**
@@ -56,13 +57,15 @@ public class AppViewIT extends ChromeBrowserTest {
      */
     @Test
     public void should_load_web_component() {
-        WebElement button = testComponent.$(TestBenchElement.class).id("button");
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("button");
         button.click();
         verifyContent("Hello World");
     }
 
     /**
      * Just a control test that assures that webcomponents is working.
+     *
      * @throws Exception
      */
     @Test
@@ -71,13 +74,24 @@ public class AppViewIT extends ChromeBrowserTest {
         button.click();
 
         // Wait for the server connect response
-        verifyContent("Anonymous access is not allowed");
+        verifyContent("Access denied");
+    }
+
+    @Test
+    public void should_request_packagePrivate_connect_service()
+            throws Exception {
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("helloFromPackagePrivate");
+        button.click();
+
+        // Wait for the server connect response
+        verifyContent("Access denied");
     }
 
     @Test
     public void should_requestAnonymously_connect_service() throws Exception {
-        WebElement button = testComponent.$(TestBenchElement.class).id(
-                "helloAnonymous");
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("helloAnonymous");
         button.click();
 
         // Wait for the server connect response
@@ -85,14 +99,36 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     @Test
-    public void should_requestAnonymously_when_CallConnectServiceFromANestedUrl() throws Exception {
+    public void should_requestAnonymously_endpoint_wrapper() throws Exception {
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("helloAnonymousWrapper");
+        button.click();
+
+        // Wait for the server connect response
+        verifyContent("Hello, stranger!");
+    }
+
+    @Test
+    public void should_requestAnonymously_packagePrivate_connect_service()
+            throws Exception {
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("helloAnonymousFromPackagePrivate");
+        button.click();
+
+        // Wait for the server connect response
+        verifyContent("Hello from package private endpoint!");
+    }
+
+    @Test
+    public void should_requestAnonymously_when_CallConnectServiceFromANestedUrl()
+            throws Exception {
         openTestUrl("/more/levels/url");
 
         testComponent = $("test-component").first();
         content = testComponent.$(TestBenchElement.class).id("content");
 
-        WebElement button = testComponent.$(TestBenchElement.class).id(
-                "helloAnonymous");
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("helloAnonymous");
         button.click();
 
         // Wait for the server connect response
@@ -101,8 +137,8 @@ public class AppViewIT extends ChromeBrowserTest {
 
     @Test
     public void should_useSendNull_when_paramterIsUndefined() {
-        WebElement button = testComponent.$(TestBenchElement.class).id(
-                "echoWithOptional");
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("echoWithOptional");
         button.click();
 
         // Wait for the server connect response
@@ -110,8 +146,18 @@ public class AppViewIT extends ChromeBrowserTest {
     }
 
     @Test
+    public void should_transformJavaNullValueToUndefined_when_gettingResponseFromEndpoint() {
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("getObjectWithNullValues");
+        button.click();
+
+        // Wait for the server connect response
+        verifyContent("undefined");
+    }
+
+    @Test
     public void should_notAbleToRequestAdminOnly_when_NotLoggedIn() {
-        verifyCallingAdminService("Anonymous access is not allowed");
+        verifyCallingAdminService("Access denied");
     }
 
     @Test
@@ -133,7 +179,7 @@ public class AppViewIT extends ChromeBrowserTest {
         login("user");
 
         // Verify admin calls
-        verifyCallingAdminService("Unauthorized access to Vaadin endpoint");
+        verifyCallingAdminService("Access denied");
 
         // Verify logged in user calls
         verifyCallingAuthorizedService();
@@ -180,11 +226,59 @@ public class AppViewIT extends ChromeBrowserTest {
         testComponent.$(TestBenchElement.class).id("checkUser").click();
         verifyCheckUser("user");
     }
+
     @Test
     public void should_checkAdminUser() {
         login("admin");
         testComponent.$(TestBenchElement.class).id("checkUser").click();
         verifyCheckUser("admin");
+    }
+
+    @Test
+    public void should_checkUserFromVaadinRequest() {
+        login("user");
+        testComponent.$(TestBenchElement.class).id("checkUserFromVaadinRequest")
+                .click();
+        verifyCheckUserFromVaadinRequest("user");
+    }
+
+    @Test
+    public void should_updateTitleInDOMWithInjectedService() {
+        Assert.assertEquals("titleRetrievedFromAService", driver
+                .findElement(By.tagName("title")).getAttribute("textContent"));
+    }
+
+    @Test
+    public void should_requestAnonymously_after_logout() throws Exception {
+        String originalCsrfToken = executeScript(
+                "return self.Vaadin.TypeScript.csrfToken").toString();
+        logout();
+        load();
+
+        String csrfToken = executeScript(
+                "return self.Vaadin.TypeScript.csrfToken").toString();
+        Assert.assertNotEquals("CSRF token should change for the new session",
+                originalCsrfToken, csrfToken);
+
+        WebElement button = testComponent.$(TestBenchElement.class)
+                .id("helloAnonymous");
+        button.click();
+
+        // Wait for the server connect response
+        verifyContent("Hello, stranger!");
+    }
+
+    @Test
+    public void should_notAbleToRequestDenied_when_LoggedIn() {
+        login("user");
+        testComponent.$(TestBenchElement.class).id("denied").click();
+        verifyContent("Access denied");
+    }
+
+    private void load() {
+        openTestUrl("/");
+        testComponent = $("test-component").waitForFirst();
+        content = testComponent.$(TestBenchElement.class).id("content");
     }
 
     private void login(String user) {
@@ -194,6 +288,10 @@ public class AppViewIT extends ChromeBrowserTest {
         testComponent.$(TestBenchElement.class).id("login").click();
         testComponent = $("test-component").first();
         content = testComponent.$(TestBenchElement.class).id("content");
+    }
+
+    private void logout() {
+        openTestUrl("/logout");
     }
 
     private void verifyCallingAdminService(String expectedMessage) {
@@ -213,6 +311,12 @@ public class AppViewIT extends ChromeBrowserTest {
 
     private void verifyCheckUser(String expectedMessage) {
         testComponent.$(TestBenchElement.class).id("checkUser").click();
+        verifyContent(expectedMessage);
+    }
+
+    private void verifyCheckUserFromVaadinRequest(String expectedMessage) {
+        testComponent.$(TestBenchElement.class).id("checkUserFromVaadinRequest")
+                .click();
         verifyContent(expectedMessage);
     }
 
