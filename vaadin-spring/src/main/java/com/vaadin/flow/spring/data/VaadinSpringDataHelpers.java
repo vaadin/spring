@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 Vaadin Ltd.
+ * Copyright 2000-2021 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -59,29 +59,24 @@ public interface VaadinSpringDataHelpers extends Serializable {
      * @return a {@link PageRequest} that can be passed for Spring Data based
      * back-end
      */
-    public static PageRequest pageRequestOfQuery(Query<?, ?> vaadinQuery) {
+    static PageRequest toSpringPageRequest(Query<?, ?> vaadinQuery) {
         Sort sort = VaadinSpringDataHelpers.toSpringDataSort(vaadinQuery);
         return PageRequest.of(vaadinQuery.getPage(), vaadinQuery.getPageSize(), sort);
     }
 
     /**
-     * Binds all items from a given Spring Data repositories.
+     * Binds all items from a given paging Spring Data repository to
+     * {@code Grid}. Usage example:
+     * <p>
+     * {@code grid.setItems(fromPagingRepository(repo));}
+     * <p>
      *
      * @param <T> the type of items to bind
-     * @param repo the repository where he results should be fetched
-     * @return the FetchCallback that makes the lazy binding to {@link Grid}.
+     * @param repo the repository where the results should be fetched from
+     * @return the FetchCallback that makes the lazy binding to {@code Grid}.
      */
-    public static <T> FetchCallback<T, Void> bindToRepository(PagingAndSortingRepository<T, ?> repo) {
-        return query -> {
-            return repo.findAll(
-                    PageRequest.of(
-                        query.getPage(), 
-                        query.getPageSize(), 
-                        VaadinSpringDataHelpers.toSpringDataSort(query)
-                    )
-            ).stream();
-        };
+    static <T> FetchCallback<T, Void> fromPagingRepository(PagingAndSortingRepository<T, ?> repo) {
+        return query -> repo.findAll(toSpringPageRequest(query)).stream();
     }
-
 
 }
