@@ -1,7 +1,7 @@
-import { LitElement, html} from 'lit';
-import { customElement, query, state } from 'lit-element';
-import {until} from 'lit-html/directives/until.js';
-import {repeat} from 'lit-html/directives/repeat.js';
+import { html } from 'lit';
+import { customElement, query, state } from 'lit/decorators';
+import { until } from 'lit/directives/until';
+import { repeat } from 'lit/directives/repeat';
 
 import '@vaadin/vaadin-form-layout';
 import '@vaadin/vaadin-checkbox';
@@ -29,7 +29,7 @@ import { field, Binder } from '@vaadin/form';
 
 import { View } from '../view';
 import ElementsModel from 'Frontend/generated/com/vaadin/flow/spring/fusionsecurity/fusionform/ElementsModel';
-import { ElementsEndpoint } from 'Frontend/generated/ElementsEndpoint';
+import { ElementsEndpoint } from 'Frontend/generated/endpoints';
 
 @customElement('vaadin-elements-view')
 export class VaadinElementsView extends View {
