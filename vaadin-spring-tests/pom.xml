@@ -62,11 +62,6 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-renderer-flow</artifactId>
-            <version>${vaadin.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-upload-flow</artifactId>
             <version>${vaadin.version}</version>
         </dependency>
