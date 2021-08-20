@@ -25,7 +25,8 @@ See other branches for other framework versions:
 * 15.0 for Vaadin 18
 * 16.0 for Vaadin 19
 * 17.0 for Vaadin 20 
-* master (currently 18.0) for upcoming major Vaadin versions
+* 18.0 for Vaadin 21 
+* master (currently 19.0) for upcoming major Vaadin versions
 
 Getting started
 ----
