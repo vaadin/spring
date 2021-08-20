@@ -44,7 +44,7 @@
 
         <!-- These are typically overridden with BOMs -->
         <vaadin.flow.version>9.0-SNAPSHOT</vaadin.flow.version>
-        <spring-boot.version>2.5.3</spring-boot.version>
+        <spring-boot.version>2.5.4</spring-boot.version>
 
         <!-- Additional manifest fields -->
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
