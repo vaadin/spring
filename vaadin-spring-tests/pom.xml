@@ -31,7 +31,7 @@
         <vaadin.version>22.0-SNAPSHOT</vaadin.version>
 
         <!-- Fusion component version -->
-        <component.version>21.0.0.beta2</component.version>
+        <component.version>${vaadin.version}</component.version>
     </properties>
 
     <dependencyManagement>
