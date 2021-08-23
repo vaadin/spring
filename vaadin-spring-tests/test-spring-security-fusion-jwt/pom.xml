@@ -65,26 +65,22 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-button-testbench</artifactId>
-            <version>${component.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-notification-testbench</artifactId>
-            <version>${component.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-text-field-testbench</artifactId>
-            <version>${component.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-login-testbench</artifactId>
-            <version>${component.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

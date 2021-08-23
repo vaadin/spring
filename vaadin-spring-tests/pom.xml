@@ -29,9 +29,6 @@
         </driver.binary.downloader.maven.plugin.version>
         <maven.war.plugin.version>3.1.0</maven.war.plugin.version>
         <vaadin.version>22.0-SNAPSHOT</vaadin.version>
-
-        <!-- Fusion component version -->
-        <component.version>${vaadin.version}</component.version>
     </properties>
 
     <dependencyManagement>
@@ -87,6 +84,11 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-notification-flow</artifactId>
+                <version>${vaadin.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-text-field-flow</artifactId>
                 <version>${vaadin.version}</version>
             </dependency>
             <dependency>
