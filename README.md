@@ -42,3 +42,4 @@ Execute `mvn clean install` in the root directory.
 Contributions
 ----
 The contributing docs can be found here: https://vaadin.com/docs-beta/latest/guide/contributing/overview/
+
