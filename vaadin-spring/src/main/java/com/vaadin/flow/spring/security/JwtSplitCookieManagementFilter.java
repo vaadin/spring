@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.fusionsecurityjwt.auth;
+package com.vaadin.flow.spring.security;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -15,6 +15,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class JwtSplitCookieManagementFilter implements Filter {
 
+    private JwtSplitCookieService jwtSplitCookieService;
+
+    public JwtSplitCookieManagementFilter(
+            JwtSplitCookieService jwtSplitCookieService) {
+        this.jwtSplitCookieService = jwtSplitCookieService;
+    }
+
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain) throws IOException, ServletException {
@@ -24,11 +31,11 @@ public class JwtSplitCookieManagementFilter implements Filter {
         if (authentication == null ||
                 authentication instanceof AnonymousAuthenticationToken) {
             // Token authentication failed — remove the cookies
-            JwtSplitCookieUtils
+            jwtSplitCookieService
                     .removeJwtSplitCookies((HttpServletRequest) request,
                             (HttpServletResponse) response);
         } else {
-            JwtSplitCookieUtils
+            jwtSplitCookieService
                     .setJwtSplitCookiesIfNecessary((HttpServletRequest) request,
                             (HttpServletResponse) response, authentication);
         }

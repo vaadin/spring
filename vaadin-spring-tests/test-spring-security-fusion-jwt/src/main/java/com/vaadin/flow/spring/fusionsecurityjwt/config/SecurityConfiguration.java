@@ -1,18 +1,10 @@
 package com.vaadin.flow.spring.fusionsecurityjwt.config;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
 import java.util.stream.Collectors;
 
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.OctetSequenceKey;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
-import com.nimbusds.jose.util.Base64URL;
-import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
-import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,17 +14,22 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
+
+import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
+import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
+import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
 
 @EnableWebSecurity
 @Order(10)
-public class SecurityConfiguration extends VaadinStatelessWebSecurityConfig {
+public class SecurityConfiguration extends VaadinWebSecurityConfigurerAdapter {
 
     public static String ROLE_USER = "user";
     public static String ROLE_ADMIN = "admin";
 
     @Autowired
     private UserInfoRepository userInfoRepository;
-    
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         // @formatter:off
@@ -47,19 +44,13 @@ public class SecurityConfiguration extends VaadinStatelessWebSecurityConfig {
             .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        setJwtSplitCookieAuthentication(http, "statelessapp", 3600,
-                JWSAlgorithm.HS256);
+        setJwtSplitCookieAuthentication(http,
+                new SecretKeySpec(Base64.getUrlDecoder().decode(
+                "I72kIcB1UrUQVHVUAzgweE+BLc0bF8mLv9SmrgKsQAk="),
+                        JwsAlgorithms.HS256),
+                "statelessapp");
         setLoginView(http, "/login");
         // @formatter:on
-    }
-
-    @Bean
-    JWKSource<SecurityContext> jwkSource() {
-        OctetSequenceKey key = new OctetSequenceKey.Builder(
-                Base64URL.from("I72kIcB1UrUQVHVUAzgweE+BLc0bF8mLv9SmrgKsQAk="))
-                .algorithm(JWSAlgorithm.HS256).build();
-        JWKSet jwkSet = new JWKSet(key);
-        return (jwkSelector, context) -> jwkSelector.select(jwkSet);
     }
 
     @Override

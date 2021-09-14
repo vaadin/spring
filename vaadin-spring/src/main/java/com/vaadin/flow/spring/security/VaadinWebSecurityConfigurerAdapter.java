@@ -15,9 +15,38 @@
  */
 package com.vaadin.flow.spring.security;
 
+import javax.crypto.SecretKey;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.config.annotation.ObjectPostProcessor;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationFilter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfAuthenticationStrategy;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.LazyCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.internal.AnnotationReader;
@@ -25,17 +54,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.server.HandlerHelper;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
  * Provides basic Vaadin security configuration for the project.
@@ -55,10 +73,10 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 &#64;EnableWebSecurity
 &#64;Configuration
 public class MySecurityConfigurerAdapter extends VaadinWebSecurityConfigurerAdapter {
-    
-} 
+
+}
  * </code>
- * 
+ *
  */
 public abstract class VaadinWebSecurityConfigurerAdapter
         extends WebSecurityConfigurerAdapter {
@@ -71,6 +89,8 @@ public abstract class VaadinWebSecurityConfigurerAdapter
 
     @Autowired
     private ViewAccessChecker viewAccessChecker;
+
+    private VaadinSavedRequestAwareAuthenticationSuccessHandler authenticationSuccessHandler;
 
     /**
      * The paths listed as "ignoring" in this method are handled without any
@@ -157,7 +177,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      * <p>
      * This is used when your application uses a Fusion based login view
      * available at the given path.
-     * 
+     *
      * @param http
      *            the http security from {@link #configure(HttpSecurity)}
      * @param fusionLoginViewPath
@@ -176,7 +196,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      * <p>
      * This is used when your application uses a Fusion based login view
      * available at the given path.
-     * 
+     *
      * @param http
      *            the http security from {@link #configure(HttpSecurity)}
      * @param fusionLoginViewPath
@@ -190,15 +210,14 @@ public abstract class VaadinWebSecurityConfigurerAdapter
             String logoutUrl) throws Exception {
         FormLoginConfigurer<HttpSecurity> formLogin = http.formLogin();
         formLogin.loginPage(fusionLoginViewPath).permitAll();
-        formLogin.successHandler(
-                new VaadinSavedRequestAwareAuthenticationSuccessHandler());
+        formLogin.successHandler(getAuthenticationSuccessHandler());
         http.logout().logoutSuccessUrl(logoutUrl);
         viewAccessChecker.setLoginView(fusionLoginViewPath);
     }
 
     /**
      * Sets up login for the application using the given Flow login view.
-     * 
+     *
      * @param http
      *            the http security from {@link #configure(HttpSecurity)}
      * @param flowLoginView
@@ -213,14 +232,14 @@ public abstract class VaadinWebSecurityConfigurerAdapter
 
     /**
      * Sets up login for the application using the given Flow login view.
-     * 
+     *
      * @param http
      *            the http security from {@link #configure(HttpSecurity)}
      * @param flowLoginView
      *            the login view to use
      * @param logoutUrl
      *            the URL to redirect the user to after logging out
-     * 
+     *
      * @throws Exception
      *             if something goes wrong
      */
@@ -244,11 +263,145 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         // Actually set it up
         FormLoginConfigurer<HttpSecurity> formLogin = http.formLogin();
         formLogin.loginPage(loginPath).permitAll();
-        formLogin.successHandler(
-                new VaadinSavedRequestAwareAuthenticationSuccessHandler());
+        formLogin.successHandler(getAuthenticationSuccessHandler());
         http.csrf().ignoringAntMatchers(loginPath);
         http.logout().logoutSuccessUrl(logoutUrl);
         viewAccessChecker.setLoginView(flowLoginView);
     }
 
+    /**
+     * Sets up stateless JWT authentication using cookies.
+     *
+     * @param http
+     *            the http security from {@link #configure(HttpSecurity)}
+     * @param secretKey
+     *            the secret key for encoding and decoding JWTs, must use a
+     *            {@link MacAlgorithm} algorithm name
+     * @param issuer
+     *            the issuer JWT claim
+     * @throws Exception
+     */
+    protected void setJwtSplitCookieAuthentication(HttpSecurity http,
+            SecretKey secretKey, String issuer) throws Exception {
+        setJwtSplitCookieAuthentication(http, secretKey, issuer, 3600L);
+    }
+
+    /**
+     * Sets up stateless JWT authentication using cookies.
+     *
+     * @param http
+     *            the http security from {@link #configure(HttpSecurity)}
+     * @param secretKey
+     *            the secret key for encoding and decoding JWTs, must use a
+     *            {@link MacAlgorithm} algorithm name
+     * @param issuer
+     *            the issuer JWT claim
+     * @param expiresIn
+     *            lifetime of the JWT and cookies, in seconds
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    protected void setJwtSplitCookieAuthentication(HttpSecurity http,
+            SecretKey secretKey, String issuer, long expiresIn)
+            throws Exception {
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
+
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter
+                .setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(secretKey)
+                .build();
+        jwtDecoder
+                .setJwtValidator(JwtValidators.createDefaultWithIssuer(issuer));
+
+        JwtSplitCookieService jwtSplitCookieService = new JwtSplitCookieService(
+                secretKey, issuer, expiresIn);
+
+        getAuthenticationSuccessHandler().setJwtSplitCookieService(jwtSplitCookieService);
+
+        // @formatter:off
+        http
+                .oauth2ResourceServer(oAuth2ResourceServer ->
+                        customizeOAuth2ResourceServer(oAuth2ResourceServer,
+                                jwtSplitCookieService.getBearerTokenResolver(),
+                                jwtDecoder, jwtAuthenticationConverter))
+                .addFilterAfter(
+                        new JwtSplitCookieManagementFilter(jwtSplitCookieService),
+                        SwitchUserFilter.class);
+        // @formatter:on
+
+        http.logout().addLogoutHandler(
+                (request, response, authentication) -> jwtSplitCookieService
+                        .removeJwtSplitCookies(request, response));
+
+        registerCsrfAuthenticationStrategy(http);
+    }
+
+    private VaadinSavedRequestAwareAuthenticationSuccessHandler getAuthenticationSuccessHandler() {
+        if (authenticationSuccessHandler == null) {
+            authenticationSuccessHandler = new VaadinSavedRequestAwareAuthenticationSuccessHandler();
+        }
+        return authenticationSuccessHandler;
+    }
+
+    private void registerCsrfAuthenticationStrategy(HttpSecurity http) {
+        CsrfConfigurer<HttpSecurity> csrf = http
+                .getConfigurer(CsrfConfigurer.class);
+        if (csrf != null) {
+            // Use cookie for storing CSRF token, as it does not require a
+            // session (double-submit cookie pattern)
+            CsrfTokenRepository csrfTokenRepository = new LazyCsrfTokenRepository(
+                    CookieCsrfTokenRepository.withHttpOnlyFalse());
+            CsrfAuthenticationStrategy csrfAuthenticationStrategy = new CsrfAuthenticationStrategy(
+                    csrfTokenRepository);
+            csrf.csrfTokenRepository(csrfTokenRepository)
+                    .sessionAuthenticationStrategy(
+                            (authentication, request, response) -> {
+                                if (!(authentication instanceof JwtAuthenticationToken)) {
+                                    csrfAuthenticationStrategy
+                                            .onAuthentication(authentication,
+                                                    request, response);
+                                }
+                            });
+        }
+    }
+
+    private void customizeOAuth2ResourceServer(
+            OAuth2ResourceServerConfigurer<HttpSecurity> oAuth2ResourceServer,
+            BearerTokenResolver bearerTokenResolver, JwtDecoder jwtDecoder,
+            JwtAuthenticationConverter jwtAuthenticationConverter) {
+        // OAuth2ResourceServerConfigurer configures a CSRF protection bypass
+        // when request contains bearer token, and does not provide a way to
+        // re-enable CSRF protection for such requests. However, having JWT in
+        // cookies requires keeping CSRF protection, so here is a workaround:
+        // set the cookie-based bearer token resolver directly on the
+        // BearerTokenAuthenticationFilter using a post processor.
+        oAuth2ResourceServer.bearerTokenResolver(request -> null);
+        oAuth2ResourceServer.withObjectPostProcessor(
+                new BearerTokenAuthentiationFilterPostProcessor(
+                        bearerTokenResolver));
+
+        oAuth2ResourceServer.jwt().decoder(jwtDecoder)
+                .jwtAuthenticationConverter(jwtAuthenticationConverter);
+    }
+
+    private static class BearerTokenAuthentiationFilterPostProcessor
+            implements ObjectPostProcessor<BearerTokenAuthenticationFilter> {
+        BearerTokenResolver bearerTokenResolver;
+
+        BearerTokenAuthentiationFilterPostProcessor(
+                BearerTokenResolver bearerTokenResolver) {
+            this.bearerTokenResolver = bearerTokenResolver;
+        }
+
+        @Override
+        public <F extends BearerTokenAuthenticationFilter> F postProcess(
+                F filter) {
+            filter.setBearerTokenResolver(bearerTokenResolver);
+            return filter;
+        }
+    }
 }

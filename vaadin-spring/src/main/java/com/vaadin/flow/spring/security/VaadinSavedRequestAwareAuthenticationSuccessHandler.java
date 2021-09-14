@@ -85,6 +85,11 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler
     private static final String SPRING_CSRF_TOKEN = "Spring-CSRF-token";
 
     /**
+     * Optional service to persist authentication in JWT cookies.
+     */
+    private JwtSplitCookieService jwtSplitCookieService;
+
+    /**
      * Redirect strategy used by
      * {@link VaadinSavedRequestAwareAuthenticationSuccessHandler}.
      */
@@ -158,6 +163,11 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler
                     determineTargetUrl(request, response));
         }
 
+        if (jwtSplitCookieService != null) {
+            jwtSplitCookieService.setJwtSplitCookiesIfNecessary(request,
+                    response, authentication);
+        }
+
         super.onAuthenticationSuccess(request, response, authentication);
     }
 
@@ -187,5 +197,9 @@ public class VaadinSavedRequestAwareAuthenticationSuccessHandler
     public void setRequestCache(RequestCache requestCache) {
         super.setRequestCache(requestCache);
         this.requestCache = requestCache;
+    }
+
+    void setJwtSplitCookieService(JwtSplitCookieService jwtSplitCookieService) {
+        this.jwtSplitCookieService = jwtSplitCookieService;
     }
 }
