@@ -1,0 +1,144 @@
+package com.vaadin.flow.spring.security;
+
+import javax.crypto.SecretKey;
+
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
+import org.springframework.security.authentication.AuthenticationTrustResolver;
+import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configurers.SecurityContextConfigurer;
+import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.LazyCsrfTokenRepository;
+
+public class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuilder<H>>
+        extends
+        AbstractHttpConfigurer<VaadinStatelessSecurityConfigurer<H>, H> {
+    private long expiresIn = 1800L;
+
+    private String issuer;
+
+    private SecretKeyConfigurer secretKeyConfigurer;
+
+    @Override
+    public void init(H http) {
+        JwtSecurityContextRepository jwtSecurityContextRepository = new JwtSecurityContextRepository();
+        SecurityContextConfigurer<H> securityContext = http.getConfigurer(
+                SecurityContextConfigurer.class);
+        if (securityContext != null) {
+            securityContext.securityContextRepository(
+                    jwtSecurityContextRepository);
+        } else {
+            http.setSharedObject(SecurityContextRepository.class,
+                    jwtSecurityContextRepository);
+        }
+    }
+
+    @Override
+    public void configure(H http) {
+        SecurityContextRepository securityContextRepository = http.getSharedObject(
+                SecurityContextRepository.class);
+
+        if (securityContextRepository instanceof JwtSecurityContextRepository) {
+            JwtSecurityContextRepository jwtSecurityContextRepository = (JwtSecurityContextRepository) securityContextRepository;
+
+            jwtSecurityContextRepository.setJwsAlgorithm(
+                    secretKeyConfigurer.getAlgorithm());
+            jwtSecurityContextRepository.setJwkSource(
+                    secretKeyConfigurer.getJWKSource());
+            jwtSecurityContextRepository.setIssuer(issuer);
+            jwtSecurityContextRepository.setExpiresIn(expiresIn);
+
+            AuthenticationTrustResolver trustResolver = http.getSharedObject(
+                    AuthenticationTrustResolver.class);
+            if (trustResolver == null) {
+                trustResolver = new AuthenticationTrustResolverImpl();
+            }
+            jwtSecurityContextRepository.setTrustResolver(trustResolver);
+        }
+
+        CsrfConfigurer<HttpSecurity> csrf = http.getConfigurer(
+                CsrfConfigurer.class);
+        if (csrf != null) {
+            // Use cookie for storing CSRF token, as it does not require a
+            // session (double-submit cookie pattern)
+            CsrfTokenRepository csrfTokenRepository = new LazyCsrfTokenRepository(
+                    CookieCsrfTokenRepository.withHttpOnlyFalse());
+            csrf.csrfTokenRepository(csrfTokenRepository);
+        }
+    }
+
+    public VaadinStatelessSecurityConfigurer<H> expiresIn(long expiresIn) {
+        this.expiresIn = expiresIn;
+        return this;
+    }
+
+    public VaadinStatelessSecurityConfigurer<H> issuer(String issuer) {
+        this.issuer = issuer;
+        return this;
+    }
+
+    public SecretKeyConfigurer withSecretKey() {
+        if (this.secretKeyConfigurer == null) {
+            this.secretKeyConfigurer = new SecretKeyConfigurer();
+        }
+        return this.secretKeyConfigurer;
+    }
+
+    public SecretKeyConfigurer withSecretKey(
+            Customizer<SecretKeyConfigurer> customizer) {
+        if (this.secretKeyConfigurer == null) {
+            this.secretKeyConfigurer = new SecretKeyConfigurer();
+        }
+        customizer.customize(secretKeyConfigurer);
+        return this.secretKeyConfigurer;
+    }
+
+    public class SecretKeyConfigurer {
+        private SecretKey secretKey;
+
+        private JwsAlgorithm jwsAlgorithm;
+
+        private SecretKeyConfigurer() {
+        }
+
+        public SecretKeyConfigurer secretKey(SecretKey secretKey) {
+            this.secretKey = secretKey;
+            if (this.jwsAlgorithm == null) {
+                this.jwsAlgorithm = MacAlgorithm.from(secretKey.getAlgorithm());
+            }
+            return this;
+        }
+
+        public SecretKeyConfigurer algorithm(MacAlgorithm algorithm) {
+            this.jwsAlgorithm = algorithm;
+            return this;
+        }
+
+        public VaadinStatelessSecurityConfigurer<H> and() {
+            return VaadinStatelessSecurityConfigurer.this;
+        }
+
+        JWKSource<SecurityContext> getJWKSource() {
+            OctetSequenceKey key = new OctetSequenceKey.Builder(
+                    secretKey).algorithm(getAlgorithm()).build();
+            JWKSet jwkSet = new JWKSet(key);
+            return (jwkSelector, context) -> jwkSelector.select(jwkSet);
+        }
+
+        JWSAlgorithm getAlgorithm() {
+            return JWSAlgorithm.parse(jwsAlgorithm.getName());
+        }
+    }
+}
