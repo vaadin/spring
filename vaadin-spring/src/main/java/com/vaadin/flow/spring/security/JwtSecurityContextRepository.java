@@ -37,18 +37,22 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
 
+/**
+ * A {@link SecurityContextRepository} implementation that stores the
+ * authentication using a signed JWT persisted in cookies.
+ */
 class JwtSecurityContextRepository implements SecurityContextRepository {
     private static final String ROLES_CLAIM = "roles";
     private static final String ROLE_AUTHORITY_PREFIX = "ROLE_";
     private final Log logger = LogFactory.getLog(this.getClass());
+    final private SerializedJwtSplitCookieRepository serializedJwtSplitCookieRepository = new SerializedJwtSplitCookieRepository();
+    final private JwtAuthenticationConverter jwtAuthenticationConverter;
     private String issuer;
     private long expiresIn = 1800L;
     private JWKSource<com.nimbusds.jose.proc.SecurityContext> jwkSource;
     private JWSAlgorithm jwsAlgorithm;
     private JwtDecoder jwtDecoder;
     private AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
-    final private SerializedJwtSplitCookieRepository serializedJwtSplitCookieRepository = new SerializedJwtSplitCookieRepository();
-    final private JwtAuthenticationConverter jwtAuthenticationConverter;
 
     JwtSecurityContextRepository() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
@@ -86,7 +90,6 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
         if (jwtDecoder != null) {
             return jwtDecoder;
         }
-
 
         DefaultJWTProcessor<com.nimbusds.jose.proc.SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
         jwtProcessor.setJWTClaimsSetVerifier((claimsSet, context) -> {
@@ -139,14 +142,21 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
         return signedJWT.serialize();
     }
 
+    private Jwt decodeJwt(HttpServletRequest request) {
+        String serializedJwt = serializedJwtSplitCookieRepository.loadSerializedJwt(request);
+        if (serializedJwt == null) {
+            return null;
+        }
+
+        return getJwtDecoder().decode(serializedJwt);
+    }
+
     @Override
     public SecurityContext loadContext(
             HttpRequestResponseHolder requestResponseHolder) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
-        String serializedJwt = serializedJwtSplitCookieRepository.loadSerializedJwt(
-                requestResponseHolder.getRequest());
-        Jwt jwt = getJwtDecoder().decode(serializedJwt);
+        Jwt jwt = decodeJwt(requestResponseHolder.getRequest());
         if (jwt != null) {
             Authentication authentication = jwtAuthenticationConverter.convert(
                     jwt);

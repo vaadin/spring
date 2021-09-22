@@ -6,6 +6,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.util.WebUtils;
 
+/**
+ * Persists the signed and serialized JWT using a pair of cookies:
+ * "jwt.headerAndPayload" (JS-readable), and "jwt.signature" (HTTP-only).
+ */
 class SerializedJwtSplitCookieRepository {
     public static final String JWT_HEADER_AND_PAYLOAD_COOKIE_NAME = "jwt.headerAndPayload";
     public static final String JWT_SIGNATURE_COOKIE_NAME = "jwt.signature";
@@ -15,10 +19,21 @@ class SerializedJwtSplitCookieRepository {
     SerializedJwtSplitCookieRepository() {
     }
 
+    /**
+     * Sets max-age limit for cookies.
+     *
+     * @param expiresIn max age (seconds), the default is 30 min
+     */
     void setExpiresIn(long expiresIn) {
         this.expiresIn = expiresIn;
     }
 
+    /**
+     * Reads the serialized JWT from the request cookies.
+     *
+     * @param request the request to read the token from
+     * @return serialized token
+     */
     String loadSerializedJwt(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
@@ -40,15 +55,29 @@ class SerializedJwtSplitCookieRepository {
         return jwtHeaderAndPayload.getValue() + "." + jwtSignature.getValue();
     }
 
-    void saveSerializedJwt(String jwt, HttpServletRequest request,
+    /**
+     * Saves the serialized JWT string using response cookies. If the serialized
+     * JWT is null, the cookies are removed.
+     *
+     * @param serializedJwt the serialized JWT
+     * @param request       the request
+     * @param response      the response to send the cookies
+     */
+    void saveSerializedJwt(String serializedJwt, HttpServletRequest request,
             HttpServletResponse response) {
-        if (jwt == null) {
+        if (serializedJwt == null) {
             this.removeJwtSplitCookies(request, response);
         } else {
-            this.setJwtSplitCookies(jwt, request, response);
+            this.setJwtSplitCookies(serializedJwt, request, response);
         }
     }
 
+    /**
+     * Checks the presence of JWT cookies in request.
+     *
+     * @param request request for checking
+     * @return true when both the JWT cookies are present
+     */
     boolean containsSerializedJwt(HttpServletRequest request) {
         Cookie jwtHeaderAndPayload = WebUtils.getCookie(request,
                 JWT_HEADER_AND_PAYLOAD_COOKIE_NAME);
@@ -57,9 +86,9 @@ class SerializedJwtSplitCookieRepository {
         return (jwtHeaderAndPayload != null) && (jwtSignature != null);
     }
 
-    private void setJwtSplitCookies(String jwt, HttpServletRequest request,
-            HttpServletResponse response) {
-        final String[] parts = jwt.split("\\.");
+    private void setJwtSplitCookies(String serializedJwt,
+            HttpServletRequest request, HttpServletResponse response) {
+        final String[] parts = serializedJwt.split("\\.");
         final String jwtHeaderAndPayload = parts[0] + "." + parts[1];
         final String jwtSignature = parts[2];
 
