@@ -5,6 +5,7 @@ import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
 import com.vaadin.testbench.TestBenchElement;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 
@@ -12,6 +13,31 @@ public abstract class AbstractIT extends ChromeBrowserTest {
 
     private static final String ROOT_PAGE_HEADER_TEXT = "Welcome to the Java Bank of Vaadin";
     private static final String ANOTHER_PUBLIC_PAGE_HEADER_TEXT = "Another public view for testing";
+    private static final int SERVER_PORT = 8888;
+
+    @Override
+    protected int getDeploymentPort() {
+        return SERVER_PORT;
+    }
+
+    @Override
+    protected String getRootURL() {
+        return super.getRootURL(); // + "/context";
+    }
+
+    @After
+    public void tearDown() {
+        if (getDriver() != null) {
+            checkForBrowserErrors();
+        }
+    }
+
+    private void checkForBrowserErrors() {
+        checkLogsForErrors(msg -> {
+            return msg.contains(
+                    "admin-only/secret.txt - Failed to load resource: the server responded with a status of 403");
+        });
+    }
 
     protected void open(String path) {
         open(path, getDriver());

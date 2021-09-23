@@ -13,39 +13,13 @@ import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.testbench.TestBenchElement;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class AppViewIT extends AbstractIT {
 
-    private static final int SERVER_PORT = 8888;
     private static final String USER_FULLNAME = "John the User";
     private static final String ADMIN_FULLNAME = "Emma the Admin";
-
-    @Override
-    protected int getDeploymentPort() {
-        return SERVER_PORT;
-    }
-
-    @Override
-    protected String getRootURL() {
-        return super.getRootURL(); // + "/context";
-    }
-
-    @After
-    public void tearDown() {
-        if (getDriver() != null) {
-            checkForBrowserErrors();
-        }
-    }
-
-    private void checkForBrowserErrors() {
-        checkLogsForErrors(msg -> {
-            return msg.contains(
-                    "admin-only/secret.txt - Failed to load resource: the server responded with a status of 403");
-        });
-    }
 
     private void logout() {
         if (!$(ButtonElement.class).attribute("id", "logout").exists()) {
