@@ -84,7 +84,7 @@ public abstract class AbstractIT extends ChromeBrowserTest {
     }
 
     protected void assertPrivatePageShown(String fullName) {
-        assertPathShown("protected");
+        assertPathShown("private");
         waitUntil(driver -> $("span").attribute("id", "balanceText").exists());
         String balance = $("span").id("balanceText").getText();
         Assert.assertTrue(balance.startsWith(
