@@ -28,6 +28,7 @@ import org.springframework.security.config.annotation.web.configurers.Expression
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -191,7 +192,8 @@ public abstract class VaadinWebSecurityConfigurerAdapter
             String logoutUrl) throws Exception {
         FormLoginConfigurer<HttpSecurity> formLogin = http.formLogin();
         formLogin.loginPage(fusionLoginViewPath).permitAll();
-        formLogin.successHandler(new VaadinSavedRequestAwareAuthenticationSuccessHandler());
+        formLogin.successHandler(
+                getVaadinSavedRequestAwareAuthenticationSuccessHandler(http));
         http.logout().logoutSuccessUrl(logoutUrl);
         viewAccessChecker.setLoginView(fusionLoginViewPath);
     }
@@ -244,7 +246,8 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         // Actually set it up
         FormLoginConfigurer<HttpSecurity> formLogin = http.formLogin();
         formLogin.loginPage(loginPath).permitAll();
-        formLogin.successHandler(new VaadinSavedRequestAwareAuthenticationSuccessHandler());
+        formLogin.successHandler(
+                getVaadinSavedRequestAwareAuthenticationSuccessHandler(http));
         http.csrf().ignoringAntMatchers(loginPath);
         http.logout().logoutSuccessUrl(logoutUrl);
         viewAccessChecker.setLoginView(flowLoginView);
@@ -283,7 +286,6 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      * @throws Exception
      *             if something goes wrong
      */
-    @SuppressWarnings("unchecked")
     protected void setJwtSplitCookieAuthentication(HttpSecurity http,
             SecretKey secretKey, String issuer, long expiresIn)
             throws Exception {
@@ -292,5 +294,16 @@ public abstract class VaadinWebSecurityConfigurerAdapter
 
         vaadinStatelessSecurityConfigurer.withSecretKey().secretKey(secretKey)
                 .and().issuer(issuer).expiresIn(expiresIn);
+    }
+
+    private VaadinSavedRequestAwareAuthenticationSuccessHandler getVaadinSavedRequestAwareAuthenticationSuccessHandler(
+            HttpSecurity http) {
+        VaadinSavedRequestAwareAuthenticationSuccessHandler vaadinSavedRequestAwareAuthenticationSuccessHandler = new VaadinSavedRequestAwareAuthenticationSuccessHandler();
+        RequestCache requestCache = http.getSharedObject(RequestCache.class);
+        if (requestCache != null) {
+            vaadinSavedRequestAwareAuthenticationSuccessHandler.setRequestCache(
+                    requestCache);
+        }
+        return vaadinSavedRequestAwareAuthenticationSuccessHandler;
     }
 }

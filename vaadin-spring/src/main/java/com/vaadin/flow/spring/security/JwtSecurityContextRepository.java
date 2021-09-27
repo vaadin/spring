@@ -35,6 +35,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
+import org.springframework.security.web.context.SaveContextOnUpdateOrErrorResponseWrapper;
 import org.springframework.security.web.context.SecurityContextRepository;
 
 /**
@@ -143,7 +144,8 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
     }
 
     private Jwt decodeJwt(HttpServletRequest request) {
-        String serializedJwt = serializedJwtSplitCookieRepository.loadSerializedJwt(request);
+        String serializedJwt = serializedJwtSplitCookieRepository.loadSerializedJwt(
+                request);
         if (serializedJwt == null) {
             return null;
         }
@@ -156,13 +158,16 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
             HttpRequestResponseHolder requestResponseHolder) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
-        Jwt jwt = decodeJwt(requestResponseHolder.getRequest());
+        HttpServletRequest request = requestResponseHolder.getRequest();
+        Jwt jwt = decodeJwt(request);
         if (jwt != null) {
             Authentication authentication = jwtAuthenticationConverter.convert(
                     jwt);
             context.setAuthentication(authentication);
         }
 
+        requestResponseHolder.setResponse(new UpdateJwtResponseWrapper(request,
+                requestResponseHolder.getResponse()));
         return context;
     }
 
@@ -185,5 +190,22 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
     public boolean containsContext(HttpServletRequest request) {
         return serializedJwtSplitCookieRepository.containsSerializedJwt(
                 request);
+    }
+
+    private final class UpdateJwtResponseWrapper
+            extends SaveContextOnUpdateOrErrorResponseWrapper {
+        private final HttpServletRequest request;
+
+        private UpdateJwtResponseWrapper(HttpServletRequest request,
+                HttpServletResponse response) {
+            super(response, true);
+            this.request = request;
+        }
+
+        @Override
+        protected void saveContext(SecurityContext context) {
+            JwtSecurityContextRepository.this.saveContext(context, this.request,
+                    this);
+        }
     }
 }

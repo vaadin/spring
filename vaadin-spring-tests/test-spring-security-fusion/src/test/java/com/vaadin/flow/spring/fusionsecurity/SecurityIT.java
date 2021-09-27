@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class SecurityIT extends ChromeBrowserTest {
 
@@ -36,12 +37,18 @@ public class SecurityIT extends ChromeBrowserTest {
     private void checkForBrowserErrors() {
         checkLogsForErrors(msg -> {
             return msg.contains(
-                    "admin-only/secret.txt - Failed to load resource: the server responded with a status of 403");
+                    "admin-only/secret.txt - Failed to load resource: the " +
+                            "server responded with a status of 403") ||
+                    msg.contains("webpack-internal://");
         });
     }
 
-    private void logout() {
-        if (!$(ButtonElement.class).attribute("id", "logout").exists()) {
+    protected void logout() {
+        ElementQuery<TestBenchElement> mainViewQuery = $("*").attribute("id",
+                "main-view");
+        if (!mainViewQuery.exists() ||
+                mainViewQuery.get(0).$(ButtonElement.class)
+                        .attribute("id", "logout").exists()) {
             open("");
             assertRootPageShown();
         }
@@ -105,13 +112,6 @@ public class SecurityIT extends ChromeBrowserTest {
     public void navigate_to_private_view_prevented() {
         open("");
         navigateTo("private", false);
-        assertLoginViewShown();
-    }
-
-    @Test
-    public void navigate_to_admin_view_prevented() {
-        open("");
-        navigateTo("admin", false);
         assertLoginViewShown();
     }
 
@@ -274,11 +274,11 @@ public class SecurityIT extends ChromeBrowserTest {
                 .equals(getRootURL() + "/" + path));
     }
 
-    private void loginUser() {
+    protected void loginUser() {
         login("john", "john");
     }
 
-    private void loginAdmin() {
+    protected void loginAdmin() {
         login("emma", "emma");
     }
 
@@ -307,7 +307,7 @@ public class SecurityIT extends ChromeBrowserTest {
         Assert.assertTrue(pageSource.contains(contents));
     }
 
-    private List<MenuItem> getMenuItems() {
+    protected List<MenuItem> getMenuItems() {
         List<TestBenchElement> anchors = getMainView().$("vaadin-tabs").first()
                 .$("a").all();
 
