@@ -96,14 +96,14 @@ class SerializedJwtSplitCookieRepository {
                 jwtHeaderAndPayload);
         headerAndPayload.setHttpOnly(false);
         headerAndPayload.setSecure(request.isSecure());
-        headerAndPayload.setPath(request.getContextPath() + "/");
+        headerAndPayload.setPath(getRequestContextPath(request));
         headerAndPayload.setMaxAge((int) expiresIn - 1);
         response.addCookie(headerAndPayload);
 
         Cookie signature = new Cookie(JWT_SIGNATURE_COOKIE_NAME, jwtSignature);
         signature.setHttpOnly(true);
         signature.setSecure(request.isSecure());
-        signature.setPath(request.getContextPath() + "/");
+        signature.setPath(getRequestContextPath(request));
         signature.setMaxAge((int) expiresIn - 1);
         response.addCookie(signature);
     }
@@ -112,17 +112,22 @@ class SerializedJwtSplitCookieRepository {
             HttpServletResponse response) {
         Cookie jwtHeaderAndPayloadRemove = new Cookie(
                 JWT_HEADER_AND_PAYLOAD_COOKIE_NAME, null);
-        jwtHeaderAndPayloadRemove.setPath(request.getContextPath() + "/");
+        jwtHeaderAndPayloadRemove.setPath(getRequestContextPath(request));
         jwtHeaderAndPayloadRemove.setMaxAge(0);
         jwtHeaderAndPayloadRemove.setSecure(request.isSecure());
         jwtHeaderAndPayloadRemove.setHttpOnly(false);
         response.addCookie(jwtHeaderAndPayloadRemove);
 
         Cookie jwtSignatureRemove = new Cookie(JWT_SIGNATURE_COOKIE_NAME, null);
-        jwtSignatureRemove.setPath(request.getContextPath() + "/");
+        jwtSignatureRemove.setPath(getRequestContextPath(request));
         jwtSignatureRemove.setMaxAge(0);
         jwtSignatureRemove.setSecure(request.isSecure());
         jwtSignatureRemove.setHttpOnly(true);
         response.addCookie(jwtSignatureRemove);
+    }
+
+    private String getRequestContextPath(HttpServletRequest request) {
+        final String contextPath = request.getContextPath();
+        return contextPath.equals("") ? "/" : contextPath;
     }
 }
