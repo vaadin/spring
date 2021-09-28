@@ -89,6 +89,7 @@ public class SpringClassesSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.spring\\.scopes\\.AbstractScope",
                 "com\\.vaadin\\.flow\\.spring\\.scopes\\.VaadinUIScope",
                 "com\\.vaadin\\.flow\\.spring\\.security\\.JwtSecurityContextRepository",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.JwtSecurityContextRepository\\$UpdateJwtResponseWrapper",
                 "com\\.vaadin\\.flow\\.spring\\.security\\.SerializedJwtSplitCookieRepository",
                 "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinAwareSecurityContextHolderStrategy",
                 "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinWebSecurityConfigurerAdapter",
