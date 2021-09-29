@@ -89,7 +89,7 @@ public class VaadinDefaultRequestCache implements RequestCache {
         return referer != null && referer.endsWith("sw.js");
     }
 
-    public void setDelegateRequestCache(RequestCache delegateRequestCache) {
+    void setDelegateRequestCache(RequestCache delegateRequestCache) {
         this.delegateRequestCache = delegateRequestCache;
     }
 }
