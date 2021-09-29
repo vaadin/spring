@@ -26,8 +26,8 @@ import org.springframework.web.util.WebUtils;
  * "jwt.headerAndPayload" (JS-readable), and "jwt.signature" (HTTP-only).
  */
 class SerializedJwtSplitCookieRepository {
-    public static final String JWT_HEADER_AND_PAYLOAD_COOKIE_NAME = "jwt.headerAndPayload";
-    public static final String JWT_SIGNATURE_COOKIE_NAME = "jwt.signature";
+    private static final String JWT_HEADER_AND_PAYLOAD_COOKIE_NAME = "jwt.headerAndPayload";
+    private static final String JWT_SIGNATURE_COOKIE_NAME = "jwt.signature";
 
     private long expiresIn = 1800L;
 
