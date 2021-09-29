@@ -266,9 +266,9 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      * @throws Exception
      *             if something goes wrong
      */
-    protected void setJwtSplitCookieAuthentication(HttpSecurity http,
+    protected void setStatelessAuthentication(HttpSecurity http,
             SecretKey secretKey, String issuer) throws Exception {
-        setJwtSplitCookieAuthentication(http, secretKey, issuer, 3600L);
+        setStatelessAuthentication(http, secretKey, issuer, 1800L);
     }
 
     /**
@@ -286,7 +286,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      * @throws Exception
      *             if something goes wrong
      */
-    protected void setJwtSplitCookieAuthentication(HttpSecurity http,
+    protected void setStatelessAuthentication(HttpSecurity http,
             SecretKey secretKey, String issuer, long expiresIn)
             throws Exception {
         VaadinStatelessSecurityConfigurer<HttpSecurity> vaadinStatelessSecurityConfigurer = new VaadinStatelessSecurityConfigurer<>();
