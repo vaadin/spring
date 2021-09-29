@@ -116,6 +116,13 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     @Test
+    public void navigate_to_admin_view_prevented() {
+        open("");
+        navigateTo("admin", false);
+        assertLoginViewShown();
+    }
+
+    @Test
     public void redirect_to_private_view_after_login() {
         open("private");
         assertPathShown("login");
