@@ -47,7 +47,7 @@ public class SecurityIT extends ChromeBrowserTest {
         ElementQuery<TestBenchElement> mainViewQuery = $("*").attribute("id",
                 "main-view");
         if (!mainViewQuery.exists() ||
-                mainViewQuery.get(0).$(ButtonElement.class)
+                !mainViewQuery.get(0).$(ButtonElement.class)
                         .attribute("id", "logout").exists()) {
             open("");
             assertRootPageShown();
