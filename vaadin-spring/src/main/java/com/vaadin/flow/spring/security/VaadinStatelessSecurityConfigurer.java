@@ -38,7 +38,7 @@ import org.springframework.security.web.csrf.LazyCsrfTokenRepository;
 import org.springframework.security.web.savedrequest.CookieRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 
-public class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuilder<H>>
+class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuilder<H>>
         extends
         AbstractHttpConfigurer<VaadinStatelessSecurityConfigurer<H>, H> {
     private long expiresIn = 1800L;
