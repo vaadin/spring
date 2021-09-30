@@ -61,8 +61,8 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
     private static final String ROLES_CLAIM = "roles";
     private static final String ROLE_AUTHORITY_PREFIX = "ROLE_";
     private final Log logger = LogFactory.getLog(this.getClass());
-    final private SerializedJwtSplitCookieRepository serializedJwtSplitCookieRepository = new SerializedJwtSplitCookieRepository();
-    final private JwtAuthenticationConverter jwtAuthenticationConverter;
+    private final SerializedJwtSplitCookieRepository serializedJwtSplitCookieRepository = new SerializedJwtSplitCookieRepository();
+    private final JwtAuthenticationConverter jwtAuthenticationConverter;
     private String issuer;
     private long expiresIn = 1800L;
     private JWKSource<com.nimbusds.jose.proc.SecurityContext> jwkSource;
@@ -109,21 +109,21 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
 
         DefaultJWTProcessor<com.nimbusds.jose.proc.SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
         jwtProcessor.setJWTClaimsSetVerifier((claimsSet, context) -> {
+            // No-op, Spring Security’s NimbusJwtDecoder uses its own validator
         });
 
-        JWSKeySelector<com.nimbusds.jose.proc.SecurityContext> jwsKeySelector = new JWSVerificationKeySelector<com.nimbusds.jose.proc.SecurityContext>(
+        JWSKeySelector<com.nimbusds.jose.proc.SecurityContext> jwsKeySelector = new JWSVerificationKeySelector<>(
                 jwsAlgorithm, jwkSource);
         jwtProcessor.setJWSKeySelector(jwsKeySelector);
-        NimbusJwtDecoder jwtDecoder = new NimbusJwtDecoder(jwtProcessor);
-        jwtDecoder.setJwtValidator(
+        NimbusJwtDecoder nimbusJwtDecoder = new NimbusJwtDecoder(jwtProcessor);
+        nimbusJwtDecoder.setJwtValidator(
                 issuer != null ? JwtValidators.createDefaultWithIssuer(issuer)
                         : JwtValidators.createDefault());
-        this.jwtDecoder = jwtDecoder;
+        this.jwtDecoder = nimbusJwtDecoder;
         return jwtDecoder;
     }
 
-    private String encodeJwt(HttpServletRequest request,
-            HttpServletResponse response, Authentication authentication)
+    private String encodeJwt(Authentication authentication)
             throws JOSEException {
         if (authentication == null ||
                 trustResolver.isAnonymous(authentication)) {
@@ -191,8 +191,7 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
             HttpServletResponse response) {
         String serializedJwt;
         try {
-            serializedJwt = encodeJwt(request, response,
-                    context.getAuthentication());
+            serializedJwt = encodeJwt(context.getAuthentication());
         } catch (JOSEException e) {
             logger.warn("Cannot serialize SecurityContext as JWT", e);
             serializedJwt = null;

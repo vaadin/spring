@@ -143,6 +143,6 @@ class SerializedJwtSplitCookieRepository {
 
     private String getRequestContextPath(HttpServletRequest request) {
         final String contextPath = request.getContextPath();
-        return contextPath.equals("") ? "/" : contextPath;
+        return "".equals(contextPath) ? "/" : contextPath;
     }
 }
