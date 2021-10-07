@@ -32,7 +32,8 @@ import com.vaadin.flow.server.VaadinServlet;
  * @author Vaadin Ltd
  *
  */
-public class ForwardingRequestWrapper extends HttpServletRequestWrapper {
+public class ForwardingRequestWrapper 
+    extends HttpServletRequestWrapper {
 
     private UrlPathHelper urlPathHelper = new UrlPathHelper();
 
