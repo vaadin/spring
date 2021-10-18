@@ -290,9 +290,8 @@ public class VaadinServletContextInitializer
                             "Found {} route classes. Here is the list: {}",
                             routeClasses.size(), routeClasses);
 
-                    Set<Class<? extends Component>> navigationTargets =
-                            validateRouteClasses(vaadinServletContext,
-                                    routeClasses.stream());
+                    Set<Class<? extends Component>> navigationTargets = validateRouteClasses(
+                            vaadinServletContext, routeClasses.stream());
 
                     getLogger().debug(
                             "There are {} navigation targets after filtering route classes: {}",
@@ -303,9 +302,8 @@ public class VaadinServletContextInitializer
                     routeConfiguration
                             .update(() -> setAnnotatedRoutes(routeConfiguration,
                                     navigationTargets));
-                    registry.setPwaConfigurationClass(
-                            validatePwaClass(vaadinServletContext,
-                                    routeClasses.stream()));
+                    registry.setPwaConfigurationClass(validatePwaClass(
+                            vaadinServletContext, routeClasses.stream()));
                 } catch (InvalidRouteConfigurationException e) {
                     throw new IllegalStateException(e);
                 }
