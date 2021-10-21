@@ -51,45 +51,14 @@ class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuilder<H>>
     @SuppressWarnings("unchecked")
     public void init(H http) {
         JwtSecurityContextRepository jwtSecurityContextRepository = new JwtSecurityContextRepository();
-        SecurityContextConfigurer<H> securityContext = http.getConfigurer(
-                SecurityContextConfigurer.class);
+        SecurityContextConfigurer<H> securityContext = http
+                .getConfigurer(SecurityContextConfigurer.class);
         if (securityContext != null) {
-            securityContext.securityContextRepository(
-                    jwtSecurityContextRepository);
+            securityContext
+                    .securityContextRepository(jwtSecurityContextRepository);
         } else {
             http.setSharedObject(SecurityContextRepository.class,
                     jwtSecurityContextRepository);
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void configure(H http) {
-        SecurityContextRepository securityContextRepository = http.getSharedObject(
-                SecurityContextRepository.class);
-
-        if (securityContextRepository instanceof JwtSecurityContextRepository) {
-            JwtSecurityContextRepository jwtSecurityContextRepository = (JwtSecurityContextRepository) securityContextRepository;
-
-            jwtSecurityContextRepository.setJwsAlgorithm(
-                    secretKeyConfigurer.getAlgorithm());
-            jwtSecurityContextRepository.setJwkSource(
-                    secretKeyConfigurer.getJWKSource());
-            jwtSecurityContextRepository.setIssuer(issuer);
-            jwtSecurityContextRepository.setExpiresIn(expiresIn);
-
-            AuthenticationTrustResolver trustResolver = http.getSharedObject(
-                    AuthenticationTrustResolver.class);
-            if (trustResolver == null) {
-                trustResolver = new AuthenticationTrustResolverImpl();
-            }
-            jwtSecurityContextRepository.setTrustResolver(trustResolver);
-        }
-
-        RequestCache requestCache = http.getSharedObject(RequestCache.class);
-        if (requestCache instanceof VaadinDefaultRequestCache) {
-            ((VaadinDefaultRequestCache) requestCache).setDelegateRequestCache(
-                    new CookieRequestCache());
         }
 
         CsrfConfigurer<H> csrf = http.getConfigurer(CsrfConfigurer.class);
@@ -99,6 +68,37 @@ class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuilder<H>>
             CsrfTokenRepository csrfTokenRepository = new LazyCsrfTokenRepository(
                     CookieCsrfTokenRepository.withHttpOnlyFalse());
             csrf.csrfTokenRepository(csrfTokenRepository);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void configure(H http) {
+        SecurityContextRepository securityContextRepository = http
+                .getSharedObject(SecurityContextRepository.class);
+
+        if (securityContextRepository instanceof JwtSecurityContextRepository) {
+            JwtSecurityContextRepository jwtSecurityContextRepository = (JwtSecurityContextRepository) securityContextRepository;
+
+            jwtSecurityContextRepository
+                    .setJwsAlgorithm(secretKeyConfigurer.getAlgorithm());
+            jwtSecurityContextRepository
+                    .setJwkSource(secretKeyConfigurer.getJWKSource());
+            jwtSecurityContextRepository.setIssuer(issuer);
+            jwtSecurityContextRepository.setExpiresIn(expiresIn);
+
+            AuthenticationTrustResolver trustResolver = http
+                    .getSharedObject(AuthenticationTrustResolver.class);
+            if (trustResolver == null) {
+                trustResolver = new AuthenticationTrustResolverImpl();
+            }
+            jwtSecurityContextRepository.setTrustResolver(trustResolver);
+        }
+
+        RequestCache requestCache = http.getSharedObject(RequestCache.class);
+        if (requestCache instanceof VaadinDefaultRequestCache) {
+            ((VaadinDefaultRequestCache) requestCache)
+                    .setDelegateRequestCache(new CookieRequestCache());
         }
     }
 
@@ -154,8 +154,8 @@ class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuilder<H>>
         }
 
         JWKSource<SecurityContext> getJWKSource() {
-            OctetSequenceKey key = new OctetSequenceKey.Builder(
-                    secretKey).algorithm(getAlgorithm()).build();
+            OctetSequenceKey key = new OctetSequenceKey.Builder(secretKey)
+                    .algorithm(getAlgorithm()).build();
             JWKSet jwkSet = new JWKSet(key);
             return (jwkSelector, context) -> jwkSelector.select(jwkSet);
         }

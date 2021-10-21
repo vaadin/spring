@@ -270,9 +270,10 @@ public class VaadinServletContextInitializer
         @SuppressWarnings("unchecked")
         @Override
         public void failFastContextInitialized(ServletContextEvent event) {
+            final VaadinServletContext vaadinServletContext = new VaadinServletContext(
+                    event.getServletContext());
             ApplicationRouteRegistry registry = ApplicationRouteRegistry
-                    .getInstance(new VaadinServletContext(
-                            event.getServletContext()));
+                    .getInstance(vaadinServletContext);
 
             getLogger().debug(
                     "Servlet Context initialized. Running route discovering....");
@@ -290,7 +291,7 @@ public class VaadinServletContextInitializer
                             routeClasses.size(), routeClasses);
 
                     Set<Class<? extends Component>> navigationTargets = validateRouteClasses(
-                            routeClasses.stream());
+                            vaadinServletContext, routeClasses.stream());
 
                     getLogger().debug(
                             "There are {} navigation targets after filtering route classes: {}",
@@ -301,8 +302,8 @@ public class VaadinServletContextInitializer
                     routeConfiguration
                             .update(() -> setAnnotatedRoutes(routeConfiguration,
                                     navigationTargets));
-                    registry.setPwaConfigurationClass(
-                            validatePwaClass(routeClasses.stream()));
+                    registry.setPwaConfigurationClass(validatePwaClass(
+                            vaadinServletContext, routeClasses.stream()));
                 } catch (InvalidRouteConfigurationException e) {
                     throw new IllegalStateException(e);
                 }
@@ -413,8 +414,8 @@ public class VaadinServletContextInitializer
             ApplicationConfiguration config = ApplicationConfiguration
                     .get(new VaadinServletContext(event.getServletContext()));
 
-            if (config == null || config.isProductionMode() || !config
-                    .enableDevServer()) {
+            if (config == null || config.isProductionMode()
+                    || !config.enableDevServer()) {
                 return;
             }
 
@@ -427,9 +428,6 @@ public class VaadinServletContextInitializer
                                 + "setting vaadin.enableDevServer=false (and "
                                 + "run the build-frontend maven goal) or "
                                 + "include the vaadin-dev-server dependency");
-            }
-            if (isDevModeAlreadyStarted(event.getServletContext())) {
-                return;
             }
 
             Set<String> basePackages;
@@ -490,21 +488,6 @@ public class VaadinServletContextInitializer
             return customScanOnly != null && !customScanOnly.isEmpty();
         }
 
-        private boolean isDevModeAlreadyStarted(ServletContext servletContext) {
-            if (devModeHandlerManager != null) {
-                VaadinServletContext vaadinContext = new VaadinServletContext(
-                        servletContext);
-                if (devModeHandlerManager
-                        .isDevModeAlreadyStarted(vaadinContext)) {
-                    if (getLogger().isDebugEnabled()) {
-                        getLogger().debug(
-                                "Skipped DevModeHandler initialization as it has been already initialized");
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 
     private class WebComponentServletContextListener
