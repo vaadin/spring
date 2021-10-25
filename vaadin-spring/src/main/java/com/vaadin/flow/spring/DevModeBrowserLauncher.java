@@ -29,11 +29,15 @@ public class DevModeBrowserLauncher implements SpringApplicationRunListener {
 
     @Override
     public void running(ConfigurableApplicationContext context) {
-        VaadinConfigurationProperties properties = context
-                .getBean(VaadinConfigurationProperties.class);
+        try {
+            VaadinConfigurationProperties properties = context
+                    .getBean(VaadinConfigurationProperties.class);
 
-        if (properties.isLaunchBrowser()) {
-            launchBrowserInDevelopmentMode(context);
+            if (properties.isLaunchBrowser()) {
+                launchBrowserInDevelopmentMode(context);
+            }
+        } catch (Exception e) {
+            getLogger().debug("Failed to launch browser", e);
         }
     }
 
