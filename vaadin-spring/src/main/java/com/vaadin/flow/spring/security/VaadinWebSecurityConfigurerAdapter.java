@@ -16,12 +16,18 @@
 package com.vaadin.flow.spring.security;
 
 import javax.crypto.SecretKey;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -29,8 +35,13 @@ import org.springframework.security.config.annotation.web.configurers.Expression
 import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.security.web.access.DelegatingAccessDeniedHandler;
+import org.springframework.security.web.access.RequestMatcherDelegatingAccessDeniedHandler;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.AnyRequestMatcher;
@@ -97,7 +108,11 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         SecurityContextHolder.setStrategyName(
                 VaadinAwareSecurityContextHolderStrategy.class.getName());
 
+        // Respond with 401 Unauthorized HTTP status code for unauthorized
+        // requests for protected Fusion endpoints, so that the response could
+        // be handled on the client side using e.g. `InvalidSessionMiddleware`.
         http.exceptionHandling()
+                .accessDeniedHandler(createAccessDeniedHandler())
                 .defaultAuthenticationEntryPointFor(
                         new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
                         requestUtil::isEndpointRequest);
@@ -318,5 +333,33 @@ public abstract class VaadinWebSecurityConfigurerAdapter
                     .setRequestCache(requestCache);
         }
         return vaadinSavedRequestAwareAuthenticationSuccessHandler;
+    }
+
+    private AccessDeniedHandler createAccessDeniedHandler() {
+        final AccessDeniedHandler defaultHandler = new AccessDeniedHandlerImpl();
+
+        final AccessDeniedHandler http401UnauthorizedHandler = new Http401UnauthorizedAccessDeniedHandler();
+
+        final LinkedHashMap<Class<? extends AccessDeniedException>, AccessDeniedHandler> exceptionHandlers = new LinkedHashMap<>();
+        exceptionHandlers.put(CsrfException.class, http401UnauthorizedHandler);
+
+        final LinkedHashMap<RequestMatcher, AccessDeniedHandler> matcherHandlers = new LinkedHashMap<>();
+        matcherHandlers.put(requestUtil::isEndpointRequest,
+                new DelegatingAccessDeniedHandler(exceptionHandlers,
+                        new AccessDeniedHandlerImpl()));
+
+        return new RequestMatcherDelegatingAccessDeniedHandler(matcherHandlers,
+                defaultHandler);
+    }
+
+    private static class Http401UnauthorizedAccessDeniedHandler
+            implements AccessDeniedHandler {
+        @Override
+        public void handle(HttpServletRequest request,
+                HttpServletResponse response,
+                AccessDeniedException accessDeniedException)
+                throws IOException, ServletException {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        }
     }
 }

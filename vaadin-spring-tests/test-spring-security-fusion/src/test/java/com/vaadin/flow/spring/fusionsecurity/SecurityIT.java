@@ -3,10 +3,14 @@ package com.vaadin.flow.spring.fusionsecurity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
@@ -37,8 +41,13 @@ public class SecurityIT extends ChromeBrowserTest {
     private void checkForBrowserErrors() {
         checkLogsForErrors(msg -> {
             return msg.contains(
-                    "admin-only/secret.txt - Failed to load resource: the "
+                    "/admin-only/secret.txt - Failed to load resource: the "
                             + "server responded with a status of 403")
+                    || msg.contains("/connect/") && msg.contains("Failed to "
+                            + "load resource: the server responded with "
+                            + "a status of 401")
+                    || msg.contains("expected \"200 OK\" response, but got 401")
+                    || msg.contains(" Event")
                     || msg.contains("webpack-internal://");
         });
     }
@@ -233,6 +242,22 @@ public class SecurityIT extends ChromeBrowserTest {
                 shouldBeTextFile.contains("Public document for all users"));
     }
 
+    @Test
+    public void reload_when_anonymous_session_expires() {
+        open("");
+        simulateNewServer();
+        assertPublicEndpointReloadsPage();
+    }
+
+    @Test
+    public void reload_when_user_session_expires() {
+        open("login");
+        loginUser();
+        simulateNewServer();
+        navigateTo("private", false);
+        assertLoginViewShown();
+    }
+
     protected void navigateTo(String path) {
         navigateTo(path, true);
     }
@@ -248,7 +273,7 @@ public class SecurityIT extends ChromeBrowserTest {
         return waitUntil(driver -> $("*").id("main-view"));
     }
 
-    private void assertLoginViewShown() {
+    protected void assertLoginViewShown() {
         assertPathShown("login");
         waitUntil(driver -> $(LoginOverlayElement.class).exists());
     }
@@ -329,4 +354,53 @@ public class SecurityIT extends ChromeBrowserTest {
         }).collect(Collectors.toList());
     }
 
+    protected void simulateNewServer() {
+        TestBenchElement mainView = waitUntil(driver -> $("main-view").get(0));
+        callAsyncMethod(mainView, "invalidateSessionIfPresent");
+    }
+
+    protected void assertPublicEndpointReloadsPage() {
+        TestBenchElement publicView = waitUntil(
+                driver -> $("public-view").get(0));
+        String timeBefore = publicView.findElement(By.id("time")).getText();
+        Assert.assertNotNull(timeBefore);
+        publicView.callFunction("updateTime");
+        publicView = waitUntil(driver -> $("public-view").get(0));
+        String timeAfter = publicView.findElement(By.id("time")).getText();
+        Assert.assertNotNull(timeAfter);
+        Assert.assertNotEquals(timeAfter, timeBefore);
+    }
+
+    protected void assertPublicEndpointWorks() {
+        TestBenchElement publicView = waitUntil(
+                driver -> $("public-view").get(0));
+        String timeBefore = publicView.findElement(By.id("time")).getText();
+        Assert.assertNotNull(timeBefore);
+        callAsyncMethod(publicView, "updateTime");
+        String timeAfter = publicView.findElement(By.id("time")).getText();
+        Assert.assertNotNull(timeAfter);
+        Assert.assertNotEquals(timeAfter, timeBefore);
+    }
+
+    private String formatArgumentRef(int index) {
+        return String.format("arguments[%d]", index);
+    }
+
+    private JavascriptExecutor getJavascriptExecutor() {
+        return (JavascriptExecutor) getDriver();
+    }
+
+    private Object callAsyncMethod(TestBenchElement element, String methodName,
+            Object... args) {
+        String objectRef = formatArgumentRef(0);
+        String argRefs = IntStream.range(1, args.length + 1)
+                .mapToObj(this::formatArgumentRef)
+                .collect(Collectors.joining(","));
+        String callbackRef = formatArgumentRef(args.length + 1);
+        String script = String.format("%s.%s(%s).then(%s)", objectRef,
+                methodName, argRefs, callbackRef);
+        Object[] scriptArgs = Stream.concat(Stream.of(element), Stream.of(args))
+                .toArray();
+        return getJavascriptExecutor().executeAsyncScript(script, scriptArgs);
+    }
 }
