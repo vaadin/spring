@@ -97,10 +97,9 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         SecurityContextHolder.setStrategyName(
                 VaadinAwareSecurityContextHolderStrategy.class.getName());
 
-        http.exceptionHandling()
-                .defaultAuthenticationEntryPointFor(
-                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                        requestUtil::isEndpointRequest);
+        http.exceptionHandling().defaultAuthenticationEntryPointFor(
+                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                requestUtil::isEndpointRequest);
 
         // Vaadin has its own CSRF protection.
         // Spring CSRF is not compatible with Vaadin internal requests
