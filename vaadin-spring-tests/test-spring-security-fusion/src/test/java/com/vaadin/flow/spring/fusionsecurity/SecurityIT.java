@@ -47,7 +47,6 @@ public class SecurityIT extends ChromeBrowserTest {
                             + "load resource: the server responded with "
                             + "a status of 401")
                     || msg.contains("expected \"200 OK\" response, but got 401")
-                    || msg.contains(" Event")
                     || msg.contains("webpack-internal://");
         });
     }
