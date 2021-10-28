@@ -353,30 +353,29 @@ public class SecurityIT extends ChromeBrowserTest {
         }).collect(Collectors.toList());
     }
 
+    private TestBenchElement getPublicView() {
+        return waitUntil(driver -> $("public-view").get(0));
+    }
+
     protected void simulateNewServer() {
         TestBenchElement mainView = waitUntil(driver -> $("main-view").get(0));
         callAsyncMethod(mainView, "invalidateSessionIfPresent");
     }
 
     protected void assertPublicEndpointReloadsPage() {
-        TestBenchElement publicView = waitUntil(
-                driver -> $("public-view").get(0));
-        String timeBefore = publicView.findElement(By.id("time")).getText();
+        String timeBefore = getPublicView().findElement(By.id("time")).getText();
         Assert.assertNotNull(timeBefore);
-        publicView.callFunction("updateTime");
-        publicView = waitUntil(driver -> $("public-view").get(0));
-        String timeAfter = publicView.findElement(By.id("time")).getText();
+        getPublicView().callFunction("updateTime");
+        String timeAfter = getPublicView().findElement(By.id("time")).getText();
         Assert.assertNotNull(timeAfter);
         Assert.assertNotEquals(timeAfter, timeBefore);
     }
 
     protected void assertPublicEndpointWorks() {
-        TestBenchElement publicView = waitUntil(
-                driver -> $("public-view").get(0));
-        String timeBefore = publicView.findElement(By.id("time")).getText();
+        String timeBefore = getPublicView().findElement(By.id("time")).getText();
         Assert.assertNotNull(timeBefore);
-        callAsyncMethod(publicView, "updateTime");
-        String timeAfter = publicView.findElement(By.id("time")).getText();
+        callAsyncMethod(getPublicView(), "updateTime");
+        String timeAfter = getPublicView().findElement(By.id("time")).getText();
         Assert.assertNotNull(timeAfter);
         Assert.assertNotEquals(timeAfter, timeBefore);
     }
