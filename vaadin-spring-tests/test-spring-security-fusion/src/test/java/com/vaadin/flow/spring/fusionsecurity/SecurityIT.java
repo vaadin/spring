@@ -363,7 +363,8 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     protected void assertPublicEndpointReloadsPage() {
-        String timeBefore = getPublicView().findElement(By.id("time")).getText();
+        String timeBefore = getPublicView().findElement(By.id("time"))
+                .getText();
         Assert.assertNotNull(timeBefore);
         getPublicView().callFunction("updateTime");
         String timeAfter = getPublicView().findElement(By.id("time")).getText();
@@ -372,7 +373,8 @@ public class SecurityIT extends ChromeBrowserTest {
     }
 
     protected void assertPublicEndpointWorks() {
-        String timeBefore = getPublicView().findElement(By.id("time")).getText();
+        String timeBefore = getPublicView().findElement(By.id("time"))
+                .getText();
         Assert.assertNotNull(timeBefore);
         callAsyncMethod(getPublicView(), "updateTime");
         String timeAfter = getPublicView().findElement(By.id("time")).getText();
