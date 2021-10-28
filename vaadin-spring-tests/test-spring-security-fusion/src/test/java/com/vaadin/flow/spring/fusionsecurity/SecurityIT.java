@@ -372,7 +372,6 @@ public class SecurityIT extends ChromeBrowserTest {
         } catch (StaleElementReferenceException e) {
             // Page reload causes the exception, ignore
         }
-        waitForClientRouter();
         String timeAfter = getPublicView().findElement(By.id("time")).getText();
         Assert.assertNotNull(timeAfter);
         Assert.assertNotEquals(timeAfter, timeBefore);
