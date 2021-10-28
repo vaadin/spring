@@ -70,7 +70,6 @@ public class SecurityIT extends ChromeBrowserTest {
 
     protected void open(String path) {
         getDriver().get(getRootURL() + "/" + path);
-        waitForClientRouter();
     }
 
     @Test
