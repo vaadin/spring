@@ -1,5 +1,7 @@
 package com.vaadin.flow.spring;
 
+import java.io.Serializable;
+
 import javax.servlet.ServletContext;
 
 import com.vaadin.base.devserver.util.BrowserLauncher;
@@ -18,7 +20,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
 /**
  * Utilities for launching a browser when running in development mode.
  */
-public class DevModeBrowserLauncher implements SpringApplicationRunListener {
+public class DevModeBrowserLauncher implements SpringApplicationRunListener, Serializable {
 
     private static final String LAUNCH_TRACKER = "LaunchUtil.hasLaunched";
     private static final String LAUNCHED_VALUE = "yes";
