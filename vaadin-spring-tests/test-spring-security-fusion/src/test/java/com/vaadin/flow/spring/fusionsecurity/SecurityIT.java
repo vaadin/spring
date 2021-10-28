@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.StaleElementReferenceException;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
@@ -69,6 +70,7 @@ public class SecurityIT extends ChromeBrowserTest {
 
     protected void open(String path) {
         getDriver().get(getRootURL() + "/" + path);
+        waitForClientRouter();
     }
 
     @Test
@@ -366,7 +368,12 @@ public class SecurityIT extends ChromeBrowserTest {
         String timeBefore = getPublicView().findElement(By.id("time"))
                 .getText();
         Assert.assertNotNull(timeBefore);
-        getPublicView().callFunction("updateTime");
+        try {
+            getPublicView().callFunction("updateTime");
+        } catch (StaleElementReferenceException e) {
+            // Page reload causes the exception, ignore
+        }
+        waitForClientRouter();
         String timeAfter = getPublicView().findElement(By.id("time")).getText();
         Assert.assertNotNull(timeAfter);
         Assert.assertNotEquals(timeAfter, timeBefore);

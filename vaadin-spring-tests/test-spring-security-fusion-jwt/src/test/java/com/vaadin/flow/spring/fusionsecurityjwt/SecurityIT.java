@@ -114,6 +114,7 @@ public class SecurityIT
         getDriver().manage().deleteCookieNamed("jwt.headerAndPayload");
         getDriver().manage().deleteCookieNamed("jwt.signature");
         navigateTo("private", false);
+        waitForClientRouter();
         assertLoginViewShown();
     }
 
