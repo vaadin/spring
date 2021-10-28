@@ -71,7 +71,7 @@ public class DevModeBrowserLauncher
             try {
                 BrowserLauncher.launch(location, outputOnFailure);
                 setLaunched();
-            } catch (Exception | NoClassDefFoundError e) {
+            } catch (Exception | NoClassDefFoundError e) { // NOSONAR
                 // NoClassDefFoundError happens if vaadin-dev-server is not on
                 // the classpath
                 getLogger().info(outputOnFailure);
@@ -112,8 +112,7 @@ public class DevModeBrowserLauncher
     }
 
     private static boolean isProductionMode(GenericWebApplicationContext app) {
-        ServletContext servletContext = ((GenericWebApplicationContext) app)
-                .getServletContext();
+        ServletContext servletContext = app.getServletContext();
         VaadinContext context = new VaadinServletContext(servletContext);
         ApplicationConfiguration applicationConfiguration = ApplicationConfiguration
                 .get(context);
