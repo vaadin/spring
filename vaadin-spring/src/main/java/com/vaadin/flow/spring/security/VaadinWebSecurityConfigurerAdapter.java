@@ -39,12 +39,9 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.AccessDeniedHandlerImpl;
 import org.springframework.security.web.access.DelegatingAccessDeniedHandler;
 import org.springframework.security.web.access.RequestMatcherDelegatingAccessDeniedHandler;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.csrf.CsrfException;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.AnyRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
@@ -111,11 +108,11 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         // Respond with 401 Unauthorized HTTP status code for unauthorized
         // requests for protected Fusion endpoints, so that the response could
         // be handled on the client side using e.g. `InvalidSessionMiddleware`.
-        http.exceptionHandling()
-                .accessDeniedHandler(createAccessDeniedHandler())
-                .defaultAuthenticationEntryPointFor(
-                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                        requestUtil::isEndpointRequest);
+        // http.exceptionHandling()
+        //         .accessDeniedHandler(createAccessDeniedHandler())
+        //         .defaultAuthenticationEntryPointFor(
+        //                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+        //                 requestUtil::isEndpointRequest);
 
         // Vaadin has its own CSRF protection.
         // Spring CSRF is not compatible with Vaadin internal requests
@@ -217,9 +214,9 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         formLogin.successHandler(
                 getVaadinSavedRequestAwareAuthenticationSuccessHandler(http));
         http.logout().logoutSuccessUrl(logoutUrl);
-        http.exceptionHandling().defaultAuthenticationEntryPointFor(
-                new LoginUrlAuthenticationEntryPoint(fusionLoginViewPath),
-                AnyRequestMatcher.INSTANCE);
+        // http.exceptionHandling().defaultAuthenticationEntryPointFor(
+        //         new LoginUrlAuthenticationEntryPoint(fusionLoginViewPath),
+        //         AnyRequestMatcher.INSTANCE);
         viewAccessChecker.setLoginView(fusionLoginViewPath);
     }
 
@@ -275,9 +272,9 @@ public abstract class VaadinWebSecurityConfigurerAdapter
                 getVaadinSavedRequestAwareAuthenticationSuccessHandler(http));
         http.csrf().ignoringAntMatchers(loginPath);
         http.logout().logoutSuccessUrl(logoutUrl);
-        http.exceptionHandling().defaultAuthenticationEntryPointFor(
-                new LoginUrlAuthenticationEntryPoint(loginPath),
-                AnyRequestMatcher.INSTANCE);
+        // http.exceptionHandling().defaultAuthenticationEntryPointFor(
+        //         new LoginUrlAuthenticationEntryPoint(loginPath),
+        //         AnyRequestMatcher.INSTANCE);
         viewAccessChecker.setLoginView(flowLoginView);
     }
 
