@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.server.DefaultDeploymentConfiguration;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
@@ -88,10 +89,19 @@ public class SpringClassesSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.spring\\.scopes\\.VaadinSessionScope",
                 "com\\.vaadin\\.flow\\.spring\\.scopes\\.AbstractScope",
                 "com\\.vaadin\\.flow\\.spring\\.scopes\\.VaadinUIScope",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.JwtSecurityContextRepository",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.JwtSecurityContextRepository\\$UpdateJwtResponseWrapper",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.SerializedJwtSplitCookieRepository",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinAwareSecurityContextHolderStrategy",
                 "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinWebSecurityConfigurerAdapter",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinWebSecurityConfigurerAdapter",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinWebSecurityConfigurerAdapter\\$Http401UnauthorizedAccessDeniedHandler",
                 "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinDefaultRequestCache",
                 "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinSavedRequestAwareAuthenticationSuccessHandler",
                 "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinSavedRequestAwareAuthenticationSuccessHandler\\$RedirectStrategy",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinStatelessSecurityConfigurer",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinStatelessSecurityConfigurer\\$SecretKeyConfigurer",
+                "com\\.vaadin\\.flow\\.spring\\.security\\.VaadinWebSecurityConfigurerAdapter\\$BearerTokenAuthentiationFilterPostProcessor",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$ClassPathScanner",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinServletContextInitializer\\$CustomResourceLoader",
                 "com\\.vaadin\\.flow\\.spring\\.VaadinConfigurationPropertiesGeneratorTrigger"),
@@ -144,6 +154,9 @@ public class SpringClassesSerializableTest extends ClassesSerializableTest {
         Mockito.when(context.getAttribute(
                 Mockito.eq(ApplicationConfiguration.class), Mockito.any()))
                 .thenReturn(appConfig);
+        Mockito.when(appConfig.getContext()).thenReturn(context);
+        Lookup lookup = Mockito.mock(Lookup.class);
+        Mockito.when(context.getAttribute(Lookup.class)).thenReturn(lookup);
         VaadinService service = new VaadinServletService(new VaadinServlet(),
                 new DefaultDeploymentConfiguration(appConfig, getClass(),
                         initParameters)) {

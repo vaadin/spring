@@ -1,8 +1,8 @@
-import "@vaadin/vaadin-button";
-import "@vaadin/vaadin-text-field";
-import { BalanceEndpoint } from "Frontend/generated/BalanceEndpoint";
+import "@vaadin/button";
+import "@vaadin/text-field";
 import { appStore } from "Frontend/stores/app-store";
-import { customElement, html, state, PropertyValues } from "lit-element";
+import { html, PropertyValues } from "lit";
+import { customElement, state } from "lit/decorators";
 import { View } from "../view";
 
 @customElement("admin-view")

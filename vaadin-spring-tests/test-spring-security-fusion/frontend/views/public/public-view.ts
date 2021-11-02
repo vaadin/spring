@@ -1,7 +1,8 @@
-import "@vaadin/vaadin-button";
-import "@vaadin/vaadin-text-field";
-import { PublicEndpoint } from "Frontend/generated/PublicEndpoint";
-import { customElement, html, state } from "lit-element";
+import "@vaadin/button";
+import "@vaadin/text-field";
+import { PublicEndpoint } from "Frontend/generated/endpoints";
+import { html } from "lit";
+import { customElement, state } from "lit/decorators";
 import { View } from "../view";
 
 @customElement("public-view")
@@ -11,7 +12,7 @@ export class PublicTSView extends View {
 
   async connectedCallback() {
     super.connectedCallback();
-    this.time = await PublicEndpoint.getServerTime();
+    await this.updateTime();
   }
 
   render() {
@@ -24,7 +25,11 @@ export class PublicTSView extends View {
         src="public/images/bank.jpg"
       />
       <p>We are very great and have great amounts of money.</p>
-      <p>This page was updated ${this.time}</p>
+      <p>This page was updated <span id="time">${this.time}</span></p>
     </div>`;
+  }
+
+  public async updateTime() {
+    this.time = await PublicEndpoint.getServerTime();
   }
 }

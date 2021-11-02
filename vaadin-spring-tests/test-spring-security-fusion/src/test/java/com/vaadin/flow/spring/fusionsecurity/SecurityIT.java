@@ -3,23 +3,29 @@ package com.vaadin.flow.spring.fusionsecurity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.StaleElementReferenceException;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.ChromeBrowserTest;
+import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class SecurityIT extends ChromeBrowserTest {
 
     private static final String ROOT_PAGE_HEADER_TEXT = "Welcome to the TypeScript Bank of Vaadin";
     private static final int SERVER_PORT = 9999;
-    private static final String USER_FULLNAME = "John the User";
-    private static final String ADMIN_FULLNAME = "Emma the Admin";
+    protected static final String USER_FULLNAME = "John the User";
+    protected static final String ADMIN_FULLNAME = "Emma the Admin";
 
     @Override
     protected int getDeploymentPort() {
@@ -36,12 +42,21 @@ public class SecurityIT extends ChromeBrowserTest {
     private void checkForBrowserErrors() {
         checkLogsForErrors(msg -> {
             return msg.contains(
-                    "admin-only/secret.txt - Failed to load resource: the server responded with a status of 403");
+                    "/admin-only/secret.txt - Failed to load resource: the "
+                            + "server responded with a status of 403")
+                    || msg.contains("/connect/") && msg.contains("Failed to "
+                            + "load resource: the server responded with "
+                            + "a status of 401")
+                    || msg.contains("expected \"200 OK\" response, but got 401")
+                    || msg.contains("webpack-internal://");
         });
     }
 
-    private void logout() {
-        if (!$(ButtonElement.class).attribute("id", "logout").exists()) {
+    protected void logout() {
+        ElementQuery<TestBenchElement> mainViewQuery = $("*").attribute("id",
+                "main-view");
+        if (!mainViewQuery.exists() || !mainViewQuery.get(0)
+                .$(ButtonElement.class).attribute("id", "logout").exists()) {
             open("");
             assertRootPageShown();
         }
@@ -53,7 +68,7 @@ public class SecurityIT extends ChromeBrowserTest {
         getMainView().$(ButtonElement.class).id("logout").click();
     }
 
-    private void open(String path) {
+    protected void open(String path) {
         getDriver().get(getRootURL() + "/" + path);
     }
 
@@ -227,11 +242,27 @@ public class SecurityIT extends ChromeBrowserTest {
                 shouldBeTextFile.contains("Public document for all users"));
     }
 
-    private void navigateTo(String path) {
+    @Test
+    public void reload_when_anonymous_session_expires() {
+        open("");
+        simulateNewServer();
+        assertPublicEndpointReloadsPage();
+    }
+
+    @Test
+    public void reload_when_user_session_expires() {
+        open("login");
+        loginUser();
+        simulateNewServer();
+        navigateTo("private", false);
+        assertLoginViewShown();
+    }
+
+    protected void navigateTo(String path) {
         navigateTo(path, true);
     }
 
-    private void navigateTo(String path, boolean assertPathShown) {
+    protected void navigateTo(String path, boolean assertPathShown) {
         getMainView().$("a").attribute("href", path).first().click();
         if (assertPathShown) {
             assertPathShown(path);
@@ -242,7 +273,7 @@ public class SecurityIT extends ChromeBrowserTest {
         return waitUntil(driver -> $("*").id("main-view"));
     }
 
-    private void assertLoginViewShown() {
+    protected void assertLoginViewShown() {
         assertPathShown("login");
         waitUntil(driver -> $(LoginOverlayElement.class).exists());
     }
@@ -253,7 +284,7 @@ public class SecurityIT extends ChromeBrowserTest {
         Assert.assertEquals(ROOT_PAGE_HEADER_TEXT, headerText);
     }
 
-    private void assertPrivatePageShown(String fullName) {
+    protected void assertPrivatePageShown(String fullName) {
         assertPathShown("private");
         waitUntil(driver -> $("span").attribute("id", "balanceText").exists());
         String balance = $("span").id("balanceText").getText();
@@ -274,11 +305,11 @@ public class SecurityIT extends ChromeBrowserTest {
                 .equals(getRootURL() + "/" + path));
     }
 
-    private void loginUser() {
+    protected void loginUser() {
         login("john", "john");
     }
 
-    private void loginAdmin() {
+    protected void loginAdmin() {
         login("emma", "emma");
     }
 
@@ -293,7 +324,7 @@ public class SecurityIT extends ChromeBrowserTest {
         waitUntilNot(driver -> $(LoginOverlayElement.class).exists());
     }
 
-    private void refresh() {
+    protected void refresh() {
         getDriver().navigate().refresh();
     }
 
@@ -307,7 +338,7 @@ public class SecurityIT extends ChromeBrowserTest {
         Assert.assertTrue(pageSource.contains(contents));
     }
 
-    private List<MenuItem> getMenuItems() {
+    protected List<MenuItem> getMenuItems() {
         List<TestBenchElement> anchors = getMainView().$("vaadin-tabs").first()
                 .$("a").all();
 
@@ -323,4 +354,58 @@ public class SecurityIT extends ChromeBrowserTest {
         }).collect(Collectors.toList());
     }
 
+    private TestBenchElement getPublicView() {
+        return waitUntil(driver -> $("public-view").get(0));
+    }
+
+    protected void simulateNewServer() {
+        TestBenchElement mainView = waitUntil(driver -> $("main-view").get(0));
+        callAsyncMethod(mainView, "invalidateSessionIfPresent");
+    }
+
+    protected void assertPublicEndpointReloadsPage() {
+        String timeBefore = getPublicView().findElement(By.id("time"))
+                .getText();
+        Assert.assertNotNull(timeBefore);
+        try {
+            getPublicView().callFunction("updateTime");
+        } catch (StaleElementReferenceException e) {
+            // Page reload causes the exception, ignore
+        }
+        String timeAfter = getPublicView().findElement(By.id("time")).getText();
+        Assert.assertNotNull(timeAfter);
+        Assert.assertNotEquals(timeAfter, timeBefore);
+    }
+
+    protected void assertPublicEndpointWorks() {
+        String timeBefore = getPublicView().findElement(By.id("time"))
+                .getText();
+        Assert.assertNotNull(timeBefore);
+        callAsyncMethod(getPublicView(), "updateTime");
+        String timeAfter = getPublicView().findElement(By.id("time")).getText();
+        Assert.assertNotNull(timeAfter);
+        Assert.assertNotEquals(timeAfter, timeBefore);
+    }
+
+    private String formatArgumentRef(int index) {
+        return String.format("arguments[%d]", index);
+    }
+
+    private JavascriptExecutor getJavascriptExecutor() {
+        return (JavascriptExecutor) getDriver();
+    }
+
+    private Object callAsyncMethod(TestBenchElement element, String methodName,
+            Object... args) {
+        String objectRef = formatArgumentRef(0);
+        String argRefs = IntStream.range(1, args.length + 1)
+                .mapToObj(this::formatArgumentRef)
+                .collect(Collectors.joining(","));
+        String callbackRef = formatArgumentRef(args.length + 1);
+        String script = String.format("%s.%s(%s).then(%s)", objectRef,
+                methodName, argRefs, callbackRef);
+        Object[] scriptArgs = Stream.concat(Stream.of(element), Stream.of(args))
+                .toArray();
+        return getJavascriptExecutor().executeAsyncScript(script, scriptArgs);
+    }
 }

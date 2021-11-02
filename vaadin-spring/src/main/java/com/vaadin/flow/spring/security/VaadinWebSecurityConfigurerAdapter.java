@@ -15,9 +15,38 @@
  */
 package com.vaadin.flow.spring.security;
 
+import javax.crypto.SecretKey;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.AccessDeniedHandlerImpl;
+import org.springframework.security.web.access.DelegatingAccessDeniedHandler;
+import org.springframework.security.web.access.RequestMatcherDelegatingAccessDeniedHandler;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.csrf.CsrfException;
+import org.springframework.security.web.savedrequest.RequestCache;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.AnyRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.internal.AnnotationReader;
@@ -25,16 +54,6 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.server.HandlerHelper;
 import com.vaadin.flow.server.auth.ViewAccessChecker;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
-import org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 
 /**
  * Provides basic Vaadin security configuration for the project.
@@ -54,10 +73,9 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 &#64;EnableWebSecurity
 &#64;Configuration
 public class MySecurityConfigurerAdapter extends VaadinWebSecurityConfigurerAdapter {
-    
-} 
+
+}
  * </code>
- * 
  */
 public abstract class VaadinWebSecurityConfigurerAdapter
         extends WebSecurityConfigurerAdapter {
@@ -85,12 +103,24 @@ public abstract class VaadinWebSecurityConfigurerAdapter
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        // Use a security context holder that can find the context from Vaadin
+        // specific classes
+        SecurityContextHolder.setStrategyName(
+                VaadinAwareSecurityContextHolderStrategy.class.getName());
+
+        // Respond with 401 Unauthorized HTTP status code for unauthorized
+        // requests for protected Fusion endpoints, so that the response could
+        // be handled on the client side using e.g. `InvalidSessionMiddleware`.
+        http.exceptionHandling()
+                .accessDeniedHandler(createAccessDeniedHandler())
+                .defaultAuthenticationEntryPointFor(
+                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
+                        requestUtil::isEndpointRequest);
+
         // Vaadin has its own CSRF protection.
         // Spring CSRF is not compatible with Vaadin internal requests
         http.csrf().ignoringRequestMatchers(
                 requestUtil::isFrameworkInternalRequest);
-        // nor with endpoints
-        http.csrf().ignoringRequestMatchers(requestUtil::isEndpointRequest);
 
         // Ensure automated requests to e.g. closing push channels, service
         // workers,
@@ -151,7 +181,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      * <p>
      * This is used when your application uses a Fusion based login view
      * available at the given path.
-     * 
+     *
      * @param http
      *            the http security from {@link #configure(HttpSecurity)}
      * @param fusionLoginViewPath
@@ -170,7 +200,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      * <p>
      * This is used when your application uses a Fusion based login view
      * available at the given path.
-     * 
+     *
      * @param http
      *            the http security from {@link #configure(HttpSecurity)}
      * @param fusionLoginViewPath
@@ -185,14 +215,17 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         FormLoginConfigurer<HttpSecurity> formLogin = http.formLogin();
         formLogin.loginPage(fusionLoginViewPath).permitAll();
         formLogin.successHandler(
-                new VaadinSavedRequestAwareAuthenticationSuccessHandler());
+                getVaadinSavedRequestAwareAuthenticationSuccessHandler(http));
         http.logout().logoutSuccessUrl(logoutUrl);
+        http.exceptionHandling().defaultAuthenticationEntryPointFor(
+                new LoginUrlAuthenticationEntryPoint(fusionLoginViewPath),
+                AnyRequestMatcher.INSTANCE);
         viewAccessChecker.setLoginView(fusionLoginViewPath);
     }
 
     /**
      * Sets up login for the application using the given Flow login view.
-     * 
+     *
      * @param http
      *            the http security from {@link #configure(HttpSecurity)}
      * @param flowLoginView
@@ -207,14 +240,14 @@ public abstract class VaadinWebSecurityConfigurerAdapter
 
     /**
      * Sets up login for the application using the given Flow login view.
-     * 
+     *
      * @param http
      *            the http security from {@link #configure(HttpSecurity)}
      * @param flowLoginView
      *            the login view to use
      * @param logoutUrl
      *            the URL to redirect the user to after logging out
-     * 
+     *
      * @throws Exception
      *             if something goes wrong
      */
@@ -239,10 +272,94 @@ public abstract class VaadinWebSecurityConfigurerAdapter
         FormLoginConfigurer<HttpSecurity> formLogin = http.formLogin();
         formLogin.loginPage(loginPath).permitAll();
         formLogin.successHandler(
-                new VaadinSavedRequestAwareAuthenticationSuccessHandler());
+                getVaadinSavedRequestAwareAuthenticationSuccessHandler(http));
         http.csrf().ignoringAntMatchers(loginPath);
         http.logout().logoutSuccessUrl(logoutUrl);
+        http.exceptionHandling().defaultAuthenticationEntryPointFor(
+                new LoginUrlAuthenticationEntryPoint(loginPath),
+                AnyRequestMatcher.INSTANCE);
         viewAccessChecker.setLoginView(flowLoginView);
     }
 
+    /**
+     * Sets up stateless JWT authentication using cookies.
+     *
+     * @param http
+     *            the http security from {@link #configure(HttpSecurity)}
+     * @param secretKey
+     *            the secret key for encoding and decoding JWTs, must use a
+     *            {@link MacAlgorithm} algorithm name
+     * @param issuer
+     *            the issuer JWT claim
+     * @throws Exception
+     *             if something goes wrong
+     */
+    protected void setStatelessAuthentication(HttpSecurity http,
+            SecretKey secretKey, String issuer) throws Exception {
+        setStatelessAuthentication(http, secretKey, issuer, 1800L);
+    }
+
+    /**
+     * Sets up stateless JWT authentication using cookies.
+     *
+     * @param http
+     *            the http security from {@link #configure(HttpSecurity)}
+     * @param secretKey
+     *            the secret key for encoding and decoding JWTs, must use a
+     *            {@link MacAlgorithm} algorithm name
+     * @param issuer
+     *            the issuer JWT claim
+     * @param expiresIn
+     *            lifetime of the JWT and cookies, in seconds
+     * @throws Exception
+     *             if something goes wrong
+     */
+    protected void setStatelessAuthentication(HttpSecurity http,
+            SecretKey secretKey, String issuer, long expiresIn)
+            throws Exception {
+        VaadinStatelessSecurityConfigurer<HttpSecurity> vaadinStatelessSecurityConfigurer = new VaadinStatelessSecurityConfigurer<>();
+        http.apply(vaadinStatelessSecurityConfigurer);
+
+        vaadinStatelessSecurityConfigurer.withSecretKey().secretKey(secretKey)
+                .and().issuer(issuer).expiresIn(expiresIn);
+    }
+
+    private VaadinSavedRequestAwareAuthenticationSuccessHandler getVaadinSavedRequestAwareAuthenticationSuccessHandler(
+            HttpSecurity http) {
+        VaadinSavedRequestAwareAuthenticationSuccessHandler vaadinSavedRequestAwareAuthenticationSuccessHandler = new VaadinSavedRequestAwareAuthenticationSuccessHandler();
+        RequestCache requestCache = http.getSharedObject(RequestCache.class);
+        if (requestCache != null) {
+            vaadinSavedRequestAwareAuthenticationSuccessHandler
+                    .setRequestCache(requestCache);
+        }
+        return vaadinSavedRequestAwareAuthenticationSuccessHandler;
+    }
+
+    private AccessDeniedHandler createAccessDeniedHandler() {
+        final AccessDeniedHandler defaultHandler = new AccessDeniedHandlerImpl();
+
+        final AccessDeniedHandler http401UnauthorizedHandler = new Http401UnauthorizedAccessDeniedHandler();
+
+        final LinkedHashMap<Class<? extends AccessDeniedException>, AccessDeniedHandler> exceptionHandlers = new LinkedHashMap<>();
+        exceptionHandlers.put(CsrfException.class, http401UnauthorizedHandler);
+
+        final LinkedHashMap<RequestMatcher, AccessDeniedHandler> matcherHandlers = new LinkedHashMap<>();
+        matcherHandlers.put(requestUtil::isEndpointRequest,
+                new DelegatingAccessDeniedHandler(exceptionHandlers,
+                        new AccessDeniedHandlerImpl()));
+
+        return new RequestMatcherDelegatingAccessDeniedHandler(matcherHandlers,
+                defaultHandler);
+    }
+
+    private static class Http401UnauthorizedAccessDeniedHandler
+            implements AccessDeniedHandler {
+        @Override
+        public void handle(HttpServletRequest request,
+                HttpServletResponse response,
+                AccessDeniedException accessDeniedException)
+                throws IOException, ServletException {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        }
+    }
 }

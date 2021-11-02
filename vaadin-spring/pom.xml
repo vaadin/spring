@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spring-parent</artifactId>
-        <version>18.0-SNAPSHOT</version>
+        <version>19.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>vaadin-spring</artifactId>
@@ -162,6 +162,16 @@
             <artifactId>flow-test-generic</artifactId>
             <version>${vaadin.flow.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-resource-server</artifactId>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>
