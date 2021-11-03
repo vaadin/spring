@@ -8,7 +8,7 @@ public class DevModeBrowserLauncherServletMappingTest
         extends DevModeBrowserLauncherNoPropertiesTest {
 
     @Test
-    public void foo() {
+    public void getUrl_withContextPath_givesUrlWithContextPathAndNoUrlMapping() {
         MockServletContext ctx = (MockServletContext) app.getServletContext();
         ctx.setContextPath("/contextpath");
         String url = DevModeBrowserLauncher.getUrl(app);
