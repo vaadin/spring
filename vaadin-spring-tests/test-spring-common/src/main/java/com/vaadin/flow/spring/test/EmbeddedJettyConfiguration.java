@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Configuration;
 // is fixed and spring-boot is updated to the latest jetty version
 // containing the fix or spring-boot changed their configuration.
 @Configuration
-@ConditionalOnClass({Servlet.class, Server.class, Loader.class,
-                     WebAppContext.class})
+@ConditionalOnClass({ Servlet.class, Server.class, Loader.class,
+        WebAppContext.class })
 public class EmbeddedJettyConfiguration {
 
     @Bean
