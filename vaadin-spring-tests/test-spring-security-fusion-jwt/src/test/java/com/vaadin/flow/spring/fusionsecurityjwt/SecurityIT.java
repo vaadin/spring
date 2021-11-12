@@ -17,6 +17,7 @@ public class SecurityIT
         openLogin();
         loginUser();
         checkJwtUsername("john");
+        checkJwtClaimString("foo", "bar");
     }
 
     @Test
@@ -24,6 +25,7 @@ public class SecurityIT
         openLogin();
         loginAdmin();
         checkJwtUsername("emma");
+        checkJwtClaimString("foo", "bar");
     }
 
     @Test
@@ -130,13 +132,17 @@ public class SecurityIT
     }
 
     private void checkJwtUsername(String expectedUsername) {
+        checkJwtClaimString("sub", expectedUsername);
+    }
+
+    private void checkJwtClaimString(String name, String expectedValue) {
         Cookie jwtCookie = getJwtCookie();
         Assert.assertNotNull(jwtCookie);
 
         String payload = jwtCookie.getValue().split("\\.")[1];
         JsonObject payloadJson = Json
                 .parse(new String(Base64.getUrlDecoder().decode(payload)));
-        Assert.assertEquals(expectedUsername, payloadJson.getString("sub"));
+        Assert.assertEquals(expectedValue, payloadJson.getString(name));
     }
 
 }

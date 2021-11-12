@@ -17,10 +17,10 @@ package com.vaadin.flow.spring.security.stateless;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -44,6 +44,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.JwtValidators;
@@ -59,8 +60,6 @@ import org.springframework.security.web.context.SecurityContextRepository;
  * authentication using a JWT persisted in cookies.
  */
 class JwtSecurityContextRepository implements SecurityContextRepository {
-    private static final String ROLES_CLAIM = "roles";
-    private static final String ROLE_AUTHORITY_PREFIX = "ROLE_";
     private final Log logger = LogFactory.getLog(this.getClass());
     private final SerializedJwtSplitCookieRepository serializedJwtSplitCookieRepository;
     private final JwtAuthenticationConverter jwtAuthenticationConverter;
@@ -70,13 +69,16 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
     private JWSAlgorithm jwsAlgorithm;
     private JwtDecoder jwtDecoder;
     private AuthenticationTrustResolver trustResolver = new AuthenticationTrustResolverImpl();
+    private JwtClaimsSource jwtClaimsSource = new DefaultJwtClaimsSource();
 
     JwtSecurityContextRepository(
             SerializedJwtSplitCookieRepository serializedJwtSplitCookieRepository) {
         this.serializedJwtSplitCookieRepository = serializedJwtSplitCookieRepository;
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        grantedAuthoritiesConverter.setAuthorityPrefix(ROLE_AUTHORITY_PREFIX);
-        grantedAuthoritiesConverter.setAuthoritiesClaimName(ROLES_CLAIM);
+        grantedAuthoritiesConverter.setAuthorityPrefix(
+                DefaultJwtClaimsSource.ROLE_AUTHORITY_PREFIX);
+        grantedAuthoritiesConverter
+                .setAuthoritiesClaimName(DefaultJwtClaimsSource.ROLES_CLAIM);
 
         jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter
@@ -103,6 +105,10 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
 
     void setTrustResolver(AuthenticationTrustResolver trustResolver) {
         this.trustResolver = trustResolver;
+    }
+
+    void setJwtClaimsSource(JwtClaimsSource jwtClaimsSource) {
+        this.jwtClaimsSource = jwtClaimsSource;
     }
 
     private JwtDecoder getJwtDecoder() {
@@ -133,13 +139,17 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
             return null;
         }
 
-        final Date now = new Date();
+        JwtClaimAccessor claims = jwtClaimsSource.get(authentication);
 
-        final List<String> roles = authentication.getAuthorities().stream()
-                .map(Objects::toString)
-                .filter(a -> a.startsWith(ROLE_AUTHORITY_PREFIX))
-                .map(a -> a.substring(ROLE_AUTHORITY_PREFIX.length()))
-                .collect(Collectors.toList());
+        final Instant now = Instant.now();
+
+        JWTClaimsSet.Builder claimsSetBuilder = new JWTClaimsSet.Builder();
+        claims.getClaims().forEach(claimsSetBuilder::claim);
+        JWTClaimsSet claimsSet = claimsSetBuilder.issuer(issuer)
+                .issueTime(Date.from(now))
+                .expirationTime(
+                        Date.from(now.plus(Duration.ofSeconds(expiresIn))))
+                .build();
 
         SignedJWT signedJWT;
         JWSHeader jwsHeader = new JWSHeader(jwsAlgorithm);
@@ -151,10 +161,6 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
 
         JWSSigner signer = new DefaultJWSSignerFactory().createJWSSigner(jwk,
                 jwsAlgorithm);
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject(authentication.getName()).issuer(issuer).issueTime(now)
-                .expirationTime(new Date(now.getTime() + expiresIn * 1000))
-                .claim(ROLES_CLAIM, roles).build();
         signedJWT = new SignedJWT(jwsHeader, claimsSet);
         signedJWT.sign(signer);
 

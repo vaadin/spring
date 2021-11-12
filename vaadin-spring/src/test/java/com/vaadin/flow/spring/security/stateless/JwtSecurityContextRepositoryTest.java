@@ -8,9 +8,13 @@ import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.nimbusds.jose.JOSEException;
@@ -37,6 +41,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -49,6 +54,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.SaveContextOnUpdateOrErrorResponseWrapper;
@@ -670,6 +676,46 @@ public class JwtSecurityContextRepositoryTest {
         JWTClaimsSet decodedClaimsSet = decodeSerializedJwt(serializedJwt,
                 jwtProcessor);
         assertClaims(decodedClaimsSet, TEST_USERNAME, TEST_ROLES, 1800);
+    }
+
+    @Test
+    public void saveContext_doesSaveJwt_withJwtClaimsSource()
+            throws BadJOSEException, ParseException, JOSEException {
+        SecurityContext securityContext = SecurityContextHolder
+                .createEmptyContext();
+        User testUser = new User(TEST_USERNAME, "", TEST_AUTHORITIES);
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                testUser, testUser.getPassword(), testUser.getAuthorities());
+        Mockito.doReturn(usernamePasswordAuthenticationToken)
+                .when(securityContext).getAuthentication();
+        JwtClaimsSource mockJwtClaimsSource = Mockito
+                .mock(JwtClaimsSource.class);
+        final List<String> authorities = TEST_AUTHORITIES.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        final Map<String, Object> claims = new HashMap<>();
+        claims.put("name", TEST_USERNAME);
+        claims.put("entitlements", authorities);
+        claims.put("http://sso.example.com/schemas/claims/group", "users");
+        Mockito.doAnswer(
+                (InvocationOnMock i) -> (JwtClaimAccessor) () -> claims)
+                .when(mockJwtClaimsSource)
+                .get(usernamePasswordAuthenticationToken);
+        jwtSecurityContextRepository.setJwtClaimsSource(mockJwtClaimsSource);
+
+        jwtSecurityContextRepository.saveContext(securityContext, request,
+                response);
+
+        String serializedJwt = getSavedSerializedJwt();
+        JWTClaimsSet decodedClaimsSet = decodeSerializedJwt(serializedJwt,
+                jwtProcessor);
+        assertClaims(decodedClaimsSet, null, null, 1800);
+        Assert.assertEquals(TEST_USERNAME,
+                decodedClaimsSet.getStringClaim("name"));
+        Assert.assertEquals(authorities, Arrays
+                .asList(decodedClaimsSet.getStringArrayClaim("entitlements")));
+        Assert.assertEquals("users", decodedClaimsSet
+                .getStringClaim("http://sso.example.com/schemas/claims/group"));
     }
 
     private void assertRequestResponseHolder() {

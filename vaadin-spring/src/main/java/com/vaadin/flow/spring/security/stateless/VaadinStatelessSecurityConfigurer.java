@@ -20,6 +20,7 @@ import javax.crypto.SecretKey;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
@@ -74,11 +75,19 @@ public final class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuild
 
     private String issuer;
 
+    private JwtClaimsSource jwtClaimsSource = new DefaultJwtClaimsSource();
+
     private SecretKeyConfigurer secretKeyConfigurer;
 
     @Override
     @SuppressWarnings("unchecked")
     public void init(H http) {
+        if (secretKeyConfigurer == null) {
+            throw new IllegalStateException("The secret key configuration was"
+                    + " not found. Make sure to configure the secret key via"
+                    + ".secretKey()");
+        }
+
         JwtSecurityContextRepository jwtSecurityContextRepository = new JwtSecurityContextRepository(
                 new SerializedJwtSplitCookieRepository());
         SecurityContextConfigurer<H> securityContext = http
@@ -116,6 +125,7 @@ public final class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuild
                     .setJwkSource(secretKeyConfigurer.getJWKSource());
             jwtSecurityContextRepository.setIssuer(issuer);
             jwtSecurityContextRepository.setExpiresIn(expiresIn);
+            jwtSecurityContextRepository.setJwtClaimsSource(jwtClaimsSource);
 
             AuthenticationTrustResolver trustResolver = http
                     .getSharedObject(AuthenticationTrustResolver.class);
@@ -159,6 +169,15 @@ public final class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuild
     }
 
     /**
+     * Sets the custom source of JWT claims.
+     */
+    public VaadinStatelessSecurityConfigurer<H> jwtClaimsSource(
+            JwtClaimsSource jwtClaimsSource) {
+        this.jwtClaimsSource = jwtClaimsSource;
+        return this;
+    }
+
+    /**
      * Specifies using a secret key for signing and verification.
      *
      * @return the {@link SecretKeyConfigurer}
@@ -192,7 +211,7 @@ public final class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuild
      * Enables configuring the secret key and the algorithm for the JWT signing
      * and verification when using {@link VaadinStatelessSecurityConfigurer}.
      */
-    public class SecretKeyConfigurer {
+    public final class SecretKeyConfigurer {
         private SecretKey secretKey;
 
         private JwsAlgorithm jwsAlgorithm;
@@ -242,7 +261,7 @@ public final class VaadinStatelessSecurityConfigurer<H extends HttpSecurityBuild
             OctetSequenceKey key = new OctetSequenceKey.Builder(secretKey)
                     .algorithm(getAlgorithm()).build();
             JWKSet jwkSet = new JWKSet(key);
-            return (jwkSelector, context) -> jwkSelector.select(jwkSet);
+            return new ImmutableJWKSet<>(jwkSet);
         }
 
         JWSAlgorithm getAlgorithm() {

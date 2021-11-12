@@ -2,6 +2,8 @@ package com.vaadin.flow.spring.fusionsecurity;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
 import com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter;
+import com.vaadin.flow.spring.security.stateless.DefaultJwtClaimsSource;
+import com.vaadin.flow.spring.security.stateless.VaadinStatelessSecurityConfigurer;
 
 @EnableWebSecurity
 @Configuration
@@ -60,6 +64,19 @@ public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
                             "I72kIcB1UrUQVHVUAzgweE-BLc0bF8mLv9SmrgKsQAk"),
                             JwsAlgorithms.HS256),
                     "statelessapp");
+
+            // noinspection unchecked
+            VaadinStatelessSecurityConfigurer<HttpSecurity> vaadinStatelessSecurityConfigurer = http
+                    .getConfigurer(VaadinStatelessSecurityConfigurer.class);
+
+            vaadinStatelessSecurityConfigurer
+                    .jwtClaimsSource((authentication) -> () -> {
+                        Map<String, Object> claims = new HashMap<>(
+                                new DefaultJwtClaimsSource().get(authentication)
+                                        .getClaims());
+                        claims.put("foo", "bar");
+                        return claims;
+                    });
         }
     }
 
