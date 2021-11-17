@@ -43,7 +43,6 @@ public class VaadinDefaultRequestCacheTest {
     @MockBean
     private CsrfChecker csrfChecker;
 
-    
     @Test
     public void normalRouteRequestSaved() {
         HttpServletRequest request = RequestUtilTest
