@@ -139,7 +139,7 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
             return null;
         }
 
-        JwtClaimAccessor claims = jwtClaimsSource.get(authentication);
+        JwtClaimAccessor claimAccessor = jwtClaimsSource.get(authentication);
 
         final Instant now = Instant.now();
 

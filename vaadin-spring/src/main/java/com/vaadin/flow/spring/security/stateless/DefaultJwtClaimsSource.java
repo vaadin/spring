@@ -28,7 +28,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
  * "sub"} and {@code "roles"} JWT claims using the authentication principal name
  * and roles respectively.
  */
-public final class DefaultJwtClaimsSource implements JwtClaimsSource {
+public class DefaultJwtClaimsSource implements JwtClaimsSource {
     static final String ROLES_CLAIM = "roles";
     static final String ROLE_AUTHORITY_PREFIX = "ROLE_";
 
