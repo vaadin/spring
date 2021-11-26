@@ -144,7 +144,7 @@ class JwtSecurityContextRepository implements SecurityContextRepository {
         final Instant now = Instant.now();
 
         JWTClaimsSet.Builder claimsSetBuilder = new JWTClaimsSet.Builder();
-        claims.getClaims().forEach(claimsSetBuilder::claim);
+        claimAccessor.getClaims().forEach(claimsSetBuilder::claim);
         JWTClaimsSet claimsSet = claimsSetBuilder.issuer(issuer)
                 .issueTime(Date.from(now))
                 .expirationTime(
