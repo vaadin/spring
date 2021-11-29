@@ -47,7 +47,7 @@ public class SpringVaadinServletService extends VaadinServletService {
 
     private final Registration serviceDestroyRegistration;
 
-    private static final String SPRING_BOOT_RESOURCES_CLASS = "org.springframework.boot.autoconfigure.web.WebProperties.Resources";
+    private static final String SPRING_BOOT_RESOURCES_CLASS = "org.springframework.boot.autoconfigure.web.WebProperties$Resources";
 
     /**
      * Creates an instance connected to the given servlet and using the given
