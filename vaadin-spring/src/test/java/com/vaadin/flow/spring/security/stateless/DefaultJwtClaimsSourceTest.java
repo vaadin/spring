@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 
 public class DefaultJwtClaimsSourceTest {
     static private final String TEST_USERNAME = "user";
@@ -31,16 +32,13 @@ public class DefaultJwtClaimsSourceTest {
     public void setup() {
         MockitoAnnotations.openMocks(this);
         defaultJwtClaimsSource = new DefaultJwtClaimsSource();
+        Mockito.doReturn(TEST_USERNAME).when(authentication).getName();
     }
 
     @Test
     public void get_claims_sub() {
-        Mockito.doReturn(TEST_USERNAME).when(authentication).getName();
-
-        JwtClaimAccessor claimAccessor = defaultJwtClaimsSource
-                .get(authentication);
-        Map<String, Object> claims = claimAccessor.getClaims();
-        Assert.assertEquals(TEST_USERNAME, claimAccessor.getSubject());
+        JwtClaimsSet claimsSet = defaultJwtClaimsSource.get(authentication);
+        Assert.assertEquals(TEST_USERNAME, claimsSet.getSubject());
     }
 
     @Test
@@ -50,10 +48,7 @@ public class DefaultJwtClaimsSourceTest {
                 .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
         Mockito.doReturn(authorities).when(authentication).getAuthorities();
 
-        JwtClaimAccessor claimAccessor = defaultJwtClaimsSource
-                .get(authentication);
-        Map<String, Object> claims = claimAccessor.getClaims();
-        Assert.assertEquals(TEST_ROLES,
-                claimAccessor.getClaimAsStringList("roles"));
+        JwtClaimsSet claimsSet = defaultJwtClaimsSource.get(authentication);
+        Assert.assertEquals(TEST_ROLES, claimsSet.getClaimAsStringList("roles"));
     }
 }

@@ -12,9 +12,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.nimbusds.jose.JOSEException;
@@ -41,7 +39,6 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -54,7 +51,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.context.HttpRequestResponseHolder;
 import org.springframework.security.web.context.SaveContextOnUpdateOrErrorResponseWrapper;
@@ -693,13 +690,12 @@ public class JwtSecurityContextRepositoryTest {
         final List<String> authorities = TEST_AUTHORITIES.stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-        final Map<String, Object> claims = new HashMap<>();
-        claims.put("name", TEST_USERNAME);
-        claims.put("entitlements", authorities);
-        claims.put("http://sso.example.com/schemas/claims/group", "users");
-        Mockito.doAnswer(
-                (InvocationOnMock i) -> (JwtClaimAccessor) () -> claims)
-                .when(mockJwtClaimsSource)
+        JwtClaimsSet jwtClaimsSet = JwtClaimsSet.builder()
+                .claim("name", TEST_USERNAME)
+                .claim("entitlements", authorities)
+                .claim("http://sso.example.com/schemas/claims/group", "users")
+                .build();
+        Mockito.doReturn(jwtClaimsSet).when(mockJwtClaimsSource)
                 .get(usernamePasswordAuthenticationToken);
         jwtSecurityContextRepository.setJwtClaimsSource(mockJwtClaimsSource);
 

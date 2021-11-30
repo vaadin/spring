@@ -16,7 +16,7 @@
 package com.vaadin.flow.spring.security.stateless;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 
 /**
  * Converts the authentication token into the JWT claims set.
@@ -31,5 +31,5 @@ public interface JwtClaimsSource {
      *            the authentication token
      * @return JWT claims set
      */
-    JwtClaimAccessor get(Authentication authentication);
+    JwtClaimsSet get(Authentication authentication);
 }

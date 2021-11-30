@@ -20,8 +20,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimAccessor;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 
 /**
  * A {@link JwtClaimsSource} implementation that creates a set with the {@code
@@ -33,15 +32,16 @@ public class DefaultJwtClaimsSource implements JwtClaimsSource {
     static final String ROLE_AUTHORITY_PREFIX = "ROLE_";
 
     @Override
-    public JwtClaimAccessor get(Authentication authentication) {
+    public JwtClaimsSet get(Authentication authentication) {
         final List<String> roles = authentication.getAuthorities().stream()
                 .map(Objects::toString)
                 .filter(a -> a.startsWith(ROLE_AUTHORITY_PREFIX))
                 .map(a -> a.substring(ROLE_AUTHORITY_PREFIX.length()))
                 .collect(Collectors.toList());
 
-        return Jwt.withTokenValue("jwt").header("type", "jwt")
-                .subject(authentication.getName()).claim(ROLES_CLAIM, roles)
+        return JwtClaimsSet.builder()
+                .subject(authentication.getName())
+                .claim(ROLES_CLAIM, roles)
                 .build();
     }
 }

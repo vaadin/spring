@@ -2,8 +2,6 @@ package com.vaadin.flow.spring.fusionsecurity;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +18,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.LazyCsrfTokenRepository;
 
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfo;
 import com.vaadin.flow.spring.fusionsecurity.data.UserInfoRepository;
@@ -69,14 +70,10 @@ public class SecurityConfig extends VaadinWebSecurityConfigurerAdapter {
             VaadinStatelessSecurityConfigurer<HttpSecurity> vaadinStatelessSecurityConfigurer = http
                     .getConfigurer(VaadinStatelessSecurityConfigurer.class);
 
-            vaadinStatelessSecurityConfigurer
-                    .jwtClaimsSource((authentication) -> () -> {
-                        Map<String, Object> claims = new HashMap<>(
-                                new DefaultJwtClaimsSource().get(authentication)
-                                        .getClaims());
-                        claims.put("foo", "bar");
-                        return claims;
-                    });
+            vaadinStatelessSecurityConfigurer.jwtClaimsSource(
+                    (authentication) -> JwtClaimsSet.from(
+                                    new DefaultJwtClaimsSource().get(authentication))
+                            .claim("foo", "bar").build());
         }
     }
 

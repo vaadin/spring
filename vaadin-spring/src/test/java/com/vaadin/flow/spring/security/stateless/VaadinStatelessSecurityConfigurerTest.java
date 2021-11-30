@@ -27,7 +27,7 @@ import org.springframework.security.config.annotation.web.configurers.CsrfConfig
 import org.springframework.security.config.annotation.web.configurers.SecurityContextConfigurer;
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithm;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
@@ -233,8 +233,8 @@ public class VaadinStatelessSecurityConfigurerTest<H extends HttpSecurityBuilder
 
     @Test
     public void configure_jwtClaimsSource() {
-        JwtClaimsSource jwtClaimsSource = authentication -> Jwt
-                .withTokenValue("jwt").build();
+        JwtClaimsSource jwtClaimsSource = authentication -> JwtClaimsSet.builder()
+                .build();
         vaadinStatelessSecurityConfigurer.withSecretKey().secretKey(SECRET_KEY)
                 .and().jwtClaimsSource(jwtClaimsSource);
 
