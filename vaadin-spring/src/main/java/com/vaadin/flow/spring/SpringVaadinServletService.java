@@ -48,6 +48,8 @@ public class SpringVaadinServletService extends VaadinServletService {
 
     private final Registration serviceDestroyRegistration;
 
+    private static final String SPRING_BOOT_RESOURCES_CLASS = "org.springframework.boot.autoconfigure.web.WebProperties$Resources";
+
     /**
      * Creates an instance connected to the given servlet and using the given
      * configuration with provided application {@code context}.
@@ -137,7 +139,7 @@ public class SpringVaadinServletService extends VaadinServletService {
             return null;
         }
         for (String prefix : context.getBean(
-                org.springframework.boot.autoconfigure.web.ResourceProperties.class)
+                org.springframework.boot.autoconfigure.web.WebProperties.Resources.class)
                 .getStaticLocations()) {
             Resource resource = context.getResource(getFullPath(path, prefix));
             if (resource != null) {
@@ -158,23 +160,25 @@ public class SpringVaadinServletService extends VaadinServletService {
         return prefix + path;
     }
 
+    /**
+     * Checks if the spring boot resources class is available without causing
+     * ClassNotFound or similar exceptions in plain Spring.
+     */
     private boolean isSpringBootConfigured() {
-        String resourcePropertiesFQN = "org.springframework.boot.autoconfigure.web.ResourceProperties";
-        if (isClassnameAvailable(resourcePropertiesFQN)) {
-            return context.getBeanNamesForType(
-                    org.springframework.boot.autoconfigure.web.ResourceProperties.class).length != 0;
+        Class<?> resourcesClass = resolveClass(SPRING_BOOT_RESOURCES_CLASS);
+        if (resourcesClass != null) {
+            return context.getBeanNamesForType(resourcesClass).length != 0;
         }
         return false;
     }
 
-    private static boolean isClassnameAvailable(String clazzName) {
+    private static Class<?> resolveClass(String clazzName) {
         try {
-            Class.forName(clazzName, false,
+            return Class.forName(clazzName, false,
                     SpringVaadinServletService.class.getClassLoader());
         } catch (LinkageError | ClassNotFoundException e) {
-            return false;
+            return null;
         }
-        return true;
     }
 
     @Override
