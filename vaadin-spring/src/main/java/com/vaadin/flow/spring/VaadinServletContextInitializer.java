@@ -436,7 +436,7 @@ public class VaadinServletContextInitializer
                     "Search for subclasses and classes with annotations took {} seconds",
                     (classScanning - start) / 1000);
 
-            if (ms > 10000 && appContext.getEnvironment()
+            if (classScanning > 10000 && appContext.getEnvironment()
                     .getProperty("vaadin.whitelisted-packages") == null) {
                 getLogger().info(
                         "Due to slow search it is recommended to use the whitelisted-packages feature to make scanning faster.\n\n"
