@@ -436,6 +436,13 @@ public class VaadinServletContextInitializer
                     "Search for subclasses and classes with annotations took {} seconds",
                     (classScanning - start) / 1000);
 
+            if (classScanning > 10000 && appContext.getEnvironment()
+                    .getProperty("vaadin.whitelisted-packages") == null) {
+                getLogger().info(
+                        "Due to slow search it is recommended to use the whitelisted-packages feature to make scanning faster.\n\n"
+                                + "See 'Flow / Integrations / Using Vaadin with Spring / Vaadin Spring Configuration' topic 'Special configuration parameters' at https://vaadin.com/docs for more detailed information.");
+            }
+
             try {
                 DevModeInitializer.initDevModeHandler(classes,
                         event.getServletContext(), config);
