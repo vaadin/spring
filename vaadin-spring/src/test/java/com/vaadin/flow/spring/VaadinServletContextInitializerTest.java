@@ -29,6 +29,7 @@ import org.springframework.core.env.Environment;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.DevModeHandler;
 import com.vaadin.flow.internal.DevModeHandlerManager;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
@@ -87,9 +88,8 @@ public class VaadinServletContextInitializerTest {
             throws Exception {
         initDefaultMocks();
 
-        Mockito.when(
-                devModeHandlerManager.isDevModeAlreadyStarted(Mockito.any()))
-                .thenReturn(false);
+        Mockito.when(devModeHandlerManager.getDevModeHandler())
+                .thenReturn(null);
         Mockito.when(devModeHandlerManager.getHandlesTypes())
                 .thenReturn(new Class<?>[0]);
 
@@ -112,9 +112,9 @@ public class VaadinServletContextInitializerTest {
             throws Exception {
         initDefaultMocks();
 
-        Mockito.when(
-                devModeHandlerManager.isDevModeAlreadyStarted(Mockito.any()))
-                .thenReturn(true);
+        DevModeHandler devModeHandler = Mockito.mock(DevModeHandler.class);
+        Mockito.when(devModeHandlerManager.getDevModeHandler())
+                .thenReturn(devModeHandler);
         Mockito.when(devModeHandlerManager.getHandlesTypes())
                 .thenReturn(new Class<?>[0]);
 

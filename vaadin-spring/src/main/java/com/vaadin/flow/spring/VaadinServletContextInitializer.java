@@ -63,13 +63,10 @@ import com.vaadin.flow.di.Lookup;
 import com.vaadin.flow.di.LookupInitializer;
 import com.vaadin.flow.internal.DevModeHandler;
 import com.vaadin.flow.internal.DevModeHandlerManager;
-import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.router.HasErrorParameter;
-import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RouteNotFoundError;
 import com.vaadin.flow.server.AmbiguousRouteConfigurationException;
 import com.vaadin.flow.server.InvalidRouteConfigurationException;
 import com.vaadin.flow.server.RouteRegistry;
@@ -429,7 +426,11 @@ public class VaadinServletContextInitializer
                                 + "run the build-frontend maven goal) or "
                                 + "include the vaadin-dev-server dependency");
             }
-            if (isDevModeAlreadyStarted(event.getServletContext())) {
+            if (devModeHandlerManager.getDevModeHandler() != null) {
+                /*
+                 * If a Spring Boot app is deployed as a war, the initializers
+                 * have already been run and should not be run again here
+                 */
                 return;
             }
 
@@ -498,21 +499,6 @@ public class VaadinServletContextInitializer
             return customScanOnly != null && !customScanOnly.isEmpty();
         }
 
-        private boolean isDevModeAlreadyStarted(ServletContext servletContext) {
-            if (devModeHandlerManager != null) {
-                VaadinServletContext vaadinContext = new VaadinServletContext(
-                        servletContext);
-                if (devModeHandlerManager
-                        .isDevModeAlreadyStarted(vaadinContext)) {
-                    if (getLogger().isDebugEnabled()) {
-                        getLogger().debug(
-                                "Skipped DevModeHandler initialization as it has been already initialized");
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 
     private class WebComponentServletContextListener
