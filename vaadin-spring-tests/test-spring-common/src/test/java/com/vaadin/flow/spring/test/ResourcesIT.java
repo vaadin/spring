@@ -6,7 +6,7 @@ import org.junit.Test;
 public class ResourcesIT extends AbstractSpringTest {
 
     private String loadFile(String file) {
-        getDriver().get(getRootURL() + file);
+        getDriver().get(getContextRootURL() + file);
         return $("body").first().getPropertyString("textContent")
                 .replaceFirst("\n$", "");
     }
