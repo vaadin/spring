@@ -316,6 +316,7 @@
             <modules>
                 <module>test-spring-common</module>
                 <module>test-spring-boot</module>
+                <module>test-spring-boot/pom-springboot23.xml</module>
                 <!--
                 Disabled as the resource scanner does not work with Undertow
                 <module>test-spring-boot-undertow</module>
