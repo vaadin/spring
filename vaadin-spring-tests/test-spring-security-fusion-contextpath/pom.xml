@@ -21,7 +21,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.vaadin</groupId>
+            <groupId>dev.hilla</groupId>
             <artifactId>hilla-endpoint</artifactId>
         </dependency>
         <dependency>

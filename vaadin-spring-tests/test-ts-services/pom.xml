@@ -37,9 +37,9 @@
             <version>${vaadin.flow.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.vaadin</groupId>
+            <groupId>dev.hilla</groupId>
             <artifactId>hilla-endpoint</artifactId>
-            <version>${vaadin.flow.version}</version>
+            <version>${hilla.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
