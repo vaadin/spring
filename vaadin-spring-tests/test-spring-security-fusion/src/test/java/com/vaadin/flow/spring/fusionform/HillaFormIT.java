@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class FusionFormIT extends ChromeBrowserTest {
+public class HillaFormIT extends ChromeBrowserTest {
 
     private static final int SERVER_PORT = 9999;
 

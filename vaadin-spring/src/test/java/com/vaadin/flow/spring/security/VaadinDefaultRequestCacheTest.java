@@ -22,12 +22,12 @@ import com.vaadin.flow.spring.SpringBootAutoConfiguration;
 import com.vaadin.flow.spring.SpringSecurityAutoConfiguration;
 import dev.hilla.Endpoint;
 import dev.hilla.EndpointRegistry;
-import dev.hilla.FusionControllerConfiguration;
-import dev.hilla.FusionEndpointProperties;
+import dev.hilla.HillaControllerConfiguration;
+import dev.hilla.HillaEndpointProperties;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = { FusionEndpointProperties.class })
-@ContextConfiguration(classes = { FusionControllerConfiguration.class,
+@SpringBootTest(classes = { HillaEndpointProperties.class })
+@ContextConfiguration(classes = { HillaControllerConfiguration.class,
         SpringBootAutoConfiguration.class,
         SpringSecurityAutoConfiguration.class })
 public class VaadinDefaultRequestCacheTest {
