@@ -185,14 +185,14 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      *
      * @param http
      *            the http security from {@link #configure(HttpSecurity)}
-     * @param fusionLoginViewPath
+     * @param hillaLoginViewPath
      *            the path to the login view
      * @throws Exception
      *             if something goes wrong
      */
-    protected void setLoginView(HttpSecurity http, String fusionLoginViewPath)
+    protected void setLoginView(HttpSecurity http, String hillaLoginViewPath)
             throws Exception {
-        setLoginView(http, fusionLoginViewPath, "/");
+        setLoginView(http, hillaLoginViewPath, "/");
     }
 
     /**
@@ -204,24 +204,24 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      *
      * @param http
      *            the http security from {@link #configure(HttpSecurity)}
-     * @param fusionLoginViewPath
+     * @param hillaLoginViewPath
      *            the path to the login view
      * @param logoutUrl
      *            the URL to redirect the user to after logging out
      * @throws Exception
      *             if something goes wrong
      */
-    protected void setLoginView(HttpSecurity http, String fusionLoginViewPath,
+    protected void setLoginView(HttpSecurity http, String hillaLoginViewPath,
             String logoutUrl) throws Exception {
         FormLoginConfigurer<HttpSecurity> formLogin = http.formLogin();
-        formLogin.loginPage(fusionLoginViewPath).permitAll();
+        formLogin.loginPage(hillaLoginViewPath).permitAll();
         formLogin.successHandler(
                 getVaadinSavedRequestAwareAuthenticationSuccessHandler(http));
         http.logout().logoutSuccessUrl(logoutUrl);
         http.exceptionHandling().defaultAuthenticationEntryPointFor(
-                new LoginUrlAuthenticationEntryPoint(fusionLoginViewPath),
+                new LoginUrlAuthenticationEntryPoint(hillaLoginViewPath),
                 AnyRequestMatcher.INSTANCE);
-        viewAccessChecker.setLoginView(fusionLoginViewPath);
+        viewAccessChecker.setLoginView(hillaLoginViewPath);
     }
 
     /**
