@@ -110,7 +110,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
                 VaadinAwareSecurityContextHolderStrategy.class.getName());
 
         // Respond with 401 Unauthorized HTTP status code for unauthorized
-        // requests for protected Fusion endpoints, so that the response could
+        // requests for protected Hilla endpoints, so that the response could
         // be handled on the client side using e.g. `InvalidSessionMiddleware`.
         http.exceptionHandling()
                 .accessDeniedHandler(createAccessDeniedHandler())
@@ -180,7 +180,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      * Sets up login for the application using form login with the given path
      * for the login view.
      * <p>
-     * This is used when your application uses a Fusion based login view
+     * This is used when your application uses a Hilla based login view
      * available at the given path.
      *
      * @param http
@@ -199,7 +199,7 @@ public abstract class VaadinWebSecurityConfigurerAdapter
      * Sets up login for the application using form login with the given path
      * for the login view.
      * <p>
-     * This is used when your application uses a Fusion based login view
+     * This is used when your application uses a Hilla based login view
      * available at the given path.
      *
      * @param http

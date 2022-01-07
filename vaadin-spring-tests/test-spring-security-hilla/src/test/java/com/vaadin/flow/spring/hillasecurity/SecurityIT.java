@@ -78,7 +78,7 @@ public class SecurityIT extends ChromeBrowserTest {
         List<MenuItem> menuItems = getMenuItems();
         List<MenuItem> expectedItems = new ArrayList<MenuItem>();
         expectedItems.add(new MenuItem("", "Public", true));
-        expectedItems.add(new MenuItem("form", "Fusion Form", true));
+        expectedItems.add(new MenuItem("form", "Hilla Form", true));
         expectedItems.add(new MenuItem("private", "Private", false));
         expectedItems.add(new MenuItem("admin", "Admin", false));
         Assert.assertEquals(expectedItems, menuItems);
@@ -91,7 +91,7 @@ public class SecurityIT extends ChromeBrowserTest {
         List<MenuItem> menuItems = getMenuItems();
         List<MenuItem> expectedItems = new ArrayList<MenuItem>();
         expectedItems.add(new MenuItem("", "Public", true));
-        expectedItems.add(new MenuItem("form", "Fusion Form", true));
+        expectedItems.add(new MenuItem("form", "Hilla Form", true));
         expectedItems.add(new MenuItem("private", "Private", true));
         expectedItems.add(new MenuItem("admin", "Admin", false));
         Assert.assertEquals(expectedItems, menuItems);
@@ -104,7 +104,7 @@ public class SecurityIT extends ChromeBrowserTest {
         List<MenuItem> menuItems = getMenuItems();
         List<MenuItem> expectedItems = new ArrayList<MenuItem>();
         expectedItems.add(new MenuItem("", "Public", true));
-        expectedItems.add(new MenuItem("form", "Fusion Form", true));
+        expectedItems.add(new MenuItem("form", "Hilla Form", true));
         expectedItems.add(new MenuItem("private", "Private", true));
         expectedItems.add(new MenuItem("admin", "Admin", true));
         Assert.assertEquals(expectedItems, menuItems);

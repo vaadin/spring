@@ -20,7 +20,7 @@ export const views: ViewRoute[] = [
     path: "form",
     component: "vaadin-elements-view",
     name: "form",
-    title: "Fusion Form",
+    title: "Hilla Form",
     action: async () => {
       await import("./views/public/vaadin-elements-view");
     },

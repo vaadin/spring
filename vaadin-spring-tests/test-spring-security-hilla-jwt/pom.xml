@@ -8,7 +8,7 @@
         <version>20.0-SNAPSHOT</version>
     </parent>
     <artifactId>test-spring-security-hilla-jwt</artifactId>
-    <name>Integration tests for Vaadin Spring Security and Fusion With JWT</name>
+    <name>Integration tests for Vaadin Spring Security and Hilla With JWT</name>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>

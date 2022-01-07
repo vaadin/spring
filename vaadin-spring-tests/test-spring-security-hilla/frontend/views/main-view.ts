@@ -88,7 +88,7 @@ export class MainView extends Layout {
       },
       {
         path: "form",
-        title: "Fusion Form",
+        title: "Hilla Form",
       },
       {
         path: "private",

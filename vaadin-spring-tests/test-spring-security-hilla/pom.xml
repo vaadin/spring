@@ -8,7 +8,7 @@
         <version>20.0-SNAPSHOT</version>
     </parent>
     <artifactId>test-spring-security-hilla</artifactId>
-    <name>Integration tests for Vaadin Spring Security and Fusion</name>
+    <name>Integration tests for Vaadin Spring Security and Hilla</name>
     <packaging>jar</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>

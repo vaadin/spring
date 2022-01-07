@@ -49,9 +49,9 @@ public class RequestUtil {
         try {
             endpointUtil = applicationContext.getBean(EndpointUtil.class);
         } catch (NoClassDefFoundError e) {
-            // Presumable Fusion is not on the classpath
+            // Presumable Hilla is not on the classpath
         } catch (Exception e) {
-            // Presumable Fusion is not on the classpath
+            // Presumable Hilla is not on the classpath
         }
 
     }
