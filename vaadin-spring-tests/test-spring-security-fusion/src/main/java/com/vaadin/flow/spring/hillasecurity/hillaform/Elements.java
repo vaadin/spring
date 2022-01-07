@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.hillasecurity.fusionform;
+package com.vaadin.flow.spring.hillasecurity.hillaform;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

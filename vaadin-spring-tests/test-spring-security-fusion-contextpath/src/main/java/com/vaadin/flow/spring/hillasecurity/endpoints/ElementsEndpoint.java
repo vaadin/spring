@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import dev.hilla.Endpoint;
-import com.vaadin.flow.spring.hillasecurity.fusionform.Elements;
-import com.vaadin.flow.spring.hillasecurity.fusionform.Elements.Options;
+import com.vaadin.flow.spring.hillasecurity.hillaform.Elements;
+import com.vaadin.flow.spring.hillasecurity.hillaform.Elements.Options;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 @Endpoint

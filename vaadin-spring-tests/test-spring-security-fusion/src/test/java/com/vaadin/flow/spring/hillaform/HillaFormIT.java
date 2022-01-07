@@ -1,4 +1,4 @@
-package com.vaadin.flow.spring.fusionform;
+package com.vaadin.flow.spring.hillaform;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
