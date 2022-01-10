@@ -44,7 +44,6 @@
 
         <!-- These are typically overridden with BOMs -->
         <vaadin.flow.version>10.0-SNAPSHOT</vaadin.flow.version>
-        <hilla.version>1.0-SNAPSHOT</hilla.version>
         <spring-boot.version>2.6.2</spring-boot.version>
 
         <!-- Additional manifest fields -->
