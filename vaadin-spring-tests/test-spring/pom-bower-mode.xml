@@ -12,6 +12,7 @@
     <packaging>war</packaging>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
+        <test.excludegroup>com.vaadin.flow.spring.test.SpringBootOnly</test.excludegroup>
     </properties>
 
     <dependencies>
