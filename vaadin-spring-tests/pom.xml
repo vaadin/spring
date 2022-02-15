@@ -548,7 +548,7 @@
         <profile>
             <id>java 11</id>
             <activation>
-                <jdk>11</jdk>
+                <jdk>[9,)</jdk>
             </activation>
             <dependencies>
                 <dependency>
