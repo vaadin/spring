@@ -548,7 +548,7 @@
         <profile>
             <id>java 11</id>
             <activation>
-                <jdk>11</jdk>
+                <jdk>[9,)</jdk>
             </activation>
             <dependencies>
                 <dependency>
@@ -564,12 +564,12 @@
                 <dependency>
                     <groupId>javax.xml.bind</groupId>
                     <artifactId>jaxb-api</artifactId>
-                    <version>2.3.0</version>
+                    <version>2.3.1</version>
                 </dependency>
                 <dependency>
                     <groupId>org.glassfish.jaxb</groupId>
                     <artifactId>jaxb-runtime</artifactId>
-                    <version>2.3.0</version>
+                    <version>2.3.5</version>
                 </dependency>
             </dependencies>
         </profile>
