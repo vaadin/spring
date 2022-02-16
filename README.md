@@ -1,9 +1,11 @@
-[![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-Spring-00b4f0.svg)](https://vaadin.com/directory/component/vaadin-spring)
-[![Stars on Vaadin Directory](https://img.shields.io/vaadin-directory/star/vaadin-spring.svg)](https://vaadin.com/directory/component/vaadin-spring)  
+Deprecated
+======================
 
-[![Published on Vaadin  Directory](https://img.shields.io/badge/Vaadin%20Directory-Spring%20Boot-00b4f0.svg)](https://vaadin.com/directory/component/vaadin-spring-boot)
-[![Stars on Vaadin Directory](https://img.shields.io/vaadin-directory/star/vaadin-spring-boot.svg)](https://vaadin.com/directory/component/vaadin-spring-boot)
-
+This repository hosts the legacy versions of the Spring Boot add-on for Vaadin 10 - 22.
+Since Vaadin 23, the code for the Spring Boot add-on has been migrated to the 
+[Flow](https://github.com/vaadin/flow) repository:
+* Issues and pull requests related to the Flow and Spring Boot integration for Vaadin 23 or newer should be created in https://github.com/vaadin/flow
+* The Spring add-on will continue to be released from this code base for the maintenance versions of Vaadin Platform (14.8 and 22). Pull requests targeting this should go to this repository (see table below for the correct target branch). 
 
 Vaadin Spring
 ======================
@@ -27,7 +29,7 @@ See other branches for other framework versions:
 * 17.0 for Vaadin 20 
 * 18.0 for Vaadin 21 
 * 19.0 for Vaadin 22
-* master (currently 20.0) for upcoming major Vaadin versions
+* master: no longer developed
 
 Getting started
 ----
