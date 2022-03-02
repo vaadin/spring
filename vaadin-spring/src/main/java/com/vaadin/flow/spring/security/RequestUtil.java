@@ -117,7 +117,8 @@ public class RequestUtil {
      */
     public boolean isAnonymousRoute(HttpServletRequest request) {
         String vaadinMapping = configurationProperties.getUrlMapping();
-        String requestedPath = getRequestPathInsideContext(request);
+        String requestedPath = HandlerHelper
+                .getRequestPathInsideContext(request);
         Optional<String> maybePath = HandlerHelper
                 .getPathIfInsideServlet(vaadinMapping, requestedPath);
         if (!maybePath.isPresent()) {
@@ -175,6 +176,48 @@ public class RequestUtil {
             url += pathInfo;
         }
         return url;
+    }
+
+    String getUrlMapping() {
+        return configurationProperties.getUrlMapping();
+    }
+
+    /**
+     * Prepends to the given {@code path} with the configured url mapping.
+     *
+     * A {@literal null} path is treated as empty string; the same applies for
+     * url mapping.
+     *
+     * @return the path with prepended url mapping.
+     * @see VaadinConfigurationProperties#getUrlMapping()
+     */
+    String applyUrlMapping(String path) {
+        return applyUrlMapping(configurationProperties.getUrlMapping(), path);
+    }
+
+    /**
+     * Prepends to the given {@code path} with the servlet path prefix from
+     * input url mapping.
+     *
+     * A {@literal null} path is treated as empty string; the same applies for
+     * url mapping.
+     *
+     * @return the path with prepended url mapping.
+     * @see VaadinConfigurationProperties#getUrlMapping()
+     */
+    static String applyUrlMapping(String urlMapping, String path) {
+        if (urlMapping == null) {
+            urlMapping = "";
+        } else {
+            // remove potential / or /* at the end of the mapping
+            urlMapping = urlMapping.replaceFirst("/\\*?$", "");
+        }
+        if (path == null) {
+            path = "";
+        } else if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        return urlMapping + "/" + path;
     }
 
 }
