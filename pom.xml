@@ -46,7 +46,7 @@
 
         <!-- These are typically overridden with BOMs -->
         <vaadin.flow.version>1.0-SNAPSHOT</vaadin.flow.version>
-        <spring-boot.version>2.5.12</spring-boot.version>
+        <spring-boot.version>2.6.6</spring-boot.version>
         <spring.security.oauth.version>2.5.1.RELEASE</spring.security.oauth.version>
 
         <!-- Additional manifest fields -->
