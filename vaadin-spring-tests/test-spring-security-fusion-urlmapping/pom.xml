@@ -54,12 +54,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>test-spring-security-fusion</artifactId>
             <version>${project.version}</version>
-            <classifier>frontend</classifier>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>test-spring-security-fusion</artifactId>
-            <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
