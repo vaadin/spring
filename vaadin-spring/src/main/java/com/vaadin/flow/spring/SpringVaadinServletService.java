@@ -17,6 +17,7 @@ package com.vaadin.flow.spring;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -24,9 +25,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
+import org.springframework.util.ReflectionUtils;
 
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.function.DeploymentConfiguration;
+import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.server.ServiceException;
 import com.vaadin.flow.server.SessionDestroyListener;
 import com.vaadin.flow.server.VaadinRequest;
@@ -55,16 +58,13 @@ public class SpringVaadinServletService extends VaadinServletService {
      * Creates an instance connected to the given servlet and using the given
      * configuration with provided application {@code context}.
      *
-     * @param servlet
-     *         the servlet which receives requests
-     * @param deploymentConfiguration
-     *         the configuration to use
-     * @param context
-     *         the Spring application context
+     * @param servlet                 the servlet which receives requests
+     * @param deploymentConfiguration the configuration to use
+     * @param context                 the Spring application context
      */
     public SpringVaadinServletService(VaadinServlet servlet,
-            DeploymentConfiguration deploymentConfiguration,
-            ApplicationContext context) {
+                                      DeploymentConfiguration deploymentConfiguration,
+                                      ApplicationContext context) {
         super(servlet, deploymentConfiguration);
         this.context = context;
         SessionDestroyListener listener = event -> sessionDestroyed(
@@ -126,7 +126,7 @@ public class SpringVaadinServletService extends VaadinServletService {
 
     @Override
     public URL getResource(String path, WebBrowser browser,
-            AbstractTheme theme) {
+                           AbstractTheme theme) {
         URL resource = super.getResource(path, browser, theme);
         if (resource == null) {
             resource = getResourceURL(
@@ -148,7 +148,7 @@ public class SpringVaadinServletService extends VaadinServletService {
             return null;
         }
         for (String prefix : context.getBean(
-                org.springframework.boot.autoconfigure.web.WebProperties.class)
+                        org.springframework.boot.autoconfigure.web.WebProperties.class)
                 .getResources().getStaticLocations()) {
             Resource resource = context.getResource(getFullPath(path, prefix));
             if (resource != null) {
@@ -166,9 +166,11 @@ public class SpringVaadinServletService extends VaadinServletService {
         if (!isSpringBoot23Configured()) {
             return null;
         }
-        for (String prefix : context.getBean(
-                org.springframework.boot.autoconfigure.web.ResourceProperties.class)
-                .getStaticLocations()) {
+        Class<?> resourcesClass = resolveClass(SPRING_BOOT_23_RESOURCES_CLASS);
+        Method method = ReflectionUtils.findMethod(resourcesClass, "getStaticLocations");
+        Object resourceProperties = context.getBean(resourcesClass);
+        String[] locations = (String[]) ReflectionUtils.invokeMethod(method, resourceProperties);
+        for (String prefix : locations) {
             Resource resource = context.getResource(getFullPath(path, prefix));
             if (resource != null) {
                 try {
@@ -224,7 +226,7 @@ public class SpringVaadinServletService extends VaadinServletService {
 
     @Override
     public InputStream getResourceAsStream(String path, WebBrowser browser,
-            AbstractTheme theme) {
+                                           AbstractTheme theme) {
         InputStream resourceAsStream = super
                 .getResourceAsStream(path, browser, theme);
         if (resourceAsStream == null) {
@@ -242,7 +244,7 @@ public class SpringVaadinServletService extends VaadinServletService {
     }
 
     private String getThemeResolvedPath(String url, WebBrowser browser,
-            AbstractTheme theme) {
+                                        AbstractTheme theme) {
         String resourceUrl = resolveResource(url, browser);
         if (theme != null) {
             String themeUrl = theme.translateUrl(resourceUrl);
