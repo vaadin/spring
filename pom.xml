@@ -45,7 +45,7 @@
 
         <!-- These are typically overridden with BOMs -->
         <vaadin.flow.version>2.8-SNAPSHOT</vaadin.flow.version>
-        <spring-boot.version>2.5.14</spring-boot.version>
+        <spring-boot.version>2.7.7</spring-boot.version>
 
         <!-- Additional manifest fields -->
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
@@ -222,14 +222,6 @@
             </snapshots>
         </repository>
         <repository>
-            <id>spring-milestones</id>
-            <name>Spring Milestones</name>
-            <url>https://repo.spring.io/milestone</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
             <id>vaadin-prereleases</id>
             <url>
                 https://maven.vaadin.com/vaadin-prereleases/
@@ -261,14 +253,6 @@
         <pluginRepository>
             <id>central</id>
             <url>https://repo.maven.apache.org/maven2</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-        <pluginRepository>
-            <id>spring-milestones</id>
-            <name>Spring Milestones</name>
-            <url>https://repo.spring.io/milestone</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
