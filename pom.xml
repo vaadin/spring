@@ -113,7 +113,6 @@
                     </properties>
                     <excludes>
                         <exclude>**/target/**</exclude>
-                        <exclude>vaadin-spring-tests/**</exclude>
                         <exclude>**/*.xml</exclude>
                         <exclude>**/*.properties</exclude>
                         <exclude>src/license/**/*</exclude>
