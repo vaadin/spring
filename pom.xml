@@ -47,7 +47,7 @@
         <spring-boot.version>2.7.7</spring-boot.version>
 
         <!-- Additional manifest fields -->
-        <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
+        <Vaadin-License-Title>Vaadin Commercial License and Service Terms</Vaadin-License-Title>
 
         <junit.version>4.12</junit.version>
         <maven.clean.plugin.version>3.0.0</maven.clean.plugin.version>
