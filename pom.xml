@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<!DOCTYPE project>
+<project xmlns="https://maven.apache.org/POM/4.0.0" xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -77,26 +78,46 @@
             <organization>Vaadin</organization>
             <email>petter@vaadin.com</email>
         </developer>
+        <developer>
+            <name>Patrik Lindström</name>
+            <organization>Vaadin</organization>
+            <email>patrik@vaadin.com</email>
+        </developer>
     </developers>
     
     <properties>
         <encoding>UTF-8</encoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         
         <!-- These are typically overridden with BOMs -->
-        <vaadin.version>8.8.0</vaadin.version>
-        <spring.version>4.3.9.RELEASE</spring.version>
-        <spring.security.version>4.2.3.RELEASE</spring.security.version>
-        <spring.boot.version>1.4.7.RELEASE</spring.boot.version>
+        <vaadin.version>8.21.0</vaadin.version>
+        <spring.version>6.0.11</spring.version>
+        <spring.security.version>6.1.2</spring.security.version>
+        <spring.boot.version>3.0.2</spring.boot.version>
 
-        <slf4j.version>1.7.7</slf4j.version>
+        <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+        <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
+
+        <slf4j.version>2.0.7</slf4j.version>
 
         <!-- Additional manifest fields -->
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
 
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.2</junit.version>
+        <jupiter.version>5.10.0</jupiter.version>
+        <mockito.version>5.4.0</mockito.version>
     </properties>
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.javassist/javassist -->
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.29.2-GA</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>

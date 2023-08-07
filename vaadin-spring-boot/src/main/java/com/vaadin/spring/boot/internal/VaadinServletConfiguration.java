@@ -271,7 +271,7 @@ public class VaadinServletConfiguration implements InitializingBean {
             vaadinServlet.setServiceUrlPath(DEFAULT_SERVLET_URL_BASE);
         }
 
-        final ServletRegistrationBean registrationBean = new ServletRegistrationBean(
+        final ServletRegistrationBean<VaadinServlet> registrationBean = new ServletRegistrationBean<>(
                 servlet, urlMappings);
         addInitParameters(registrationBean);
         return registrationBean;
