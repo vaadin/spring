@@ -12,7 +12,7 @@
 
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-spring-parent</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>vaadin-spring-parent</name>
@@ -90,24 +90,26 @@
         <maven.compiler.release>17</maven.compiler.release>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        
+
         <!-- These are typically overridden with BOMs -->
         <vaadin.version>8.21.0</vaadin.version>
-        <spring.version>6.0.11</spring.version>
+        <spring.version>6.0.12</spring.version>
         <spring.security.version>6.1.2</spring.security.version>
-        <spring.boot.version>3.0.2</spring.boot.version>
+        <spring.boot.version>3.1.4</spring.boot.version>
 
         <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+        <jakarta.websocket.version>2.1.1</jakarta.websocket.version>
         <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
 
         <slf4j.version>2.0.7</slf4j.version>
+        <javassist.version>3.29.2-GA</javassist.version>
 
         <!-- Additional manifest fields -->
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
 
         <junit.version>4.13.2</junit.version>
         <jupiter.version>5.10.0</jupiter.version>
-        <mockito.version>5.4.0</mockito.version>
+        <mockito.version>5.5.0</mockito.version>
     </properties>
 
     <dependencies>
@@ -117,6 +119,24 @@
             <artifactId>javassist</artifactId>
             <version>3.29.2-GA</version>
         </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.8</version>
+          </dependency>
+
+          <!-- slf4j override -->
+          <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>license-checker</artifactId>
+            <version>1.12.3</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+          </dependency>
     </dependencies>
 
     <build>
@@ -145,7 +165,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
+                <version>3.3.0</version>
                 <configuration>
                     <excludeResources>true</excludeResources>
                 </configuration>
@@ -161,13 +181,37 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <inherited>true</inherited>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven-version</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.6.2</version>
+                                </requireMavenVersion>          
+                                <!--<dependencyConvergence />-->
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
