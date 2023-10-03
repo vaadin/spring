@@ -130,8 +130,8 @@ public class UIScopeImplTest {
 
     @Test
     public void testRemove() {
-        Object ret1 = uiScopeImpl.get(TEST_BEAN_NAME, objFactory);
-        Object ret = uiScopeImpl.remove(TEST_BEAN_NAME);
+        /* final Object ret1 = */ uiScopeImpl.get(TEST_BEAN_NAME, objFactory);
+        final Object ret = uiScopeImpl.remove(TEST_BEAN_NAME);
 
         assertSame(bean, ret);
 
@@ -209,6 +209,7 @@ public class UIScopeImplTest {
     }
 
     @Rule
+    @SuppressWarnings("deprecation")
     public ExpectedException thrown = ExpectedException.none();
 
     @Test

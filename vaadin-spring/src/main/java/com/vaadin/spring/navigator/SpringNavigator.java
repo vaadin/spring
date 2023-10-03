@@ -276,7 +276,7 @@ public class SpringNavigator extends Navigator {
                             "Could not find error view bean of class [{}] in application context, creating it with Class.newInstance()",
                             viewClass.getName());
                     try {
-                        return viewClass.newInstance();
+                        return viewClass.getDeclaredConstructor().newInstance();
                     } catch (Exception e2) {
                         throw new RuntimeException(e2);
                     }

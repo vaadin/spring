@@ -47,7 +47,7 @@ public class UUIDTest {
 
     @Test
     public void testDifferentClassNotEquals() {
-        assertNotEquals(new UIID(1), new Integer(1));
+        assertNotEquals(new UIID(1), Integer.valueOf(1));
     }
 
     @Test

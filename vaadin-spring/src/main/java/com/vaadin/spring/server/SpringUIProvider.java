@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -97,6 +98,7 @@ public class SpringUIProvider extends UIProvider {
                 .getBeanNamesForAnnotation(SpringUI.class);
         for (String uiBeanName : uiBeanNames) {
             Class<?> beanType = getWebApplicationContext().getType(uiBeanName);
+            Assert.notNull(beanType, "BeanType for UI " + uiBeanName + " was null");
             if (UI.class.isAssignableFrom(beanType)) {
                 logger.debug("Found Vaadin UI [{}]",
                         beanType.getCanonicalName());
@@ -134,6 +136,11 @@ public class SpringUIProvider extends UIProvider {
     protected String deriveMappingForUI(String uiBeanName) {
         SpringUI annotation = getWebApplicationContext()
                 .findAnnotationOnBean(uiBeanName, SpringUI.class);
+        Assert.notNull(annotation, "SpringUI annotation for bean " + uiBeanName
+            + " could not be found!");
+        if (annotation == null) {
+            return "";
+        }
         return resolvePropertyPlaceholders(annotation.path());
     }
 

@@ -273,6 +273,7 @@ public class DefaultViewCache implements ViewCache {
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public void destroy() {
             // backwards compatibility
             if (!(navigator instanceof SpringNavigator)) {

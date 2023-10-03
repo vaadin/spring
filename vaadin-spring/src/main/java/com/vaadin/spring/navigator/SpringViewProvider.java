@@ -431,8 +431,9 @@ public class SpringViewProvider implements ViewProvider {
         if (isAccessGranted(viewInfo)) {
             final BeanDefinition beanDefinition = getBeanDefinitionRegistry()
                     .getBeanDefinition(viewInfo.getBeanName());
-            if (beanDefinition.getScope()
-                    .equals(ViewScopeImpl.VAADIN_VIEW_SCOPE_NAME)) {
+            final String scope = beanDefinition.getScope();
+
+            if (scope != null && scope.equals(ViewScopeImpl.VAADIN_VIEW_SCOPE_NAME)) {
                 LOGGER.trace("View [{}] is view scoped, activating scope",
                         viewInfo.getViewName());
                 final ViewCache viewCache = ViewScopeImpl

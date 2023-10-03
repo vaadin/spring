@@ -94,14 +94,16 @@
         <!-- These are typically overridden with BOMs -->
         <vaadin.version>8.21.0</vaadin.version>
         <spring.version>6.0.12</spring.version>
+        <spring.context.version>5.3.29</spring.context.version>
         <spring.security.version>6.1.2</spring.security.version>
-        <spring.boot.version>3.1.4</spring.boot.version>
+        <spring.boot.version>3.0.4</spring.boot.version>
 
         <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
         <jakarta.websocket.version>2.1.1</jakarta.websocket.version>
         <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
 
-        <slf4j.version>2.0.7</slf4j.version>
+        <log4j.version>2.7</log4j.version>
+        <slf4j.version>1.7.21</slf4j.version>
         <javassist.version>3.29.2-GA</javassist.version>
 
         <!-- Additional manifest fields -->
