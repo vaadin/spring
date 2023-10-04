@@ -163,7 +163,7 @@ public class SpringVaadinServletTest {
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getServletPath()).thenReturn(servletPath);
         Mockito.when(request.getPathInfo()).thenReturn(pathInfo);
-        Mockito.when(request.getRequestURI()).thenReturn("");
+        Mockito.when(request.getRequestURI()).thenReturn(servletPath + pathInfo);
         Mockito.when(request.getContextPath()).thenReturn("");
         return request;
     }
