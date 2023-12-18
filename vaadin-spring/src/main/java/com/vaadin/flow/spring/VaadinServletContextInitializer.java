@@ -253,7 +253,7 @@ public class VaadinServletContextInitializer
                 try {
                     List<Class<?>> routeClasses = findByAnnotation(
                             getRoutePackages(), Route.class, RouteAlias.class)
-                                    .collect(Collectors.toList());
+                            .collect(Collectors.toList());
 
                     getLogger().debug(
                             "Found {} route classes. Here is the list: {}",
@@ -334,8 +334,8 @@ public class VaadinServletContextInitializer
 
             Stream<Class<? extends Component>> hasErrorComponents = findBySuperType(
                     getErrorParameterPackages(), HasErrorParameter.class)
-                            .filter(Component.class::isAssignableFrom)
-                            .map(clazz -> (Class<? extends Component>) clazz);
+                    .filter(Component.class::isAssignableFrom)
+                    .map(clazz -> (Class<? extends Component>) clazz);
             registry.setErrorNavigationTargets(
                     hasErrorComponents.collect(Collectors.toSet()));
         }
@@ -429,7 +429,7 @@ public class VaadinServletContextInitializer
 
             Set<Class<?>> classes = findByAnnotationOrSuperType(basePackages,
                     customLoader, annotations, superTypes)
-                            .collect(Collectors.toSet());
+                    .collect(Collectors.toSet());
 
             final long classScanning = System.currentTimeMillis();
             getLogger().info(
@@ -437,10 +437,12 @@ public class VaadinServletContextInitializer
                     (classScanning - start) / 1000);
 
             if (classScanning > 10000 && appContext.getEnvironment()
-                    .getProperty("vaadin.whitelisted-packages") == null) {
+                    .getProperty("vaadin.allowed-packages") == null
+                    && appContext.getEnvironment()
+                            .getProperty("vaadin.whitelisted-packages") == null) {
                 getLogger().info(
-                        "Due to slow search it is recommended to use the whitelisted-packages feature to make scanning faster.\n\n"
-                                + "See the whitelisted-packages section in the docs at https://vaadin.com/docs/latest/flow/integrations/spring/configuration#special-configuration-parameters");
+                        "Class scanning is taking a long time. You can use the allowed-packages property to make it faster.\n\n"
+                                + "See documentation for details: https://vaadin.com/docs/integrations/spring/configuration");
             }
 
             try {
@@ -490,7 +492,7 @@ public class VaadinServletContextInitializer
 
                 Set<Class<?>> webComponentExporters = findBySuperType(
                         getWebComponentPackages(), WebComponentExporter.class)
-                                .collect(Collectors.toSet());
+                        .collect(Collectors.toSet());
 
                 try {
                     initializer.process(webComponentExporters,
@@ -520,12 +522,19 @@ public class VaadinServletContextInitializer
      * {@code context} provided.
      *
      * @param context
-     *            the application context
+     *                the application context
      */
     public VaadinServletContextInitializer(ApplicationContext context) {
         appContext = context;
         String neverScanProperty = appContext.getEnvironment()
-                .getProperty("vaadin.blacklisted-packages");
+                .getProperty("vaadin.blocked-packages");
+        if (neverScanProperty == null) {
+            neverScanProperty = appContext.getEnvironment()
+                    .getProperty("vaadin.blacklisted-packages");
+            if (neverScanProperty != null) {
+                getLogger().warn("vaadin.blacklisted-packages is deprecatd. Use vaadin.blocked-packages instead.");
+            }
+        }
         List<String> neverScan;
         if (neverScanProperty == null) {
             neverScan = Collections.emptyList();
@@ -535,7 +544,14 @@ public class VaadinServletContextInitializer
         }
 
         String onlyScanProperty = appContext.getEnvironment()
-                .getProperty("vaadin.whitelisted-packages");
+                .getProperty("vaadin.allowed-packages");
+        if (onlyScanProperty == null) {
+            onlyScanProperty = appContext.getEnvironment()
+                    .getProperty("vaadin.whitelisted-packages");
+            if (onlyScanProperty != null) {
+                getLogger().warn("vaadin.whitelisted-packages is deprecatd. Use vaadin.allowed-packages instead.");
+            }
+        }
         if (onlyScanProperty == null) {
             customScanOnly = Collections.emptyList();
             customLoader = new CustomResourceLoader(appContext, neverScan);
@@ -549,7 +565,7 @@ public class VaadinServletContextInitializer
 
         if (!customScanOnly.isEmpty() && !neverScan.isEmpty()) {
             getLogger().warn(
-                    "vaadin.blacklisted-packages is ignored because both vaadin.whitelisted-packages and vaadin.blacklisted-packages have been set.");
+                    "vaadin.blocked-packages is ignored because both vaadin.allowed-packages and vaadin.blocked-packages have been set.");
         }
     }
 
@@ -817,9 +833,9 @@ public class VaadinServletContextInitializer
          * Constructor.
          *
          * @param context
-         *            the ServletContext
+         *                     the ServletContext
          * @param registration
-         *            the ServletRegistration for this ServletConfig instance
+         *                     the ServletRegistration for this ServletConfig instance
          */
         private SpringStubServletConfig(ServletContext context,
                 ServletRegistrationBean registration,
@@ -868,13 +884,14 @@ public class VaadinServletContextInitializer
          * Creates a DeploymentConfiguration.
          *
          * @param context
-         *            the ServletContext
+         *                     the ServletContext
          * @param registration
-         *            the ServletRegistrationBean to get servlet parameters from
+         *                     the ServletRegistrationBean to get servlet parameters
+         *                     from
          * @param servletClass
-         *            the class to look for properties defined with annotations
+         *                     the class to look for properties defined with annotations
          * @param appContext
-         *            the ApplicationContext
+         *                     the ApplicationContext
          * @return a DeploymentConfiguration instance
          */
         public static DeploymentConfiguration createDeploymentConfiguration(
