@@ -117,7 +117,7 @@ public class VaadinConfigurationProperties {
      * @return blocked packages
      * @deprecated use getBlockedPackages()
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public List<String> getBlacklistedPackages() {
         return Collections.unmodifiableList(blockedPackages);
     }
@@ -137,7 +137,7 @@ public class VaadinConfigurationProperties {
      * @param blockedPackages list of packages to ignore
      * @deprecated use setBlockedPackages()
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public void setBlacklistedPackages(List<String> blockedPackages) {
         this.blockedPackages = new ArrayList<>(blockedPackages);
     }
@@ -157,6 +157,7 @@ public class VaadinConfigurationProperties {
      * @return allowed packages
      * @deprecated use getAllowedPackages()
      */
+    @Deprecated(forRemoval = true)
     public List<String> getWhitelistedPackages() {
         return Collections.unmodifiableList(allowedPackages);
     }
@@ -177,7 +178,7 @@ public class VaadinConfigurationProperties {
      * @param allowedPackages list of packages to be scanned
      * @deprecated use setAllowedPackages()
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public void setWhitelistedPackages(List<String> allowedPackages) {
         this.allowedPackages = new ArrayList<>(allowedPackages);
     }

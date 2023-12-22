@@ -532,7 +532,7 @@ public class VaadinServletContextInitializer
             neverScanProperty = appContext.getEnvironment()
                     .getProperty("vaadin.blacklisted-packages");
             if (neverScanProperty != null) {
-                getLogger().warn("vaadin.blacklisted-packages is deprecatd. Use vaadin.blocked-packages instead.");
+                getLogger().warn("vaadin.blacklisted-packages is deprecated and may not be supported in the future. Use vaadin.blocked-packages instead.");
             }
         }
         List<String> neverScan;
