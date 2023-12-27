@@ -15,7 +15,7 @@
  */
 package com.vaadin.spring.internal;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.context.annotation.Scope;
 

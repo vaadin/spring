@@ -126,7 +126,7 @@ public class VaadinServletConfiguration implements InitializingBean {
             SpringUI annotation = applicationContext
                     .findAnnotationOnBean(uiBeanName, SpringUI.class);
             String path = applicationContext.getEnvironment()
-                    .resolvePlaceholders(annotation.path())
+                    .resolvePlaceholders(annotation != null ? annotation.path() : "")
                     .replaceFirst("^/", "");
 
             // Map PushStateNavigation UIs to wildcard path
@@ -242,7 +242,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     }
 
     @Bean
-    protected ServletRegistrationBean vaadinServletRegistration() {
+    protected ServletRegistrationBean<?> vaadinServletRegistration() {
         return createServletRegistrationBean();
     }
 
@@ -257,7 +257,7 @@ public class VaadinServletConfiguration implements InitializingBean {
         return new SpringVaadinServlet();
     }
 
-    protected ServletRegistrationBean createServletRegistrationBean() {
+    protected ServletRegistrationBean<?> createServletRegistrationBean() {
         getLogger().info("Registering Vaadin servlet");
         final String[] urlMappings = getUrlMappings();
         getLogger().info("Servlet will be mapped to URLs {}",
@@ -271,14 +271,14 @@ public class VaadinServletConfiguration implements InitializingBean {
             vaadinServlet.setServiceUrlPath(DEFAULT_SERVLET_URL_BASE);
         }
 
-        final ServletRegistrationBean registrationBean = new ServletRegistrationBean(
+        final ServletRegistrationBean<VaadinServlet> registrationBean = new ServletRegistrationBean<>(
                 servlet, urlMappings);
         addInitParameters(registrationBean);
         return registrationBean;
     }
 
     protected void addInitParameters(
-            ServletRegistrationBean servletRegistrationBean) {
+            ServletRegistrationBean<?> servletRegistrationBean) {
         getLogger().info("Setting servlet init parameters");
 
         addInitParameter(servletRegistrationBean,
@@ -300,7 +300,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     }
 
     private void addInitParameter(
-            ServletRegistrationBean servletRegistrationBean, String paramName,
+            ServletRegistrationBean<?> servletRegistrationBean, String paramName,
             String propertyValue) {
         if (propertyValue != null) {
             getLogger().info("Set servlet init parameter [{}] = [{}]",

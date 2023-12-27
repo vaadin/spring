@@ -33,6 +33,7 @@ import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
 import com.vaadin.spring.server.SpringVaadinServlet;
+import com.vaadin.ui.UI;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
@@ -62,7 +63,8 @@ public class VaadinAutoConfigurationTest extends AbstractSpringUIProviderTest {
     @Test
     public void testVaadinServletDefined() {
         // this sets up the UI scope
-        TestUI ui = createUi(TestUI.class);
+        final TestUI ui = createUi(TestUI.class);
+        Assert.isInstanceOf(UI.class, ui, "Created TestUI was null!");
         Assert.isInstanceOf(SpringVaadinServlet.class,
                 applicationContext.getBean("vaadinServlet"),
                 "Vaadin servlet is not autoconfigured");
@@ -71,7 +73,8 @@ public class VaadinAutoConfigurationTest extends AbstractSpringUIProviderTest {
     @Test
     public void testNavigatorDefined() {
         // this sets up the UI scope
-        TestUI ui = createUi(TestUI.class);
+        final TestUI ui = createUi(TestUI.class);
+        Assert.isInstanceOf(UI.class, ui, "Created TestUI was null!");
         Assert.isInstanceOf(SpringNavigator.class,
                 applicationContext.getBean(SpringNavigator.class),
                 "Vaadin Navigator is not autoconfigured");

@@ -23,7 +23,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -92,7 +91,7 @@ public class UIScopeImplTest {
         VaadinSession sessionSpy = Mockito.spy(new VaadinSession(mockService));
         ReentrantLock sessionLock = new ReentrantLock();
 
-        Mockito.doReturn((Registration) () -> { }).when(mockService).addServiceDestroyListener(any());
+        Mockito.doReturn((Registration) () -> { }).when(mockService).addServiceDestroyListener(Mockito.any());
         Mockito.doReturn(sessionLock).when(sessionSpy).getLockInstance();
         Mockito.doReturn(mockWrappedSession).when(sessionSpy).getSession();
 
@@ -131,8 +130,8 @@ public class UIScopeImplTest {
 
     @Test
     public void testRemove() {
-        Object ret1 = uiScopeImpl.get(TEST_BEAN_NAME, objFactory);
-        Object ret = uiScopeImpl.remove(TEST_BEAN_NAME);
+        /* final Object ret1 = */ uiScopeImpl.get(TEST_BEAN_NAME, objFactory);
+        final Object ret = uiScopeImpl.remove(TEST_BEAN_NAME);
 
         assertSame(bean, ret);
 
@@ -210,6 +209,7 @@ public class UIScopeImplTest {
     }
 
     @Rule
+    @SuppressWarnings("deprecation")
     public ExpectedException thrown = ExpectedException.none();
 
     @Test

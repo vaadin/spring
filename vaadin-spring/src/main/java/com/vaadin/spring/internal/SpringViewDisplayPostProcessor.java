@@ -69,7 +69,7 @@ public class SpringViewDisplayPostProcessor implements BeanPostProcessor,
             return bean;
         }
 
-        if (beanFactory != null) {
+        TRY_REGISTER: if (beanFactory != null) {
             try {
                 BeanDefinition beanDefinition = beanFactory
                         .getMergedBeanDefinition(beanName);
@@ -81,6 +81,12 @@ public class SpringViewDisplayPostProcessor implements BeanPostProcessor,
                         .getSource() instanceof StandardMethodMetadata) {
                     StandardMethodMetadata metadata = (StandardMethodMetadata) beanDefinition
                             .getSource();
+
+                    if (metadata == null) {
+                        LOGGER.error("Bean [{}] metadata is null!", bean);
+                        break TRY_REGISTER;
+                    }
+
                     Map<String, Object> annotationAttributes = metadata
                             .getAnnotationAttributes(
                                     SpringViewDisplay.class.getName());

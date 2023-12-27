@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -273,6 +273,7 @@ public class DefaultViewCache implements ViewCache {
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public void destroy() {
             // backwards compatibility
             if (!(navigator instanceof SpringNavigator)) {

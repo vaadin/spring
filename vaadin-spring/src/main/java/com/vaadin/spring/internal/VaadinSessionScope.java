@@ -178,6 +178,7 @@ public class VaadinSessionScope implements Scope, BeanFactoryPostProcessor {
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public void destroy() {
             session.lock();
             try {

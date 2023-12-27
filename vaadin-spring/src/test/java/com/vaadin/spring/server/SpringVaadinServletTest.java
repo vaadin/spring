@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public class SpringVaadinServletTest {
 
@@ -163,7 +163,7 @@ public class SpringVaadinServletTest {
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         Mockito.when(request.getServletPath()).thenReturn(servletPath);
         Mockito.when(request.getPathInfo()).thenReturn(pathInfo);
-        Mockito.when(request.getRequestURI()).thenReturn("");
+        Mockito.when(request.getRequestURI()).thenReturn(servletPath + pathInfo);
         Mockito.when(request.getContextPath()).thenReturn("");
         return request;
     }
