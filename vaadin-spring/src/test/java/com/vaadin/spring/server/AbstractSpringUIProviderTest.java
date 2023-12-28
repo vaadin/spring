@@ -15,13 +15,14 @@
  */
 package com.vaadin.spring.server;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Locale;
-
-import jakarta.servlet.http.HttpServletRequest;
-
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.*;
+import com.vaadin.spring.annotation.EnableVaadin;
+import com.vaadin.spring.internal.UIScopeImpl;
+import com.vaadin.spring.test.util.SingletonBeanStoreRetrievalStrategy;
+import com.vaadin.spring.test.util.TestVaadinSession;
+import com.vaadin.ui.UI;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,19 +31,12 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
-import com.vaadin.server.UICreateEvent;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinServletService;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.server.WrappedSession;
-import com.vaadin.spring.annotation.EnableVaadin;
-import com.vaadin.spring.internal.UIScopeImpl;
-import com.vaadin.spring.test.util.SingletonBeanStoreRetrievalStrategy;
-import com.vaadin.spring.test.util.TestVaadinSession;
-import com.vaadin.ui.UI;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 
 @RunWith(SpringJUnit4ClassRunner.class)
 // make sure the context is cleaned

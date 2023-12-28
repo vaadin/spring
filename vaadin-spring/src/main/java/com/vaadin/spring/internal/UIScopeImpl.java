@@ -15,14 +15,13 @@
  */
 package com.vaadin.spring.internal;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import jakarta.servlet.http.HttpSessionActivationListener;
-import jakarta.servlet.http.HttpSessionEvent;
-
+import com.vaadin.server.ClientConnector;
+import com.vaadin.server.ServiceDestroyEvent;
+import com.vaadin.server.ServiceDestroyListener;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.shared.Registration;
+import com.vaadin.ui.UI;
+import com.vaadin.util.CurrentInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectFactory;
@@ -31,12 +30,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.util.Assert;
 
-import com.vaadin.server.ClientConnector;
-import com.vaadin.server.ServiceDestroyEvent;
-import com.vaadin.server.ServiceDestroyListener;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.ui.UI;
-import com.vaadin.util.CurrentInstance;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionEvent;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Implementation of Spring's
@@ -116,9 +114,8 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
     /**
      * Cleans up everything associated with all UI scopes of a specific session.
      *
-     * @param session
-     *            the Vaadin session for which to do the clean up, not
-     *            <code>null</code>
+     * @param session the Vaadin session for which to do the clean up, not
+     *                <code>null</code>
      */
     public static void cleanupSession(VaadinSession session) {
         assert session != null;
@@ -220,8 +217,8 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
 
         BeanStore getBeanStore(final UIID uiid) {
             if (serviceDestroyRegistration == null) {
-            // serviceDestroyRegistration is null if there was no listener as session
-            // has been moved from node to other node, hence added here
+                // serviceDestroyRegistration is null if there was no listener as session
+                // has been moved from node to other node, hence added here
                 serviceDestroyRegistration = this.session.getService().addServiceDestroyListener(this);
             }
             BeanStore beanStore = beanStoreMap.get(uiid);
@@ -294,7 +291,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         private static final long serialVersionUID = 8775528615443492292L;
 
         UIBeanStore(VaadinSession session, UIID uuid,
-                DestructionCallback destructionCallback) {
+                    DestructionCallback destructionCallback) {
             super(session, uuid.toString(), destructionCallback);
         }
 

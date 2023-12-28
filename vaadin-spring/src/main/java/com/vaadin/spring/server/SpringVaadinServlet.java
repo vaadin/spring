@@ -15,32 +15,19 @@
  */
 package com.vaadin.spring.server;
 
+import com.vaadin.server.*;
+import com.vaadin.spring.internal.UIScopeImpl;
+import com.vaadin.spring.internal.VaadinSessionScope;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-
-import com.vaadin.server.DefaultUIProvider;
-import com.vaadin.server.DeploymentConfiguration;
-import com.vaadin.server.ServiceException;
-import com.vaadin.server.SessionDestroyEvent;
-import com.vaadin.server.SessionDestroyListener;
-import com.vaadin.server.SessionInitEvent;
-import com.vaadin.server.SessionInitListener;
-import com.vaadin.server.UIProvider;
-import com.vaadin.server.VaadinServlet;
-import com.vaadin.server.VaadinServletRequest;
-import com.vaadin.server.VaadinServletService;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.spring.internal.UIScopeImpl;
-import com.vaadin.spring.internal.VaadinSessionScope;
 
 /**
  * Subclass of the standard {@link com.vaadin.server.VaadinServlet Vaadin
@@ -120,7 +107,7 @@ public class SpringVaadinServlet extends VaadinServlet {
      * with a slash.
      *
      * @return service URL path relative to context path (starting with slash)
-     *         or null to use the default
+     * or null to use the default
      */
     public String getServiceUrlPath() {
         return serviceUrlPath;
@@ -133,9 +120,8 @@ public class SpringVaadinServlet extends VaadinServlet {
      * be set before servlet service instances are created, i.e. before the
      * servlet is placed into service by the servlet container.
      *
-     * @param serviceUrlPath
-     *            service URL path relative to the context path (starting with a
-     *            slash) or null for default
+     * @param serviceUrlPath service URL path relative to the context path (starting with a
+     *                       slash) or null for default
      */
     public void setServiceUrlPath(String serviceUrlPath) {
         this.serviceUrlPath = serviceUrlPath;
@@ -168,7 +154,6 @@ public class SpringVaadinServlet extends VaadinServlet {
      *
      * @param request http client request
      * @return static file path or null if the request is not for a static resource.
-     *
      */
     @Override
     protected String getStaticFilePath(HttpServletRequest request) {
@@ -183,7 +168,6 @@ public class SpringVaadinServlet extends VaadinServlet {
     */
         String staticFilePath = super.getStaticFilePath(request);
         if (staticFilePath == null) {
-
             try {
                 String decodedRequestURI = URLDecoder.decode(
                         request.getRequestURI(), StandardCharsets.UTF_8.name());
@@ -196,6 +180,11 @@ public class SpringVaadinServlet extends VaadinServlet {
                 if (decodedRequestURI.startsWith(decodedContextPath + "/VAADIN/")) {
                     return decodedRequestURI.substring(decodedContextPath.length());
                 }
+
+                if ((request.getRequestURI() == null && request.getContextPath() == null)
+                        || (request.getRequestURI().isEmpty() && request.getContextPath().isEmpty())) {
+                    return getStaticFilePathBasedOnServletPathAndPathInfo(request);
+                }
             } catch (UnsupportedEncodingException exception) {
                 // cannot happen since UTF8 is always supported
                 throw new RuntimeException(exception);
@@ -203,4 +192,24 @@ public class SpringVaadinServlet extends VaadinServlet {
         }
         return staticFilePath;
     }
+
+    private String getStaticFilePathBasedOnServletPathAndPathInfo(
+            HttpServletRequest request) {
+        String pathInfo = request.getPathInfo();
+        if (pathInfo == null) {
+            return null;
+        }
+        // Servlet mapped as /* serves at /VAADIN
+        // Servlet mapped as /foo/bar/* serves at /foo/bar/VAADIN
+        if (pathInfo.startsWith("/VAADIN/")) {
+            return pathInfo;
+        }
+        String servletPrefixedPath = request.getServletPath() + pathInfo;
+        // Servlet mapped as /VAADIN/*
+        if (servletPrefixedPath.startsWith("/VAADIN/")) {
+            return servletPrefixedPath;
+        }
+        return null;
+    }
+
 }

@@ -15,12 +15,11 @@
  */
 package com.vaadin.spring.server;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.web.util.UrlPathHelper;
-
 import com.vaadin.server.VaadinServletRequest;
 import com.vaadin.server.VaadinServletService;
+import org.springframework.web.util.UrlPathHelper;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Custom Vaadin servlet request to handle getPathInfo() when the servlet is
@@ -36,14 +35,13 @@ public class SpringVaadinServletRequest extends VaadinServletRequest {
      *
      * @param request
      * @param vaadinService
-     * @param clearServletPath
-     *            true to use empty string as the servlet path (needed when
-     *            using ServletForwardingController for bootstrap page
-     *            requests), false to use the normal servlet path - for more
-     *            information on this hack, see {@link SpringVaadinServlet}
+     * @param clearServletPath true to use empty string as the servlet path (needed when
+     *                         using ServletForwardingController for bootstrap page
+     *                         requests), false to use the normal servlet path - for more
+     *                         information on this hack, see {@link SpringVaadinServlet}
      */
     public SpringVaadinServletRequest(HttpServletRequest request,
-            VaadinServletService vaadinService, boolean clearServletPath) {
+                                      VaadinServletService vaadinService, boolean clearServletPath) {
         super(request, vaadinService);
         this.clearServletPath = clearServletPath;
     }

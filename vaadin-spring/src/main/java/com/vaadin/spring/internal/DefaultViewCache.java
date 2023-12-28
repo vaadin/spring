@@ -15,22 +15,20 @@
  */
 package com.vaadin.spring.internal;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
-import jakarta.annotation.PreDestroy;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
-
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.navigator.ViewActivationListener;
 import com.vaadin.ui.UI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.Assert;
+
+import javax.annotation.PreDestroy;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Default implementation of {@link com.vaadin.spring.internal.ViewCache}. For
@@ -85,9 +83,8 @@ public class DefaultViewCache implements ViewCache {
      * Called by {@link com.vaadin.spring.navigator.SpringViewProvider} when a
      * view scoped view is about to be created.
      *
-     * @param viewName
-     *            the {@link com.vaadin.spring.annotation.SpringView#name()
-     *            name} of the view (not the bean name).
+     * @param viewName the {@link com.vaadin.spring.annotation.SpringView#name()
+     *                 name} of the view (not the bean name).
      */
     @Override
     public void creatingView(String viewName) {
@@ -108,12 +105,10 @@ public class DefaultViewCache implements ViewCache {
      * Called by {@link com.vaadin.spring.navigator.SpringViewProvider} when a
      * view scoped view has been created.
      *
-     * @param viewName
-     *            the {@link com.vaadin.spring.annotation.SpringView#name()
-     *            name} of the view (not the bean name).
-     * @param viewInstance
-     *            the created view instance, or {@code null} if the view could
-     *            not be created.
+     * @param viewName     the {@link com.vaadin.spring.annotation.SpringView#name()
+     *                     name} of the view (not the bean name).
+     * @param viewInstance the created view instance, or {@code null} if the view could
+     *                     not be created.
      */
     @Override
     public void viewCreated(String viewName, View viewInstance) {
@@ -256,7 +251,7 @@ public class DefaultViewCache implements ViewCache {
         private final Navigator navigator;
 
         ViewBeanStore(UI ui, String viewName,
-                DestructionCallback destructionCallback) {
+                      DestructionCallback destructionCallback) {
             super(ui.getSession(), ui.getId() + ":" + viewName,
                     destructionCallback);
             this.viewName = viewName;

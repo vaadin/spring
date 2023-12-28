@@ -15,31 +15,9 @@
  */
 package com.vaadin.spring.server;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-
-import jakarta.servlet.ServletContext;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-import org.springframework.web.context.WebApplicationContext;
-
 import com.vaadin.navigator.PushStateNavigation;
 import com.vaadin.navigator.ViewDisplay;
-import com.vaadin.server.UIClassSelectionEvent;
-import com.vaadin.server.UICreateEvent;
-import com.vaadin.server.UIProvider;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinSession;
+import com.vaadin.server.*;
 import com.vaadin.shared.ApplicationConstants;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringViewDisplay;
@@ -51,6 +29,22 @@ import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.SingleComponentContainer;
 import com.vaadin.ui.UI;
 import com.vaadin.util.CurrentInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.ServletContext;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Vaadin {@link com.vaadin.server.UIProvider} that looks up UI classes from the
@@ -125,19 +119,18 @@ public class SpringUIProvider extends UIProvider {
 
     /**
      * Derive the name (path) for a UI based on its annotation parameters.
-     *
+     * <p>
      * If a path is given as a parameter for the annotation, it is used. An
      * empty string maps to the root context.
      *
-     * @param uiBeanName
-     *            name of the UI bean
+     * @param uiBeanName name of the UI bean
      * @return path to map the UI to
      */
     protected String deriveMappingForUI(String uiBeanName) {
         SpringUI annotation = getWebApplicationContext()
                 .findAnnotationOnBean(uiBeanName, SpringUI.class);
         Assert.notNull(annotation, "SpringUI annotation for bean " + uiBeanName
-            + " could not be found!");
+                + " could not be found!");
         if (annotation == null) {
             return "";
         }
@@ -260,8 +253,7 @@ public class SpringUIProvider extends UIProvider {
      * <p>
      * Any errors are logged and otherwise ignored, as this only helps caching.
      *
-     * @param theme
-     *            name of the theme
+     * @param theme name of the theme
      */
     protected void createThemeDirectory(String theme) {
         File path = null;
@@ -303,9 +295,8 @@ public class SpringUIProvider extends UIProvider {
      * Configures a UI to use the navigator found by {@link #getNavigator()} if
      * there is a {@link SpringViewDisplay} annotation.
      *
-     * @param ui
-     *            the Spring managed UI instance for which to configure
-     *            automatic navigation
+     * @param ui the Spring managed UI instance for which to configure
+     *           automatic navigation
      */
     protected void configureNavigator(UI ui) {
         // this test first as it is cheaper than looking for SpringViewDisplays
@@ -339,9 +330,8 @@ public class SpringUIProvider extends UIProvider {
      * Returns the configured navigator bean or null if no bean defined.
      *
      * @return bean extending {@link SpringNavigator} or null if none defined
-     * @throws BeansException
-     *             if there are multiple navigator beans or other configuration
-     *             problem
+     * @throws BeansException if there are multiple navigator beans or other configuration
+     *                        problem
      */
     protected SpringNavigator getNavigator() {
         try {

@@ -15,18 +15,11 @@
  */
 package com.vaadin.spring.internal;
 
-import com.vaadin.server.ServiceDestroyEvent;
-import com.vaadin.server.WrappedHttpSession;
+import com.vaadin.server.*;
 import com.vaadin.shared.Registration;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import com.vaadin.spring.internal.UIScopeImpl.UIStore;
+import com.vaadin.spring.internal.UIScopeImpl.VaadinSessionBeanStoreRetrievalStrategy;
+import com.vaadin.util.CurrentInstance;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,16 +27,12 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.ObjectFactory;
-
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.server.WrappedSession;
-import com.vaadin.spring.internal.UIScopeImpl.UIStore;
-import com.vaadin.spring.internal.UIScopeImpl.VaadinSessionBeanStoreRetrievalStrategy;
-import com.vaadin.util.CurrentInstance;
 import org.springframework.mock.web.MockHttpSession;
 
 import java.util.concurrent.locks.ReentrantLock;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class UIScopeImplTest {
 
@@ -56,7 +45,7 @@ public class UIScopeImplTest {
     private Object bean = new Object();
     private ObjectFactory<Object> objFactory;
 
-    VaadinSessionBeanStoreRetrievalStrategy vaadinBSRetrieval;
+    UIScopeImpl.VaadinSessionBeanStoreRetrievalStrategy vaadinBSRetrieval;
 
     String beanStoreName = "TestBeanStore";
     BeanStore beanStore;
@@ -71,7 +60,7 @@ public class UIScopeImplTest {
         when(beanStore.get(TEST_BEAN_NAME, objFactory)).thenReturn(bean);
         when(beanStore.remove(TEST_BEAN_NAME)).thenReturn(bean);
 
-        vaadinBSRetrieval = mock(VaadinSessionBeanStoreRetrievalStrategy.class);
+        vaadinBSRetrieval = mock(UIScopeImpl.VaadinSessionBeanStoreRetrievalStrategy.class);
         when(vaadinBSRetrieval.getBeanStore()).thenReturn(beanStore);
         when(vaadinBSRetrieval.getConversationId()).thenReturn(
                 TEST_CONVERSATION_ID);
@@ -91,7 +80,8 @@ public class UIScopeImplTest {
         VaadinSession sessionSpy = Mockito.spy(new VaadinSession(mockService));
         ReentrantLock sessionLock = new ReentrantLock();
 
-        Mockito.doReturn((Registration) () -> { }).when(mockService).addServiceDestroyListener(Mockito.any());
+        Mockito.doReturn((Registration) () -> {
+        }).when(mockService).addServiceDestroyListener(Mockito.any());
         Mockito.doReturn(sessionLock).when(sessionSpy).getLockInstance();
         Mockito.doReturn(mockWrappedSession).when(sessionSpy).getSession();
 
@@ -130,7 +120,8 @@ public class UIScopeImplTest {
 
     @Test
     public void testRemove() {
-        /* final Object ret1 = */ uiScopeImpl.get(TEST_BEAN_NAME, objFactory);
+        /* final Object ret1 = */
+        uiScopeImpl.get(TEST_BEAN_NAME, objFactory);
         final Object ret = uiScopeImpl.remove(TEST_BEAN_NAME);
 
         assertSame(bean, ret);

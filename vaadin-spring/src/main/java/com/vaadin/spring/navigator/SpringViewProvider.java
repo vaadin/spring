@@ -15,18 +15,16 @@
  */
 package com.vaadin.spring.navigator;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-
-import jakarta.annotation.PostConstruct;
-
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewProvider;
+import com.vaadin.spring.access.ViewAccessControl;
+import com.vaadin.spring.access.ViewInstanceAccessControl;
+import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.internal.Conventions;
+import com.vaadin.spring.internal.ViewCache;
+import com.vaadin.spring.internal.ViewScopeImpl;
+import com.vaadin.spring.server.SpringVaadinServletService;
+import com.vaadin.ui.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -39,16 +37,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewProvider;
-import com.vaadin.spring.access.ViewAccessControl;
-import com.vaadin.spring.access.ViewInstanceAccessControl;
-import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.internal.Conventions;
-import com.vaadin.spring.internal.ViewCache;
-import com.vaadin.spring.internal.ViewScopeImpl;
-import com.vaadin.spring.server.SpringVaadinServletService;
-import com.vaadin.ui.UI;
+import javax.annotation.PostConstruct;
+import java.io.Serializable;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * A Vaadin {@link ViewProvider} that fetches the views from the Spring
@@ -72,7 +65,7 @@ import com.vaadin.ui.UI;
  *     }
  * }
  * </pre>
- *
+ * <p>
  * View-based security can be provided by creating a Spring bean that implements
  * the interface {@link com.vaadin.spring.access.ViewAccessControl} (for view
  * bean name and annotation based security) or
@@ -135,7 +128,7 @@ public class SpringViewProvider implements ViewProvider {
 
     @Autowired
     public SpringViewProvider(ApplicationContext applicationContext,
-            BeanDefinitionRegistry beanDefinitionRegistry) {
+                              BeanDefinitionRegistry beanDefinitionRegistry) {
         this.applicationContext = applicationContext;
         this.beanDefinitionRegistry = beanDefinitionRegistry;
     }
@@ -160,8 +153,7 @@ public class SpringViewProvider implements ViewProvider {
      * {@link com.vaadin.spring.access.ViewInstanceAccessControl} denies access
      * to a view.
      *
-     * @param accessDeniedViewClass
-     *            the access denied view class, may be {@code null}.
+     * @param accessDeniedViewClass the access denied view class, may be {@code null}.
      */
     public void setAccessDeniedViewClass(
             Class<? extends View> accessDeniedViewClass) {
@@ -212,7 +204,7 @@ public class SpringViewProvider implements ViewProvider {
     }
 
     protected String getViewNameFromAnnotation(Class<?> beanClass,
-            SpringView annotation) {
+                                               SpringView annotation) {
         String viewName = Conventions.deriveMappingForView(beanClass, annotation);
         return getWebApplicationContext().getEnvironment().resolvePlaceholders(viewName);
     }
@@ -262,9 +254,8 @@ public class SpringViewProvider implements ViewProvider {
      * ({@link ViewAccessControl}), and view instance specific checks
      * ({@link ViewInstanceAccessControl}) are not applied.
      *
-     * @param viewName
-     *            view name in the form returned by {@link #getViewName(String)}
-     *            (no parameters)
+     * @param viewName view name in the form returned by {@link #getViewName(String)}
+     *                 (no parameters)
      * @return list of ViewInfo, not null
      */
     protected List<ViewInfo> getAllowedViewsForCurrentUI(String viewName) {
@@ -324,7 +315,7 @@ public class SpringViewProvider implements ViewProvider {
     }
 
     protected String getViewName(String viewAndParameters,
-            List<ViewInfo> views) {
+                                 List<ViewInfo> views) {
         // first look for exact matches
         for (ViewInfo view : views) {
             if (view.getViewName().equals(viewAndParameters)) {
@@ -389,7 +380,7 @@ public class SpringViewProvider implements ViewProvider {
     }
 
     private Class<? extends UI> getValidUIClass(UI currentUI,
-            Class<? extends UI>[] validUIClasses) {
+                                                Class<? extends UI>[] validUIClasses) {
         for (Class<? extends UI> validUI : validUIClasses) {
             if (validUI.isAssignableFrom(currentUI.getClass())) {
                 return validUI;
@@ -419,12 +410,10 @@ public class SpringViewProvider implements ViewProvider {
      * created here, a view scope is set up to be active during the view
      * creation and until navigating away from the view.
      *
-     * @param viewInfo
-     *            view metadata
+     * @param viewInfo view metadata
      * @return view instance from the application context, not null
-     * @throws BeansException
-     *             if no suitable bean is found or view scope initialization
-     *             failed
+     * @throws BeansException if no suitable bean is found or view scope initialization
+     *                        failed
      */
     protected View getViewFromApplicationContext(ViewInfo viewInfo) {
         View view = null;
@@ -480,7 +469,7 @@ public class SpringViewProvider implements ViewProvider {
      * context based on {@link #setAccessDeniedViewClass(Class)}.
      *
      * @return access denied view instance from application context or null if
-     *         no access denied view class is set
+     * no access denied view class is set
      */
     protected View getAccessDeniedView() {
         if (accessDeniedViewClass != null) {
@@ -507,7 +496,7 @@ public class SpringViewProvider implements ViewProvider {
     }
 
     protected boolean isAccessGrantedToViewInstance(ViewInfo viewInfo,
-            View view) {
+                                                    View view) {
         final UI currentUI = UI.getCurrent();
         final Map<String, ViewInstanceAccessControl> accessDelegates = getWebApplicationContext()
                 .getBeansOfType(ViewInstanceAccessControl.class);

@@ -15,12 +15,11 @@
  */
 package com.vaadin.spring.internal;
 
-import jakarta.annotation.PostConstruct;
-
-import org.springframework.context.annotation.Scope;
-
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.ui.TextField;
+import org.springframework.context.annotation.Scope;
+
+import javax.annotation.PostConstruct;
 
 @SpringComponent
 @Scope("prototype")
