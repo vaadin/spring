@@ -18,11 +18,11 @@ package com.vaadin.spring.server;
 import com.vaadin.server.*;
 import com.vaadin.spring.internal.UIScopeImpl;
 import com.vaadin.spring.internal.VaadinSessionScope;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

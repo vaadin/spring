@@ -15,11 +15,10 @@
  */
 package com.vaadin.spring.server;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import javax.servlet.http.HttpServletRequest;
 
 
 public class SpringVaadinServletTest {

@@ -17,9 +17,9 @@ package com.vaadin.spring.server;
 
 import com.vaadin.server.VaadinServletRequest;
 import com.vaadin.server.VaadinServletService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.util.UrlPathHelper;
 
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Custom Vaadin servlet request to handle getPathInfo() when the servlet is

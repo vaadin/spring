@@ -95,10 +95,12 @@
         <maven.compiler.target>17</maven.compiler.target>
 
         <!-- These are typically overridden with BOMs -->
+        <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+        <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
         <vaadin.version>8.22.0</vaadin.version>
-        <spring.version>5.3.31</spring.version>
-        <spring.boot.version>2.7.18</spring.boot.version>
-        <spring.security.version>5.8.9</spring.security.version>
+        <spring.version>6.1.2</spring.version>
+        <spring.boot.version>3.2.1</spring.boot.version>
+        <spring.security.version>6.2.1</spring.security.version>
         <slf4j.version>2.0.9</slf4j.version>
         <junit.version>4.13.2</junit.version>
         <mockito.version>5.8.0</mockito.version>

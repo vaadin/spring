@@ -23,6 +23,7 @@ import com.vaadin.spring.internal.UIScopeImpl;
 import com.vaadin.spring.test.util.SingletonBeanStoreRetrievalStrategy;
 import com.vaadin.spring.test.util.TestVaadinSession;
 import com.vaadin.ui.UI;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 
 import static org.mockito.Mockito.mock;
