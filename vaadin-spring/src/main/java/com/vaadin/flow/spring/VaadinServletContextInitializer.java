@@ -549,7 +549,7 @@ public class VaadinServletContextInitializer
             onlyScanProperty = appContext.getEnvironment()
                     .getProperty("vaadin.whitelisted-packages");
             if (onlyScanProperty != null) {
-                getLogger().warn("vaadin.whitelisted-packages is deprecatd and may not be supported in the future. Use vaadin.allowed-packages instead.");
+                getLogger().warn("vaadin.whitelisted-packages is deprecated and may not be supported in the future. Use vaadin.allowed-packages instead.");
             }
         }
         if (onlyScanProperty == null) {
