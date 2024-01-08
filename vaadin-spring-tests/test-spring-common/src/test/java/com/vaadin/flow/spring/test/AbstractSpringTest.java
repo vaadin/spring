@@ -3,8 +3,10 @@ package com.vaadin.flow.spring.test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.logging.Level;
 
 import com.vaadin.flow.testutil.ChromeBrowserTest;
+import org.junit.After;
 
 public abstract class AbstractSpringTest extends ChromeBrowserTest {
 
@@ -12,6 +14,12 @@ public abstract class AbstractSpringTest extends ChromeBrowserTest {
     protected String getTestURL(String... parameters) {
         return getTestURL(getRootURL(), getContextPath() + getTestPath(),
                 parameters);
+    }
+
+    @After
+    public void logConsoleErrors() {
+        getLogEntries(Level.ALL)
+                .forEach(le -> System.out.println("=================== " + le.getMessage()));
     }
 
     protected String getContextRootURL() {
