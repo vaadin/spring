@@ -26,7 +26,7 @@ public class ComponentAddedViaInitListenerIT extends AbstractSpringTest {
     public void componentAddedViaInitListenerIsLoaded() {
         open();
 
-        TestBenchElement component = $("init-listener-component").first();
+        TestBenchElement component = waitUntil(d -> $("init-listener-component").first());
         TestBenchElement div = component.$("div").first();
         Assert.assertEquals("Init Listener Component", div.getText());
     }

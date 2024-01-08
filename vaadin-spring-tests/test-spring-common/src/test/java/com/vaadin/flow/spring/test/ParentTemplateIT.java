@@ -16,12 +16,10 @@
 
 package com.vaadin.flow.spring.test;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import com.vaadin.testbench.TestBenchElement;
 
 public class ParentTemplateIT extends AbstractSpringTest {
 
@@ -34,7 +32,7 @@ public class ParentTemplateIT extends AbstractSpringTest {
     public void customElementIsRegistered() throws Exception {
         open();
 
-        TestBenchElement template = $("parent-template").first();
+        TestBenchElement template = waitUntil(d -> $("parent-template").first());
         WebElement div = template.$("*").id("div");
 
         Assert.assertEquals("baz", div.getText());
@@ -49,7 +47,7 @@ public class ParentTemplateIT extends AbstractSpringTest {
     public void injectedComponentIsSpringManaged() throws Exception {
         open();
 
-        TestBenchElement template = $("parent-template").first();
+        TestBenchElement template = waitUntil(d -> $("parent-template").first());
 
         TestBenchElement child = template.$("*").id("child");
 

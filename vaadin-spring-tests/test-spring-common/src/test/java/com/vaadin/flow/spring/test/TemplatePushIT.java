@@ -1,15 +1,14 @@
 package com.vaadin.flow.spring.test;
 
-import org.junit.Test;
-
 import com.vaadin.testbench.TestBenchElement;
+import org.junit.Test;
 
 public class TemplatePushIT extends AbstractSpringTest {
 
     @Test
     public void elementChangesPushed() throws Exception {
         open();
-        TestBenchElement tpl = $("template-push-view").first();
+        TestBenchElement tpl = waitUntil(d -> $("template-push-view").first());
         tpl.$("button").id("elementTest").click();
         TestBenchElement label = tpl.$("label").id("label");
         waitUntil(foo -> {
@@ -20,7 +19,7 @@ public class TemplatePushIT extends AbstractSpringTest {
     @Test
     public void execJsPushed() throws Exception {
         open();
-        TestBenchElement tpl = $("template-push-view").first();
+        TestBenchElement tpl = waitUntil(d -> $("template-push-view").first());
         tpl.$("button").id("execJsTest").click();
         TestBenchElement label = tpl.$("label").id("label");
         waitUntil(foo -> {
@@ -31,7 +30,7 @@ public class TemplatePushIT extends AbstractSpringTest {
     @Test
     public void callFunctionPushed() throws Exception {
         open();
-        TestBenchElement tpl = $("template-push-view").first();
+        TestBenchElement tpl = waitUntil(d -> $("template-push-view").first());
         tpl.$("button").id("callFunctionTest").click();
         TestBenchElement label = tpl.$("label").id("label");
         waitUntil(foo -> {
