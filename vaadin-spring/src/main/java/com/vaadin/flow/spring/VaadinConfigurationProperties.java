@@ -1,8 +1,8 @@
 /**
  * Copyright (C) 2000-2023 Vaadin Ltd
- *
+ * <p>
  * This program is available under Vaadin Commercial License and Service Terms.
- *
+ * <p>
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
@@ -45,14 +45,14 @@ public class VaadinConfigurationProperties {
     private Pnpm pnpm = new Pnpm();
 
     /**
-     * Custom package blacklist that should be skipped in scanning.
+     * List of blocked packages that shouldn't be scanned.
      */
-    private List<String> blacklistedPackages = new ArrayList<>();
+    private List<String> blockedPackages = new ArrayList<>();
 
     /**
-     * Custom package whitelist that should be scanned.
+     * List of allowed packages that should be scanned.
      */
-    private List<String> whitelistedPackages = new ArrayList<>();
+    private List<String> allowedPackages = new ArrayList<>();
 
     /**
      * Whether a browser should be launched on startup when in development mode.
@@ -144,7 +144,7 @@ public class VaadinConfigurationProperties {
      * server might be incorrectly handled by
      * {@link com.vaadin.flow.spring.security.VaadinWebSecurityConfigurerAdapter}
      * and access to a public view will be denied instead of allowed.
-     * 
+     *
      * @param loadOnStartup
      *            {@code true} to load the servlet on startup, {@code false}
      *            otherwise
@@ -168,7 +168,7 @@ public class VaadinConfigurationProperties {
     /**
      * Sets whether a browser should be launched on startup when in development
      * mode.
-     * 
+     *
      * @param launchBrowser
      *            {@code true} to launch a browser on startup when in
      *            development mode, {@code false} otherwise
@@ -199,41 +199,84 @@ public class VaadinConfigurationProperties {
     }
 
     /**
-     * Get a list of packages that are blacklisted for class scanning.
+     * Get a list of packages that are blocked for class scanning.
      *
-     * @return package blacklist
+     * @return blocked packages
+     * @deprecated use getBlockedPackages()
      */
+    @Deprecated
     public List<String> getBlacklistedPackages() {
-        return Collections.unmodifiableList(blacklistedPackages);
+        return Collections.unmodifiableList(blockedPackages);
     }
 
     /**
-     * Set list of packages to ignore for class scanning.
+     * Get a list of packages that are blocked for class scanning.
      *
-     * @param blacklistedPackages
-     *            list of packages to ignore
+     * @return blocked packages
      */
-    public void setBlacklistedPackages(List<String> blacklistedPackages) {
-        this.blacklistedPackages = new ArrayList<>(blacklistedPackages);
+    public List<String> getBlockedPackages() {
+        return Collections.unmodifiableList(blockedPackages);
     }
 
     /**
-     * Get a list of packages that are white-listed for class scanning.
+     * Set a list of packages to ignore for class scanning.
      *
-     * @return package white-list
+     * @param blockedPackages list of packages to ignore
+     * @deprecated use setBlockedPackages()
      */
+    @Deprecated
+    public void setBlacklistedPackages(List<String> blockedPackages) {
+        this.blockedPackages = new ArrayList<>(blockedPackages);
+    }
+
+    /**
+     * Set a list of packages to ignore for class scanning.
+     *
+     * @param blockedPackages list of packages to ignore
+     */
+    public void setBlockedPackages(List<String> blockedPackages) {
+        this.blockedPackages = new ArrayList<>(blockedPackages);
+    }
+
+    /**
+     * Get a list of packages that are allowed for class scanning.
+     *
+     * @return allowed packages
+     * @deprecated use getAllowedPackages()
+     */
+    @Deprecated
     public List<String> getWhitelistedPackages() {
-        return Collections.unmodifiableList(whitelistedPackages);
+        return Collections.unmodifiableList(allowedPackages);
     }
 
     /**
-     * Set list of packages to be scanned. If <code>whitelistedPackages</code>
-     * is set then <code>blacklistedPackages</code> is ignored.
+     * Get a list of packages that are allowed for class scanning.
      *
-     * @param whitelistedPackages
-     *            list of packages to be scanned
+     * @return allowed packages
      */
-    public void setWhitelistedPackages(List<String> whitelistedPackages) {
-        this.whitelistedPackages = new ArrayList<>(whitelistedPackages);
+    public List<String> getAllowedPackages() {
+        return Collections.unmodifiableList(allowedPackages);
+    }
+
+    /**
+     * Set list of packages to be scanned. If <code>allowedPackages</code>
+     * is set then <code>blockedPackages</code> is ignored.
+     *
+     * @param allowedPackages list of packages to be scanned
+     * @deprecated use setAllowedPackages()
+     */
+    @Deprecated
+    public void setWhitelistedPackages(List<String> allowedPackages) {
+        this.allowedPackages = new ArrayList<>(allowedPackages);
+    }
+
+    /**
+     * Set list of packages to be scanned. If <code>allowedPackages</code>
+     * is set then <code>blockedPackages</code> is ignored.
+     *
+     * @param allowedPackages list of packages to be scanned
+     */
+    public void setAllowedPackages(List<String> allowedPackages) {
+        this.allowedPackages = new ArrayList<>(allowedPackages);
     }
 }
