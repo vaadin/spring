@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-spring-addons</artifactId>
+        <version>4.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>vaadin-spring-addon-eventbus</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Vaadin4Spring Addons for Vaadin 8 - Event Bus</name>
+
+    <developers>
+        <!-- In alphabetical order -->
+        <developer>
+            <name>Chris Phillipson</name>
+            <email>fastnsilver@gmail.com</email>
+        </developer>
+        <developer>
+            <name>Erik Lumme</name>
+            <organization>Vaadin</organization>
+            <email>erik@vaadin.com</email>
+        </developer>
+        <developer>
+            <name>Gert-Jan Timmer</name>
+            <email>gjr.timmer@gmail.com</email>
+        </developer>
+        <developer>
+            <name>Idel Pivnitskiy</name>
+            <email>idel.pivnitskiy@gmail.com</email>
+        </developer>
+        <developer>
+            <name>Josh Long</name>
+            <email>josh@joshlong.com</email>
+        </developer>
+        <developer>
+            <name>Marco Luthardt</name>
+            <email>marco.luthardt@iandme.net</email>
+        </developer>
+        <developer>
+            <name>Matti Tahvonen</name>
+            <organization>Vaadin</organization>
+            <email>matti@vaadin.com</email>
+        </developer>
+        <developer>
+            <name>Nicolas Frankel</name>
+            <email>nicolas@frankel.ch</email>
+        </developer>
+        <developer>
+            <name>Patrik Lindström</name>
+            <email>patrik@vaadin.com</email>
+        </developer>
+        <developer>
+            <name>Peter Lehto</name>
+            <organization>Vaadin</organization>
+            <email>peter@vaadin.com</email>
+        </developer>
+        <developer>
+            <name>Petter Holmström</name>
+            <organization>Vaadin</organization>
+            <email>petter@vaadin.com</email>
+        </developer>
+        <developer>
+            <name>Tobias Placht</name>
+            <email>dev@knacht.net</email>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-extensions-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>

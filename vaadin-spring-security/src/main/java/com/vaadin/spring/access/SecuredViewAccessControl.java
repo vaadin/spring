@@ -92,7 +92,10 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
      */
     @SuppressWarnings("unused")
     public boolean isAccessGranted(Class<? extends View> viewClass) {
-        Secured viewSecured = AnnotationUtils.findAnnotation(viewClass, Secured.class);
+        Secured viewSecured = null;
+        if (viewClass != null) {
+            viewSecured = AnnotationUtils.findAnnotation(viewClass, Secured.class);
+        }
         return isAccessGranted(viewSecured);
     }
 
