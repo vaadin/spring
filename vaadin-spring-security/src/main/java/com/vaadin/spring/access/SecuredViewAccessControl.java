@@ -90,7 +90,6 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
      * @return {@code true} if the access is granted or the view is not secured, {@code false} otherwise
      * @see Secured
      */
-    @SuppressWarnings("unused")
     public boolean isAccessGranted(Class<? extends View> viewClass) {
         Secured viewSecured = null;
         if (viewClass != null) {
