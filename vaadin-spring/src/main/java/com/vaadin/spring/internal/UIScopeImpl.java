@@ -20,12 +20,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpSessionActivationListener;
-import javax.servlet.http.HttpSessionEvent;
-
-import com.vaadin.shared.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -35,6 +32,8 @@ import org.springframework.util.Assert;
 import com.vaadin.server.ClientConnector;
 import com.vaadin.server.ServiceDestroyEvent;
 import com.vaadin.server.ServiceDestroyListener;
+import com.vaadin.server.SessionDestroyEvent;
+import com.vaadin.server.SessionDestroyListener;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.UI;
 import com.vaadin.util.CurrentInstance;
@@ -107,29 +106,13 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
     }
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) {
+    public void postProcessBeanFactory(
+            ConfigurableListableBeanFactory configurableListableBeanFactory)
+            throws BeansException {
         LOGGER.debug("Registering Vaadin UI scope with bean factory [{}]",
                 configurableListableBeanFactory);
         configurableListableBeanFactory.registerScope(VAADIN_UI_SCOPE_NAME,
                 this);
-    }
-
-    /**
-     * Cleans up everything associated with all UI scopes of a specific session.
-     *
-     * @param session
-     *            the Vaadin session for which to do the clean up, not
-     *            <code>null</code>
-     */
-    public static void cleanupSession(VaadinSession session) {
-        assert session != null;
-
-        UIStore uiStore = session.getAttribute(UIStore.class);
-        if (uiStore != null) {
-            LOGGER.debug("Vaadin session has been destroyed, destroying [{}]",
-                    uiStore);
-            uiStore.destroy();
-        }
     }
 
     /**
@@ -191,40 +174,34 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         }
     }
 
-    static class UIStore implements ServiceDestroyListener, HttpSessionActivationListener, Serializable {
+    static class UIStore implements SessionDestroyListener,
+            ServiceDestroyListener, Serializable {
 
         private static final long serialVersionUID = -2964924681534104416L;
 
         private static final Logger LOGGER = LoggerFactory
                 .getLogger(UIStore.class);
 
-        private final Map<UIID, BeanStore> beanStoreMap = new ConcurrentHashMap<>();
+        private final Map<UIID, BeanStore> beanStoreMap = new ConcurrentHashMap<UIID, BeanStore>();
         private final VaadinSession session;
         private final String sessionId;
-        // This needs to be transient to avoid serialization issue in HA environment, see #11661
-        private transient Registration serviceDestroyRegistration;
 
         // for testing only
         UIStore() {
             // just to keep the compiler happy when the UIStore is mocked
             sessionId = null;
             session = null;
-            serviceDestroyRegistration = null;
         }
 
         UIStore(VaadinSession session) {
             sessionId = session.getSession().getId();
             this.session = session;
-            serviceDestroyRegistration = this.session.getService().addServiceDestroyListener(this);
+            this.session.getService().addSessionDestroyListener(this);
+            this.session.getService().addServiceDestroyListener(this);
             this.session.setAttribute(UIStore.class, this);
         }
 
         BeanStore getBeanStore(final UIID uiid) {
-            if (serviceDestroyRegistration == null) {
-            // serviceDestroyRegistration is null if there was no listener as session
-            // has been moved from node to other node, hence added here
-                serviceDestroyRegistration = this.session.getService().addServiceDestroyListener(this);
-            }
             BeanStore beanStore = beanStoreMap.get(uiid);
             if (beanStore == null) {
                 beanStore = new UIBeanStore(session, uiid,
@@ -252,11 +229,11 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
 
         void destroy() {
             LOGGER.trace("Destroying [{}]", this);
-            session.accessSynchronously(() -> {
-                session.setAttribute(UIStore.class, null);
-                serviceDestroyRegistration.remove();
-            });
-            for (BeanStore beanStore : new HashSet<>(beanStoreMap.values())) {
+            session.setAttribute(BeanStore.class, null);
+            session.getService().removeSessionDestroyListener(this);
+            session.getService().removeServiceDestroyListener(this);
+            for (BeanStore beanStore : new HashSet<BeanStore>(
+                    beanStoreMap.values())) {
                 beanStore.destroy();
             }
             Assert.isTrue(beanStoreMap.isEmpty(),
@@ -271,21 +248,19 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         }
 
         @Override
+        public void sessionDestroy(SessionDestroyEvent event) {
+            if (event.getSession().equals(session)) {
+                LOGGER.debug(
+                        "Vaadin session has been destroyed, destroying [{}]",
+                        this);
+                destroy();
+            }
+        }
+
+        @Override
         public String toString() {
             return String.format("%s[id=%x, sessionId=%s]", getClass()
                     .getSimpleName(), System.identityHashCode(this), sessionId);
-        }
-
-        @Override
-        public void sessionWillPassivate(HttpSessionEvent se) {
-            // Remove listener if session is being serialized and moved to other node
-            serviceDestroyRegistration.remove();
-            serviceDestroyRegistration = null;
-        }
-
-        @Override
-        public void sessionDidActivate(HttpSessionEvent se) {
-            // No need for anything here
         }
     }
 

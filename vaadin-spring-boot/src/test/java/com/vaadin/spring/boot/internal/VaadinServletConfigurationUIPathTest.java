@@ -33,7 +33,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
-import com.vaadin.navigator.PushStateNavigation;
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
@@ -56,11 +55,6 @@ public class VaadinServletConfigurationUIPathTest {
 
     @SpringUI(path = "wild/**")
     private static class Wildcard extends DummyUI {
-    }
-
-    @SpringUI(path = "pushState")
-    @PushStateNavigation
-    private static class PushState extends DummyUI {
     }
 
     private static class MyVaadinServletConfiguration
@@ -87,11 +81,6 @@ public class VaadinServletConfigurationUIPathTest {
         @Bean
         public Wildcard wildcard() {
             return new Wildcard();
-        }
-
-        @Bean
-        public PushState pushState() {
-            return new PushState();
         }
 
         @Bean

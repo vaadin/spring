@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-import com.vaadin.navigator.PushStateNavigation;
 import com.vaadin.server.UIClassSelectionEvent;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinService;
@@ -50,16 +49,6 @@ public class SpringUIProviderTestWithWildcardUIs
     private static class Wildcard extends DummyUI {
     }
 
-    @SpringUI(path = "pushState")
-    @PushStateNavigation
-    private static class PushState extends DummyUI {
-    }
-
-    @SpringUI(path = "pushState/sub")
-    @PushStateNavigation
-    private static class PushStateSub extends DummyUI {
-    }
-
     @Configuration
     @EnableVaadinNavigation
     static class Config extends AbstractSpringUIProviderTest.Config {
@@ -76,16 +65,6 @@ public class SpringUIProviderTestWithWildcardUIs
         @Bean
         public Wildcard wildcard() {
             return new Wildcard();
-        }
-
-        @Bean
-        public PushState pushState() {
-            return new PushState();
-        }
-
-        @Bean
-        public PushStateSub pushStateSub() {
-            return new PushStateSub();
         }
     }
 
@@ -109,24 +88,6 @@ public class SpringUIProviderTestWithWildcardUIs
         verifyUIFromPath(Wildcard.class, "/wild/foo");
         verifyUIFromPath(Wildcard.class, "/wild/foo/bar");
         verifyUIFromPath(Wildcard.class, "/wild/foo/bar/baz");
-    }
-
-    @Test
-    public void testPushStateUI() {
-        verifyUIFromPath(PushState.class, "/pushState");
-        verifyUIFromPath(PushState.class, "/pushState/");
-        verifyUIFromPath(PushState.class, "/pushState/foo");
-        verifyUIFromPath(PushState.class, "/pushState/foo/bar");
-        verifyUIFromPath(PushState.class, "/pushState/foo/bar/baz");
-    }
-
-    @Test
-    public void testPushStateSubUI() {
-        verifyUIFromPath(PushStateSub.class, "/pushState/sub");
-        verifyUIFromPath(PushStateSub.class, "/pushState/sub/");
-        verifyUIFromPath(PushStateSub.class, "/pushState/sub/foo");
-        verifyUIFromPath(PushStateSub.class, "/pushState/sub/foo/bar");
-        verifyUIFromPath(PushStateSub.class, "/pushState/sub/foo/bar/baz");
     }
 
     private void verifyUIFromPath(Class<? extends UI> cls, String path) {

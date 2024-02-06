@@ -15,15 +15,11 @@
  */
 package com.vaadin.spring.internal;
 
-import com.vaadin.server.ServiceDestroyEvent;
-import com.vaadin.server.WrappedHttpSession;
-import com.vaadin.shared.Registration;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,9 +38,6 @@ import com.vaadin.server.WrappedSession;
 import com.vaadin.spring.internal.UIScopeImpl.UIStore;
 import com.vaadin.spring.internal.UIScopeImpl.VaadinSessionBeanStoreRetrievalStrategy;
 import com.vaadin.util.CurrentInstance;
-import org.springframework.mock.web.MockHttpSession;
-
-import java.util.concurrent.locks.ReentrantLock;
 
 public class UIScopeImplTest {
 
@@ -79,29 +72,6 @@ public class UIScopeImplTest {
 
         uiScopeImpl = new UIScopeImpl();
         UIScopeImpl.setBeanStoreRetrievalStrategy(vaadinBSRetrieval);
-    }
-
-    /**
-     * This test case was introduced to detect a missing lock in UIScopeImpl.UIStore.serviceDestroy().
-     * See https://github.com/vaadin/spring/issues/383
-     */
-    @Test
-    public void testUIStoreDestroyAcquiresLock() {
-        VaadinService mockService = Mockito.mock(VaadinService.class);
-        WrappedSession mockWrappedSession = new WrappedHttpSession(new MockHttpSession());
-        VaadinSession sessionSpy = Mockito.spy(new VaadinSession(mockService));
-        ReentrantLock sessionLock = new ReentrantLock();
-
-        Mockito.doReturn((Registration) () -> { }).when(mockService).addServiceDestroyListener(any());
-        Mockito.doReturn(sessionLock).when(sessionSpy).getLockInstance();
-        Mockito.doReturn(mockWrappedSession).when(sessionSpy).getSession();
-
-        sessionLock.lock();
-        UIStore uiStore = new UIStore(sessionSpy);
-        sessionLock.unlock();
-
-        // serviceDestroy() is called by VaadinService without acquiring the lock before
-        uiStore.serviceDestroy(Mockito.mock(ServiceDestroyEvent.class));
     }
 
     @Test
