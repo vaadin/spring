@@ -15,6 +15,7 @@
  */
 package com.vaadin.spring.boot;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,10 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.vaadin.spring.annotation.EnableVaadin;
+import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.server.AbstractSpringUIProviderTest;
@@ -38,7 +42,6 @@ import com.vaadin.ui.UI;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
-// make sure the context is cleaned
 @DirtiesContext
 public class VaadinAutoConfigurationTest extends AbstractSpringUIProviderTest {
 
@@ -47,12 +50,17 @@ public class VaadinAutoConfigurationTest extends AbstractSpringUIProviderTest {
 
     @SpringUI
     @SpringViewDisplay
-    private static class TestUI extends DummyUI {
-    }
+    private static class TestUI extends DummyUI {}
+
+    @SpringView
+    private static class TestView extends DummyView {}
 
     @Configuration
     @EnableAutoConfiguration
+    @EnableVaadin
+    @EnableVaadinNavigation
     protected static class Config {
+        
         // this gets configured by the UI provider
         @Bean
         public TestUI ui() {

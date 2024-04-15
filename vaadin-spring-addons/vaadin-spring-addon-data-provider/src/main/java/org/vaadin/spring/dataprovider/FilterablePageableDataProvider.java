@@ -1,4 +1,4 @@
-package org.vaadin.artur.spring.dataprovider;
+package org.vaadin.spring.dataprovider;
 
 import java.util.Optional;
 

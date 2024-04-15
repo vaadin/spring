@@ -47,7 +47,7 @@ import com.vaadin.ui.declarative.Design;
  * @author Petter Holmström (petter@vaadin.com)
  * @author Gert-Jan Timmer (gjr.timmer@gmail.com)
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class VaadinConfiguration implements ApplicationContextAware,
         BeanDefinitionRegistryPostProcessor {
 
@@ -77,13 +77,13 @@ public class VaadinConfiguration implements ApplicationContextAware,
     }
 
     @Bean
-    @com.vaadin.spring.annotation.UIScope
-    ViewCache viewCache() {
+    @UIScope
+    static ViewCache viewCache() {
         return new DefaultViewCache();
     }
 
     @Bean
-    VaadinSpringComponentFactory componentFactory() {
+    static VaadinSpringComponentFactory componentFactory() {
         return new VaadinSpringComponentFactory();
     }
 

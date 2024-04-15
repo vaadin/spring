@@ -17,6 +17,7 @@ package com.vaadin.spring.web;
 
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.spring.annotation.EnableVaadin;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Notification;
@@ -40,7 +41,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class TestStaticHttp {
+
     private static final String MANDATORY_BOOTSTRAP_PART = "log('Vaadin bootstrap loaded');";
+
     @Autowired
     private WebClient webClient;
 
@@ -49,7 +52,7 @@ public class TestStaticHttp {
 
     @Test
     public void testExample() throws Exception {
-        String javaScriptUrl = "http://localhost:" + port + "/VAADIN/vaadinBootstrap.js?v=8.0-SNAPSHOT";
+        String javaScriptUrl = "http://localhost:" + port + "/VAADIN/vaadinBootstrap.js?v=8.23.0";
         String content = this.webClient.getPage(javaScriptUrl).getWebResponse().getContentAsString();
         Assert.assertTrue("Mandatory part of bootstrap is not found",
                 content.contains(MANDATORY_BOOTSTRAP_PART));
@@ -60,8 +63,8 @@ public class TestStaticHttp {
         @Override
         protected void init(VaadinRequest vaadinRequest) {
             setContent(
-                    new VerticalLayout(
-                            new Button("Click me", event -> Notification.show("Thanks"))));
+                new VerticalLayout(
+                    new Button("Click me", event -> Notification.show("Thanks"))));
         }
     }
 

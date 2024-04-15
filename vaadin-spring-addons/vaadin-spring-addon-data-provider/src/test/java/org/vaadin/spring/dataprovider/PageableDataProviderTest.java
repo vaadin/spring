@@ -1,9 +1,8 @@
-package org.vaadin.artur.spring.dataprovider;
+package org.vaadin.spring.dataprovider;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.data.util.Pair;
-import org.vaadin.artur.spring.dataprovider.PageableDataProvider;
 
 public class PageableDataProviderTest {
 
