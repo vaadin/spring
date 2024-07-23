@@ -69,6 +69,10 @@ public class SpringStubServletConfigTest {
         Assert.assertFalse("ProductionMode should be 'false' by default.",
                 deploymentConfiguration.isProductionMode());
 
+        when(environment.getProperty(
+                "vaadin." + Constants.SERVLET_PARAMETER_PRODUCTION_MODE))
+                        .thenReturn("true");
+
         deploymentConfiguration = VaadinServletContextInitializer.SpringStubServletConfig
                 .createDeploymentConfiguration(context, registration,
                         SpringServlet.class, applicationContext);
