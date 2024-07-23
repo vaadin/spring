@@ -121,7 +121,7 @@ public class VaadinServletContextInitializer
             "org/eclipse/persistence", "org/hamcrest", "org/hibernate",
             "org/javassist", "org/jboss", "org/jsoup", "org/seleniumhq",
             "org/slf4j", "org/atmosphere", "org/springframework",
-            "org/webjars/bowergithub", "org/yaml",
+            "org/yaml",
 
             "java/", "javax/", "javafx/", "com/sun/", "oracle/deploy",
             "oracle/javafx", "oracle/jrockit", "oracle/jvm", "oracle/net",
@@ -408,8 +408,7 @@ public class VaadinServletContextInitializer
                             servletRegistrationBean, SpringServlet.class,
                             appContext);
 
-            if (config.isCompatibilityMode() || config.isProductionMode()
-                    || !config.enableDevServer()) {
+            if (config.isProductionMode() || !config.enableDevServer()) {
                 return;
             }
 

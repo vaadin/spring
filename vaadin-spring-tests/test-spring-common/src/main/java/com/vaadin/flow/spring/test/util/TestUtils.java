@@ -31,16 +31,6 @@ public final class TestUtils {
      * @param args java command-line arguments
      */
     public static void startSpringApplication(Class<?> appClass, String[] args) {
-        setVaadinProperties();
         SpringApplication.run(appClass, args);
-    }
-
-    /**
-     * Sets an essential Vaadin system properties.
-     */
-    public static void setVaadinProperties() {
-        // Sets compatibility mode if application is launched with bower profile.
-        // Workaround for https://github.com/vaadin/spring/issues/605
-        System.setProperty("vaadin.compatibilityMode", String.valueOf(System.getProperty("bowerMode") != null));
     }
 }

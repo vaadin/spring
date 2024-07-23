@@ -314,11 +314,6 @@
     <profiles>
         <profile>
             <id>npm</id>
-            <activation>
-                <property>
-                    <name>!bowerMode</name>
-                </property>
-            </activation>
             <modules>
                 <module>test-spring-common</module>
                 <module>test-spring-boot</module>
@@ -344,41 +339,6 @@
                 <!-- This test tests that we find the packages as expected -->
                 <module>test-spring-boot-only-prepare</module>
                 <module>test-spring-white-list</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>bower</id>
-            <activation>
-                <property>
-                    <name>bowerMode</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.springframework.boot</groupId>
-                        <artifactId>spring-boot-maven-plugin</artifactId>
-                        <configuration>
-                            <!-- Disable JVM fork mode for applications started by spring-boot-maven-plugin
-                            in order to avoid the issues with JMX connection between spring-boot-maven-plugin
-                            and Spring Boot application.
-                            NOTE: <jvmArguments>, <systemPropertyVariables> tags are ignored in
-                            fork mode and the properties should be set via TestUtils class.
-                            Workaround for https://github.com/vaadin/spring/issues/605 -->
-                            <fork>false</fork>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-            <modules>
-                <module>test-spring-common</module>
-
-                <!-- bower mode tests -->
-                <module>test-spring-boot/pom-bower-mode.xml</module>
-                <module>test-spring-boot-scan/pom-bower-mode.xml</module>
-                <module>test-spring-war/pom-bower-mode.xml</module>
-                <module>test-spring/pom-bower-mode.xml</module>
-                <module>test-spring-boot-contextpath/pom-bower-mode.xml</module>
             </modules>
         </profile>
         <profile>
