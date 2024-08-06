@@ -113,7 +113,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.12.1</version>
                 <configuration>
-                    <release>8</release>
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
@@ -227,4 +226,15 @@
             <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
     </repositories>
+    <profiles>
+        <profile>
+            <id>JDK11</id>
+            <activation>
+                <jdk>[11,)</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+            </properties>
+        </profile>
+    </profiles>
 </project>
