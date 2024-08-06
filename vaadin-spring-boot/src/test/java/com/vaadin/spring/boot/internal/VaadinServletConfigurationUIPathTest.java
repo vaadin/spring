@@ -104,8 +104,8 @@ public class VaadinServletConfigurationUIPathTest {
 
         Set<String> keySet = new HashSet<>(mapping.getUrlMap().keySet());
 
-        Stream.of("/", "/sub", "/sub/*", "/wild", "/wild/**", "/pushState",
-                "/pushState/**").forEach(mappedPath -> {
+        Stream.of("/", "/sub", "/sub/*", "/wild", "/wild/**")
+                .forEach(mappedPath -> {
                     assertTrue("Expected mapping not found: " + mappedPath,
                             keySet.remove(mappedPath));
                 });
