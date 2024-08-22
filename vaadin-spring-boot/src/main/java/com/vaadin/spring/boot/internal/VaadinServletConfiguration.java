@@ -69,8 +69,8 @@ public class VaadinServletConfiguration implements InitializingBean {
     private static final String PATH_WILDCARD_ALL = "/**";
     private static final String PATH_WILDCARD_SINGLE = "/*";
     private static final String DEFAULT_SERVLET_URL_BASE = "/vaadinServlet";
-    public static final String DEFAULT_SERVLET_URL_MAPPING = DEFAULT_SERVLET_URL_BASE
-            + PATH_WILDCARD_SINGLE;
+    public static final String DEFAULT_SERVLET_URL_MAPPING = 
+            DEFAULT_SERVLET_URL_BASE + PATH_WILDCARD_SINGLE;
 
     /**
      * Mapping for static resources that is used in case a non-default mapping
@@ -124,10 +124,24 @@ public class VaadinServletConfiguration implements InitializingBean {
         for (String uiBeanName : uiBeanNames) {
             SpringUI annotation = applicationContext.findAnnotationOnBean(
                     uiBeanName, SpringUI.class);
-            uiMappings.add(applicationContext.getEnvironment()
+            uiMappings.add(this.applicationContext.getEnvironment()
                     .resolvePlaceholders(annotation.path())
                     .replaceFirst("^/", ""));
-        }
+
+            //
+            // TODO: PushStateNavigation does not exist in Vaadin 7
+            //
+
+            // // Map PushStateNavigation UIs to wildcard path
+            // boolean hasPushStateNavigation = applicationContext
+            //         .findAnnotationOnBean(uiBeanName,
+            //                 PushStateNavigation.class) != null;
+            // 
+            // if (hasPushStateNavigation) {
+            //     path = getWildcardedPath(path);
+            // }
+
+        } 
         return uiMappings;
     }
 
@@ -158,6 +172,28 @@ public class VaadinServletConfiguration implements InitializingBean {
         }
         return builder.toString();
     }
+
+    //
+    // TODO: PushStateNavigation API does not exist in Vaadin 7
+    //
+    // /**
+    //  * Gets a wildcarded version of the given path. This method makes sure that
+    //  * the given path ends with {@code /**}.
+    //  *
+    //  * @param path
+    //  *            the path to wildcard
+    //  * @return the path with wildcard
+    //  */
+    // private String getWildcardedPath(String path) {
+    //     if (path.endsWith(PATH_WILDCARD_SINGLE)) {
+    //         path = path + "*";
+    //     } else if (!path.endsWith(PATH_WILDCARD_ALL)) {
+    //         path = path + PATH_WILDCARD_ALL;
+    //     }
+    //     assert path.endsWith(
+    //             PATH_WILDCARD_ALL) : "PushStateNavigation UI Path should end with '/**'";
+    //     return path;
+    // }
 
     protected Logger getLogger() {
         return logger;
@@ -211,6 +247,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     }
 
     @Bean
+    @SuppressWarnings("rawtypes")
     protected ServletRegistrationBean vaadinServletRegistration() {
         return createServletRegistrationBean();
     }
@@ -226,6 +263,7 @@ public class VaadinServletConfiguration implements InitializingBean {
         return new SpringVaadinServlet();
     }
 
+    @SuppressWarnings("rawtypes")
     protected ServletRegistrationBean createServletRegistrationBean() {
         getLogger().info("Registering Vaadin servlet");
         final String[] urlMappings = getUrlMappings();
@@ -240,13 +278,15 @@ public class VaadinServletConfiguration implements InitializingBean {
             vaadinServlet.setServiceUrlPath(DEFAULT_SERVLET_URL_BASE);
         }
 
-        final ServletRegistrationBean registrationBean = new ServletRegistrationBean(
-                servlet, urlMappings);
+        @SuppressWarnings({ "unchecked" })
+        final ServletRegistrationBean registrationBean =
+            new ServletRegistrationBean(servlet, urlMappings);
         addInitParameters(registrationBean);
         return registrationBean;
     }
 
     protected void addInitParameters(
+            @SuppressWarnings("rawtypes")
             ServletRegistrationBean servletRegistrationBean) {
         getLogger().info("Setting servlet init parameters");
 
@@ -269,6 +309,7 @@ public class VaadinServletConfiguration implements InitializingBean {
     }
 
     private void addInitParameter(
+            @SuppressWarnings("rawtypes")
             ServletRegistrationBean servletRegistrationBean, String paramName,
             String propertyValue) {
         if (propertyValue != null) {

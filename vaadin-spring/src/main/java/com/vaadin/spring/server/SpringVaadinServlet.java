@@ -21,7 +21,6 @@ import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.vaadin.server.DefaultUIProvider;
@@ -71,7 +70,7 @@ public class SpringVaadinServlet extends VaadinServlet {
             @Override
             public void sessionInit(SessionInitEvent sessionInitEvent)
                     throws ServiceException {
-                WebApplicationContext webApplicationContext = WebApplicationContextUtils
+                WebApplicationContextUtils
                         .getWebApplicationContext(getServletContext());
 
                 // remove DefaultUIProvider instances to avoid mapping
@@ -92,6 +91,16 @@ public class SpringVaadinServlet extends VaadinServlet {
                 // add Spring UI provider
                 SpringUIProvider uiProvider = new SpringUIProvider(session);
                 session.addUIProvider(uiProvider);
+
+                // Removed due to API no longer being available
+                // getService().addSessionDestroyListener(new SessionDestroyListener() {
+                //     @Override
+                //     public void sessionDestroy(SessionDestroyEvent event) {
+                //         VaadinSession session = event.getSession();
+                //         UIScopeImpl.cleanupSession(session);
+                //         VaadinSessionScope.cleanupSession(session);
+                //     }
+                // });
             }
         });
     }
@@ -144,5 +153,4 @@ public class SpringVaadinServlet extends VaadinServlet {
             return new VaadinServletRequest(request, getService());
         }
     }
-
 }

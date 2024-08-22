@@ -37,8 +37,7 @@ import com.vaadin.spring.server.AbstractSpringUIProviderTest;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
-// make sure the context is cleaned
-@DirtiesContext
+@DirtiesContext     // make sure the context is cleaned
 public class VaadinAutoConfigurationWithCustomNavigatorTest
         extends AbstractSpringUIProviderTest {
 
@@ -75,7 +74,7 @@ public class VaadinAutoConfigurationWithCustomNavigatorTest
     public void testNavigatorCustomized() {
         // this sets up the UI scope
         TestUI ui = createUi(TestUI.class);
-        Assert.notNull(ui);
+        Assert.notNull(ui, "UI should not be null");
         Assert.isInstanceOf(MyNavigator.class,
                 applicationContext.getBean(SpringNavigator.class),
                 "Vaadin Navigator is not correctly overridden");

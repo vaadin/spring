@@ -62,7 +62,7 @@ public class VaadinAutoConfigurationTest extends AbstractSpringUIProviderTest {
     @Test
     public void testVaadinServletDefined() {
         // this sets up the UI scope
-        TestUI ui = createUi(TestUI.class);
+        createUi(TestUI.class);
         Assert.isInstanceOf(SpringVaadinServlet.class,
                 applicationContext.getBean("vaadinServlet"),
                 "Vaadin servlet is not autoconfigured");
@@ -71,7 +71,7 @@ public class VaadinAutoConfigurationTest extends AbstractSpringUIProviderTest {
     @Test
     public void testNavigatorDefined() {
         // this sets up the UI scope
-        TestUI ui = createUi(TestUI.class);
+        createUi(TestUI.class);
         Assert.isInstanceOf(SpringNavigator.class,
                 applicationContext.getBean(SpringNavigator.class),
                 "Vaadin Navigator is not autoconfigured");

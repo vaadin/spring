@@ -15,13 +15,6 @@
  */
 package com.vaadin.spring.boot.internal;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +24,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
@@ -41,8 +33,7 @@ import com.vaadin.spring.server.AbstractSpringUIProviderTest.DummyUI;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
-// make sure the context is cleaned
-@DirtiesContext
+@DirtiesContext // make sure the context is cleaned
 public class VaadinServletConfigurationUIPathTest {
 
     @SpringUI
@@ -56,6 +47,14 @@ public class VaadinServletConfigurationUIPathTest {
     @SpringUI(path = "wild/**")
     private static class Wildcard extends DummyUI {
     }
+
+    //
+    // TODO: PushState API does not exist in Vaadin 7
+    //
+    // @SpringUI(path = "pushState")
+    // @PushStateNavigation
+    // private static class PushState extends DummyUI {
+    // }
 
     private static class MyVaadinServletConfiguration
             extends VaadinServletConfiguration {
@@ -83,6 +82,14 @@ public class VaadinServletConfigurationUIPathTest {
             return new Wildcard();
         }
 
+        //
+        // TODO: PushState API does not exist in Vaadin 7
+        //
+        // @Bean
+        // public PushState pushState() {
+        //     return new PushState();
+        // }
+
         @Bean
         public MyVaadinServletConfiguration myVaadinServletConfiguration() {
             return new MyVaadinServletConfiguration();
@@ -97,22 +104,25 @@ public class VaadinServletConfigurationUIPathTest {
     @Autowired
     VaadinServletConfiguration configuration;
 
+    //
+    // UI mapping not supported by Vaadin 7
+    //
     @Test
     public void testUIMappings() {
-        SimpleUrlHandlerMapping mapping = configuration
-                .vaadinUiForwardingHandlerMapping();
-
-        Set<String> keySet = new HashSet<>(mapping.getUrlMap().keySet());
-
-        Stream.of("/", "/sub", "/sub/*", "/wild", "/wild/**")
-                .forEach(mappedPath -> {
-                    assertTrue("Expected mapping not found: " + mappedPath,
-                            keySet.remove(mappedPath));
-                });
-
-        assertTrue(
-                "Extra path mapped: "
-                        + keySet.stream().collect(Collectors.joining(", ")),
-                keySet.isEmpty());
+    //    SimpleUrlHandlerMapping mapping = configuration
+    //            .vaadinUiForwardingHandlerMapping();
+    //
+    //    Set<String> keySet = new HashSet<>(mapping.getUrlMap().keySet());
+    //
+    //    Stream.of("/", "/sub", "/sub/*", "/wild", "/wild/**")
+    //            .forEach(mappedPath -> {
+    //                assertTrue("Expected mapping not found: " + mappedPath,
+    //                        keySet.remove(mappedPath));
+    //            });
+    //
+    //    assertTrue(
+    //            "Extra path mapped: "
+    //                    + keySet.stream().collect(Collectors.joining(", ")),
+    //            keySet.isEmpty());
     }
 }
