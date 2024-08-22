@@ -1,23 +1,37 @@
-[![Build Status](https://travis-ci.org/vaadin/spring.svg?branch=master)](https://travis-ci.org/vaadin/spring)
-
 Vaadin Spring
 ======================
 
 Vaadin Spring is the official Spring integration for [Vaadin Framework](https://github.com/vaadin/framework).
-This branch is Vaadin Framework 8.2+ compatible. See other branches for other framework versions:
-* master for Vaadin 10
-* 3.X for Vaadin 8.2+
-* 2.0 and 2.1 for Vaadin Framework 8.0...8.1 versions 
-* 1.2 for Vaadin Framework V7 versions 
+This branch is Vaadin Framework 7.7.44+ compatible. See other branches for other framework versions:
+* 10+ for Vaadin Flow
+* 4.x for Vaadin 8.21+ with Jakarta EE
+* 3.x for Vaadin 8.2+
+* 2.0 and 2.1 for Vaadin 8.0...8.1 versions
+* 1.3 for Vaadin 7.7.44+ with Java 8
+* 1.2 for Vaadin 7 versions
 
 Download release
 ----
 
-Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to https://vaadin.com/addon/vaadin-spring.
+Official releases of this add-on are available at
+[Vaadin Directory](https://vaadin.com/directory/component/vaadin-spring).
 
 Building the project
 ----
-Execute `mvn clean install` in the root directory to build vaadin-spring and vaadin-spring-boot.
+Execute `mvn clean install` in the root directory to build all modules.
+
+Vaadin Spring 1.3
+----
+This version of Vaadin Spring is based on Vaadin Spring 3.2 (for Vaadin 8) and
+has been altered to be compatible with Vaadin 7.7.44.
+Due to technical limitations, Vaadin Spring 1.3 does not support Java 6 and
+contains some API changes compared to Vaadin Spring 1.2 (for Vaadin 7).
+
+Note: Vaadin 7.7.44 requires Vaadin 7 Extended Maintenance subscription.
+This version of Vaadin Spring is not compatible with free Vaadin 7 versions.
+
+Vaadin Spring 1.3 is compatible with Spring 4.3, Spring Security 4.2, and
+Spring Boot 2.7. 
 
 Contributions
 ----
@@ -25,7 +39,7 @@ Contributions to the project can be done using pull requests.
 You will be asked to sign a contribution agreement after creating the first one.
 
 
-Copyright 2015-2018 Vaadin Ltd.
+Copyright 2015-2024 Vaadin Ltd.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not
 use this file except in compliance with the License. You may obtain a copy of
