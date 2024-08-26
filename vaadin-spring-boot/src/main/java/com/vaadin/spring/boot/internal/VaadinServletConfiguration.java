@@ -127,20 +127,6 @@ public class VaadinServletConfiguration implements InitializingBean {
             uiMappings.add(this.applicationContext.getEnvironment()
                     .resolvePlaceholders(annotation.path())
                     .replaceFirst("^/", ""));
-
-            //
-            // TODO: PushStateNavigation does not exist in Vaadin 7
-            //
-
-            // // Map PushStateNavigation UIs to wildcard path
-            // boolean hasPushStateNavigation = applicationContext
-            //         .findAnnotationOnBean(uiBeanName,
-            //                 PushStateNavigation.class) != null;
-            // 
-            // if (hasPushStateNavigation) {
-            //     path = getWildcardedPath(path);
-            // }
-
         } 
         return uiMappings;
     }
@@ -172,28 +158,6 @@ public class VaadinServletConfiguration implements InitializingBean {
         }
         return builder.toString();
     }
-
-    //
-    // TODO: PushStateNavigation API does not exist in Vaadin 7
-    //
-    // /**
-    //  * Gets a wildcarded version of the given path. This method makes sure that
-    //  * the given path ends with {@code /**}.
-    //  *
-    //  * @param path
-    //  *            the path to wildcard
-    //  * @return the path with wildcard
-    //  */
-    // private String getWildcardedPath(String path) {
-    //     if (path.endsWith(PATH_WILDCARD_SINGLE)) {
-    //         path = path + "*";
-    //     } else if (!path.endsWith(PATH_WILDCARD_ALL)) {
-    //         path = path + PATH_WILDCARD_ALL;
-    //     }
-    //     assert path.endsWith(
-    //             PATH_WILDCARD_ALL) : "PushStateNavigation UI Path should end with '/**'";
-    //     return path;
-    // }
 
     protected Logger getLogger() {
         return logger;
