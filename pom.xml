@@ -82,6 +82,11 @@
             <organization>Vaadin</organization>
             <email>patrik@vaadin.com</email>
         </developer>
+        <developer>
+            <name>Anna Koskinen</name>
+            <organization>Vaadin</organization>
+            <email>anna@vaadin.com</email>
+        </developer>
     </developers>
     
     <properties>
