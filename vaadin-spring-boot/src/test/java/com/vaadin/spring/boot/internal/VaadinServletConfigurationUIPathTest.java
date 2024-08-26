@@ -99,15 +99,15 @@ public class VaadinServletConfigurationUIPathTest {
     public void testUIMappings() {
         SimpleUrlHandlerMapping mapping = configuration
                 .vaadinUiForwardingHandlerMapping();
-    
+
         Set<String> keySet = new HashSet<>(mapping.getUrlMap().keySet());
-    
+
         Stream.of("/", "/sub", "/sub/*", "/wild", "/wild/**")
                 .forEach(mappedPath -> {
                     Assert.assertTrue("Expected mapping not found: " + mappedPath,
                             keySet.remove(mappedPath));
                 });
-    
+
         Assert.assertTrue(
                 "Extra path mapped: "
                         + keySet.stream().collect(Collectors.joining(", ")),
