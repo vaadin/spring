@@ -183,6 +183,7 @@ public class VaadinSessionScope implements Scope, BeanFactoryPostProcessor {
             try {
                 try {
                     session.setAttribute(BeanStore.class, null);
+                    session.getService().removeServiceDestroyListener(this);
                 } finally {
                     super.destroy();
                 }
