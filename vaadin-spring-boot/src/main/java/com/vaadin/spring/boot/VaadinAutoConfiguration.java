@@ -96,5 +96,15 @@ public class VaadinAutoConfiguration {
         public void afterPropertiesSet() throws Exception {
             logger.debug("{} initialized", getClass().getName());
         }
-    } 
+    }
+
+    /**
+     * Deploys JSR-356 websocket endpoints when Atmosphere is available.
+     *
+     * @return the server endpoint exporter which does the actual work.
+     */
+    @Bean
+    public ServerEndpointExporter websocketEndpointDeployer() {
+        return new VaadinWebsocketEndpointExporter();
+    }
 }

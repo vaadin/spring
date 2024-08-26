@@ -15,13 +15,12 @@
  */
 package com.vaadin.spring.boot.internal;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +40,7 @@ import com.vaadin.spring.server.AbstractSpringUIProviderTest.DummyUI;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
-// make sure the context is cleaned
-@DirtiesContext
+@DirtiesContext // make sure the context is cleaned
 public class VaadinServletConfigurationUIPathTest {
 
     @SpringUI
@@ -106,11 +104,11 @@ public class VaadinServletConfigurationUIPathTest {
 
         Stream.of("/", "/sub", "/sub/*", "/wild", "/wild/**")
                 .forEach(mappedPath -> {
-                    assertTrue("Expected mapping not found: " + mappedPath,
+                    Assert.assertTrue("Expected mapping not found: " + mappedPath,
                             keySet.remove(mappedPath));
                 });
 
-        assertTrue(
+        Assert.assertTrue(
                 "Extra path mapped: "
                         + keySet.stream().collect(Collectors.joining(", ")),
                 keySet.isEmpty());
