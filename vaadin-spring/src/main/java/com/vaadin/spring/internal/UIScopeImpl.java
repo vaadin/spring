@@ -205,7 +205,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         private final Map<UIID, BeanStore> beanStoreMap = new ConcurrentHashMap<UIID, BeanStore>();
         private final VaadinSession session;
         private final String sessionId;
-        
+
         // for testing only
         UIStore() {
             // just to keep the compiler happy when the UIStore is mocked
