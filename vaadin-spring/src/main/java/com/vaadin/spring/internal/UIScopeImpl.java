@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.Registration;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -116,6 +118,24 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
     }
 
     /**
+     * Cleans up everything associated with all UI scopes of a specific session.
+     *
+     * @param session
+     *            the Vaadin session for which to do the clean up, not
+     *            <code>null</code>
+     */
+    public static void cleanupSession(VaadinSession session) {
+        assert session != null;
+
+        UIStore uiStore = session.getAttribute(UIStore.class);
+        if (uiStore != null) {
+            LOGGER.debug("Vaadin session has been destroyed, destroying [{}]",
+                    uiStore);
+            uiStore.destroy();
+        }
+    }
+
+    /**
      * Implementation of {@link BeanStoreRetrievalStrategy} that stores the
      * {@link BeanStore} in the current {@link com.vaadin.server.VaadinSession}.
      */
@@ -185,7 +205,7 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
         private final Map<UIID, BeanStore> beanStoreMap = new ConcurrentHashMap<UIID, BeanStore>();
         private final VaadinSession session;
         private final String sessionId;
-
+        
         // for testing only
         UIStore() {
             // just to keep the compiler happy when the UIStore is mocked
@@ -229,6 +249,9 @@ public class UIScopeImpl implements Scope, BeanFactoryPostProcessor {
 
         void destroy() {
             LOGGER.trace("Destroying [{}]", this);
+            session.accessSynchronously(() -> {
+                session.setAttribute(UIStore.class, null);
+            });
             session.setAttribute(BeanStore.class, null);
             session.getService().removeSessionDestroyListener(this);
             session.getService().removeServiceDestroyListener(this);

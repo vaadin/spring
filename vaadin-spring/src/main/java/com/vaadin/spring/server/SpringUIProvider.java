@@ -36,6 +36,7 @@ import com.vaadin.server.UICreateEvent;
 import com.vaadin.server.UIProvider;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.shared.ApplicationConstants;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.spring.internal.UIID;
@@ -202,6 +203,7 @@ public class SpringUIProvider extends UIProvider {
                     event.getUIClass().getCanonicalName(), identifier);
             UI ui = getWebApplicationContext().getBean(event.getUIClass());
             configureNavigator(ui);
+
             return ui;
         } finally {
             CurrentInstance.set(key, null);

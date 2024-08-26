@@ -48,14 +48,6 @@ public class VaadinServletConfigurationUIPathTest {
     private static class Wildcard extends DummyUI {
     }
 
-    //
-    // TODO: PushState API does not exist in Vaadin 7
-    //
-    // @SpringUI(path = "pushState")
-    // @PushStateNavigation
-    // private static class PushState extends DummyUI {
-    // }
-
     private static class MyVaadinServletConfiguration
             extends VaadinServletConfiguration {
     }
@@ -81,14 +73,6 @@ public class VaadinServletConfigurationUIPathTest {
         public Wildcard wildcard() {
             return new Wildcard();
         }
-
-        //
-        // TODO: PushState API does not exist in Vaadin 7
-        //
-        // @Bean
-        // public PushState pushState() {
-        //     return new PushState();
-        // }
 
         @Bean
         public MyVaadinServletConfiguration myVaadinServletConfiguration() {
