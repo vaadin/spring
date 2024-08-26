@@ -15,6 +15,12 @@
  */
 package com.vaadin.spring.boot.internal;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +30,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 import com.vaadin.spring.annotation.EnableVaadinNavigation;
 import com.vaadin.spring.annotation.SpringUI;
@@ -88,25 +95,22 @@ public class VaadinServletConfigurationUIPathTest {
     @Autowired
     VaadinServletConfiguration configuration;
 
-    //
-    // UI mapping not supported by Vaadin 7
-    //
     @Test
     public void testUIMappings() {
-    //    SimpleUrlHandlerMapping mapping = configuration
-    //            .vaadinUiForwardingHandlerMapping();
-    //
-    //    Set<String> keySet = new HashSet<>(mapping.getUrlMap().keySet());
-    //
-    //    Stream.of("/", "/sub", "/sub/*", "/wild", "/wild/**")
-    //            .forEach(mappedPath -> {
-    //                assertTrue("Expected mapping not found: " + mappedPath,
-    //                        keySet.remove(mappedPath));
-    //            });
-    //
-    //    assertTrue(
-    //            "Extra path mapped: "
-    //                    + keySet.stream().collect(Collectors.joining(", ")),
-    //            keySet.isEmpty());
+        SimpleUrlHandlerMapping mapping = configuration
+                .vaadinUiForwardingHandlerMapping();
+    
+        Set<String> keySet = new HashSet<>(mapping.getUrlMap().keySet());
+    
+        Stream.of("/", "/sub", "/sub/*", "/wild", "/wild/**")
+                .forEach(mappedPath -> {
+                    Assert.assertTrue("Expected mapping not found: " + mappedPath,
+                            keySet.remove(mappedPath));
+                });
+    
+        Assert.assertTrue(
+                "Extra path mapped: "
+                        + keySet.stream().collect(Collectors.joining(", ")),
+                keySet.isEmpty());
     }
 }
