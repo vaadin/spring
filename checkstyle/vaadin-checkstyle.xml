@@ -140,9 +140,6 @@
 
         <!-- Checks for Size Violations. -->
         <!-- See http://checkstyle.sf.net/config_sizes.html -->
-        <module name="LineLength">
-            <property name="severity" value="warning" />
-        </module>
         <module name="MethodLength">
             <property name="severity" value="warning" />
         </module>
@@ -248,6 +245,10 @@
             <property name="format" value="System\.err\.println"/>
         </module>
 
+    </module>
+
+    <module name="LineLength">
+        <property name="severity" value="warning" />
     </module>
 
 </module>
