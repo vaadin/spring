@@ -3,4 +3,5 @@ target/
 .project
 .settings/
 .idea
+.checkstyle
 *.iml
