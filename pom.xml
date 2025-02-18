@@ -135,23 +135,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.6.0</version>
                 <configuration>
-                    <enableRulesSummary>false</enableRulesSummary>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                    <configLocation>checkstyle/vaadin-checkstyle.xml</configLocation>
-                    <violationSeverity>error</violationSeverity>
-                    <headerLocation>checkstyle/header</headerLocation>
+                    <propertyExpansion>config_loc=${basedir}/checkstyle</propertyExpansion>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>validate</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -218,6 +204,28 @@
                             </pluginExecutions>
                         </lifecycleMappingMetadata>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.6.0</version>
+                    <configuration>
+                        <enableRulesSummary>false</enableRulesSummary>
+                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                        <configLocation>checkstyle/vaadin-checkstyle.xml</configLocation>
+                        <violationSeverity>error</violationSeverity>
+                        <headerLocation>checkstyle/header</headerLocation>
+                        <failsOnError>true</failsOnError>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>checkstyle</id>
+                            <goals>
+                                <goal>checkstyle</goal>
+                            </goals>
+                            <phase>process-sources</phase>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
