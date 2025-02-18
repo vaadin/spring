@@ -31,4 +31,16 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <propertyExpansion>config_loc=${basedir}/../../checkstyle</propertyExpansion>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
