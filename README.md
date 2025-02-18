@@ -19,8 +19,8 @@ Since Vaadin 23, the code for the Spring Boot add-on has been migrated to the
 Download release
 ----
 
-Official releases of this add-on are available at Vaadin Directory. For Maven instructions, download and reviews, go to https://vaadin.com/addon/vaadin-spring.
-
+Official releases of this add-on are available at
+[Vaadin Directory](https://vaadin.com/directory/component/vaadin-spring).
 
 Building the project
 ----
