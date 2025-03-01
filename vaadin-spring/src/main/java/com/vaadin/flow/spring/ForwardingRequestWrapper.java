@@ -42,24 +42,15 @@ public class ForwardingRequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public String getServletPath() {
-        String pathInfo = super.getPathInfo();
-        if (pathInfo == null) {
-            // the path where a ServletForwardingController is registered is not
-            // a real servlet path
-            return "";
-        } else {
-            return super.getServletPath();
-        }
+        return (super.getPathInfo() == null) ? super.getServletPath() : "";
+        // the path where a ServletForwardingController is registered is not
+        // a real servlet path
     }
 
     @Override
     public String getPathInfo() {
-        String pathInfo = super.getPathInfo();
-        if (pathInfo == null) {
-            // this uses getServletPath() and should work both with and without
-            // clearServletPath
-            pathInfo = urlPathHelper.getPathWithinServletMapping(this);
-        }
-        return pathInfo;
+        return (super.getPathInfo() == null) ? urlPathHelper.getPathWithinServletMapping(this) : super.getPathInfo();
+        // this uses getServletPath() and should work both with and without
+        // clearServletPath
     }
 }
