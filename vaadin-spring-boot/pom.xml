@@ -111,12 +111,6 @@
             <version>${spring.boot.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure-processor</artifactId>
-            <optional>true</optional>
-            <version>${spring.boot.version}</version>
-        </dependency>
     </dependencies>
     
     <build>
