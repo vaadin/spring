@@ -18,9 +18,7 @@ package com.vaadin.spring.server;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
+import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.vaadin.server.DefaultUIProvider;
@@ -37,6 +35,9 @@ import com.vaadin.server.VaadinServletService;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.internal.UIScopeImpl;
 import com.vaadin.spring.internal.VaadinSessionScope;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Subclass of the standard {@link com.vaadin.server.VaadinServlet Vaadin
@@ -67,14 +68,15 @@ public class SpringVaadinServlet extends VaadinServlet {
 
     @Override
     protected void servletInitialized() throws ServletException {
-        getService().addSessionInitListener(new SessionInitListener() {
+		VaadinServletService service = getService();
+		service.addSessionInitListener(new SessionInitListener() {
 
             private static final long serialVersionUID = -6307820453486668084L;
 
             @Override
             public void sessionInit(SessionInitEvent sessionInitEvent)
                     throws ServiceException {
-                WebApplicationContextUtils
+				WebApplicationContext webApplicationContext = WebApplicationContextUtils
                         .getWebApplicationContext(getServletContext());
 
                 // remove DefaultUIProvider instances to avoid mapping
@@ -92,15 +94,18 @@ public class SpringVaadinServlet extends VaadinServlet {
                     }
                 }
 
-                session.addUIProvider(new SpringUIProvider(session));
-                getService().addSessionDestroyListener(new SessionDestroyListener() {
-                    @Override
-                    public void sessionDestroy(SessionDestroyEvent event) {
-                        VaadinSession session = event.getSession();
-                        UIScopeImpl.cleanupSession(session);
-                        VaadinSessionScope.cleanupSession(session);
-                    }
-                });
+				// add Spring UI provider
+				SpringUIProvider uiProvider = new SpringUIProvider(session);
+				session.addUIProvider(uiProvider);
+			}
+		});
+		service.addSessionDestroyListener(new SessionDestroyListener() {
+			@Override
+			public void sessionDestroy(SessionDestroyEvent event) {
+				VaadinSession session = event.getSession();
+
+				UIScopeImpl.cleanupSession(session);
+				VaadinSessionScope.cleanupSession(session);
             }
         });
     }

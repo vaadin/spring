@@ -25,8 +25,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -49,6 +47,8 @@ import com.vaadin.spring.internal.ViewCache;
 import com.vaadin.spring.internal.ViewScopeImpl;
 import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.UI;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * A Vaadin {@link ViewProvider} that fetches the views from the Spring

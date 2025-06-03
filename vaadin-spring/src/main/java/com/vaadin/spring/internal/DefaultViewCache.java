@@ -19,8 +19,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import javax.annotation.PreDestroy;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -31,6 +29,8 @@ import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.spring.navigator.ViewActivationListener;
 import com.vaadin.ui.UI;
+
+import jakarta.annotation.PreDestroy;
 
 /**
  * Default implementation of {@link com.vaadin.spring.internal.ViewCache}. For

@@ -17,16 +17,17 @@ package com.vaadin.spring.server;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.servlet.ServletContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -36,17 +37,18 @@ import com.vaadin.server.UICreateEvent;
 import com.vaadin.server.UIProvider;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinSession;
-import com.vaadin.shared.ApplicationConstants;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.spring.annotation.SpringViewDisplay;
-import com.vaadin.spring.internal.UIID;
 import com.vaadin.spring.internal.SpringViewDisplayPostProcessor;
 import com.vaadin.spring.internal.SpringViewDisplayRegistrationBean;
+import com.vaadin.spring.internal.UIID;
 import com.vaadin.spring.navigator.SpringNavigator;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.SingleComponentContainer;
 import com.vaadin.ui.UI;
 import com.vaadin.util.CurrentInstance;
+
+import jakarta.servlet.ServletContext;
 
 /**
  * Vaadin {@link com.vaadin.server.UIProvider} that looks up UI classes from the
@@ -131,6 +133,10 @@ public class SpringUIProvider extends UIProvider {
     protected String deriveMappingForUI(String uiBeanName) {
         SpringUI annotation = getWebApplicationContext()
                 .findAnnotationOnBean(uiBeanName, SpringUI.class);
+		Assert.notNull(annotation, "SpringUI annotation for bean " + uiBeanName + " could not be found!");
+		if (annotation == null) {
+			return "";
+		}
         return resolvePropertyPlaceholders(annotation.path());
     }
 
@@ -139,18 +145,38 @@ public class SpringUIProvider extends UIProvider {
             UIClassSelectionEvent uiClassSelectionEvent) {
         final String path = extractUIPathFromRequest(
                 uiClassSelectionEvent.getRequest());
-        if (pathToUIMap.containsKey(path)) {
-            return pathToUIMap.get(path);
-        }
+        Class<? extends UI> ui = null;
+        String pathInfo = path;
 
-        for (Map.Entry<String, Class<? extends UI>> entry : wildcardPathToUIMap
-                .entrySet()) {
-            if (path.startsWith(entry.getKey())) {
-                return entry.getValue();
+        if (pathToUIMap.containsKey(path)) {
+            ui = pathToUIMap.get(path);
+        } else {
+            // Find the longest matching UI path
+            Entry<String, Class<? extends UI>> entry = wildcardPathToUIMap
+                    .entrySet().stream()
+                    .filter(e -> path.startsWith(e.getKey()))
+                    .sorted(Comparator.comparing(e -> {
+						String key = ((Entry<String, ?>) e).getKey();
+                        return key.length();
+                    }).reversed()).findFirst().orElse(null);
+
+            if (entry != null) {
+                ui = entry.getValue();
+                pathInfo = entry.getKey();
             }
         }
 
-        return null;
+        // Sometimes pathInfo does not contain leading slash
+        if (!pathInfo.isEmpty() && !pathInfo.startsWith("/")) {
+            pathInfo = "/" + pathInfo;
+        }
+
+        // Pass the path info to the UI through request
+		uiClassSelectionEvent.getRequest().setAttribute("/",
+                uiClassSelectionEvent.getRequest().getContextPath() + pathInfo);
+
+        return ui;
+
     }
 
     private String extractUIPathFromRequest(VaadinRequest request) {

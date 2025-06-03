@@ -15,6 +15,20 @@
  */
 package com.vaadin.spring.navigator;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionValidationException;
+import org.springframework.context.ApplicationContext;
+
 import com.vaadin.navigator.NavigationStateManager;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.navigator.View;
@@ -28,19 +42,6 @@ import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.SingleComponentContainer;
 import com.vaadin.ui.UI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.BeanFactoryUtils;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionValidationException;
-import org.springframework.context.ApplicationContext;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * A Navigator that automatically uses {@link SpringViewProvider} and allows
@@ -276,7 +277,7 @@ public class SpringNavigator extends Navigator {
                             "Could not find error view bean of class [{}] in application context, creating it with Class.newInstance()",
                             viewClass.getName());
                     try {
-                        return viewClass.newInstance();
+						return viewClass.getDeclaredConstructor().newInstance();
                     } catch (Exception e2) {
                         throw new RuntimeException(e2);
                     }

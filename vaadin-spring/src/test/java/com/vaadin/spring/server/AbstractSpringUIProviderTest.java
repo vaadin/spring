@@ -20,8 +20,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +41,8 @@ import com.vaadin.spring.internal.UIScopeImpl;
 import com.vaadin.spring.test.util.SingletonBeanStoreRetrievalStrategy;
 import com.vaadin.spring.test.util.TestVaadinSession;
 import com.vaadin.ui.UI;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 // make sure the context is cleaned
