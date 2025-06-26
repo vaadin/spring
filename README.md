@@ -25,18 +25,24 @@ Building the project
 ----
 Execute `mvn clean install` in the root directory to build all modules.
 
-Vaadin Spring 1.3
+Vaadin Spring 1.4
 ----
-This version of Vaadin Spring is based on Vaadin Spring 3.2 (for Vaadin 8) and
-has been altered to be compatible with Vaadin 7.7.44.
-Due to technical limitations, Vaadin Spring 1.3 does not support Java 6 and
-contains some API changes compared to Vaadin Spring 1.2 (for Vaadin 7).
+This version of Vaadin Spring is for Vaadin 7.7.47+ and supports Java 17+,
+Spring Framework 6.x, Spring Boot 3.x, and Jakarta EE10.
 
-Note: Vaadin 7.7.44 requires Vaadin 7 Extended Maintenance subscription.
+Due to technical limitations, Vaadin Spring 1.4 does not support Java 8 and
+contains some API changes compared to Vaadin Spring 1.3 (for Vaadin 7).
+
+Note: Vaadin 7.7.47 requires Vaadin 7 Extended Maintenance subscription.
 This version of Vaadin Spring is not compatible with free Vaadin 7 versions.
 
-Vaadin Spring 1.3 is compatible with Spring 4.3, Spring Security 4.2, and
-Spring Boot 2.7. 
+The initial release of Vaadin Spring 1.4 was built with the following versions:
+* Vaadin 7.7.47
+* Spring 6.2.7
+* Spring Security 6.4.6
+* Spring Boot 3.4.6
+* Jakarta API 3.0.0
+* Jakarta Servlet 6.0.0
 
 Contributions
 ----
