@@ -8,6 +8,7 @@ This branch is Vaadin Framework 7.7.44+ compatible. See other branches for other
 * 4.x for Vaadin 8.21+ with Jakarta EE
 * 3.x for Vaadin 8.2+
 * 2.0 and 2.1 for Vaadin 8.0...8.1 versions
+* 1.4 for Vaadin 7.7.47+ with Spring 6, Spring Boot 3, Java 17+ and Jakarta EE10+
 * 1.3 for Vaadin 7.7.44+ with Java 8
 * 1.2 for Vaadin 7 versions
 
