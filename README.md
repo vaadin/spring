@@ -8,8 +8,10 @@ This branch is Vaadin Framework 14.12+ compatible.
 See other branches for other framework versions:
 * 1.2 for Vaadin V7 versions
 * 1.3 for Vaadin 7.7.44+ with Java 8
+* 1.4 for Vaadin 7.7.47+ with Spring 6, Spring Boot 3, Java 17+ and Jakarta EE10+
 * 2.0 and 2.1 for Vaadin 8.0...8.1 versions
 * 3.x for Vaadin V8.2+
+* 4.x for Vaadin 8.21+ with Spring 6, Spring Boot 3, Java 17+ and Jakarta EE10+
 * 10.0 for Vaadin 10 
 * 11.0 for Vaadin 13 
 * 12.0 for Vaadin 14.0
