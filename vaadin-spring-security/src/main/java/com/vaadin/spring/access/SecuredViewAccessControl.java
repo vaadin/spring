@@ -52,36 +52,8 @@ import java.util.stream.Stream;
 @SpringComponent
 public class SecuredViewAccessControl implements ViewAccessControl, Serializable {
 
-    private static boolean caseSensitiveRoleDefs = false;
-    
     @Autowired
     private transient ApplicationContext applicationContext;
-
-    /**
-     * The behavior of Spring Security up to version 6.x allowed for case-insensitive
-     * role definitions. Spring boot 7 changes this to case-sensitive by default.
-     * Spring Add-on for Vaadin 8 retains the old behavior of case insensitive role
-     * names by default, but the new behavior can be enabled by calling this function
-     * with the parameter 'true'.
-     * 
-     * @param enabled true to enable case sensitive role definitions.
-     */
-    public static void setCaseSensitive(boolean enabled) {
-        caseSensitiveRoleDefs = enabled;
-    }
-
-    /**
-     * Returns whether role-definition matching is currently case-sensitive.
-     * <p>
-     * By default this is {@code true}. The value can be changed through
-     * {@link #setCaseSensitive(boolean)}.
-     *
-     * @return {@code true} when role definitions are matched case-sensitively,
-     *         {@code false} when matching is case-insensitive
-     */
-    public static boolean isCaseSensitive() {
-        return caseSensitiveRoleDefs;
-    }
 
     /**
      * Checks if the current user is granted any explicitly provided security attributes
@@ -102,18 +74,8 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
 
-        if (caseSensitiveRoleDefs) {
-            return Stream.of(securityConfigAttributes)
-                .anyMatch(authorities::contains);
-        }
-
-        Set<String> normalizedAuthorities = authorities.stream()
-                .map(SecuredViewAccessControl::normalizeAuthority)
-                .collect(Collectors.toSet());
-
         return Stream.of(securityConfigAttributes)
-                .map(SecuredViewAccessControl::normalizeAuthority)
-                .anyMatch(normalizedAuthorities::contains);
+            .anyMatch(authorities::contains);
     }
 
     /**
@@ -194,13 +156,6 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
         }
 
         return null;
-    }
-
-    /**
-     * Helper for case insensitivity
-     */
-    private static String normalizeAuthority(String authority) {
-        return authority == null ? "" : authority.trim().toUpperCase();
     }
 
 }
