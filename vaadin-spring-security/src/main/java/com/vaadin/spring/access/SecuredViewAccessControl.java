@@ -19,6 +19,12 @@ import com.vaadin.navigator.View;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.UI;
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinServletRequest;
+
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -27,8 +33,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import java.io.Serializable;
+import java.security.Principal;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,8 +52,36 @@ import java.util.stream.Stream;
 @SpringComponent
 public class SecuredViewAccessControl implements ViewAccessControl, Serializable {
 
+    private static boolean caseSensitiveRoleDefs = false;
+    
     @Autowired
     private transient ApplicationContext applicationContext;
+
+    /**
+     * The behavior of Spring Security up to version 6.x allowed for case-insensitive
+     * role definitions. Spring boot 7 changes this to case-sensitive by default.
+     * Spring Add-on for Vaadin 8 retains the old behavior of case insensitive role
+     * names by default, but the new behavior can be enabled by calling this function
+     * with the parameter 'true'.
+     * 
+     * @param enabled true to enable case sensitive role definitions.
+     */
+    public static void setCaseSensitive(boolean enabled) {
+        caseSensitiveRoleDefs = enabled;
+    }
+
+    /**
+     * Returns whether role-definition matching is currently case-sensitive.
+     * <p>
+     * By default this is {@code true}. The value can be changed through
+     * {@link #setCaseSensitive(boolean)}.
+     *
+     * @return {@code true} when role definitions are matched case-sensitively,
+     *         {@code false} when matching is case-insensitive
+     */
+    public static boolean isCaseSensitive() {
+        return caseSensitiveRoleDefs;
+    }
 
     /**
      * Checks if the current user is granted any explicitly provided security attributes
@@ -57,16 +93,27 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
      * @see Secured
      */
     protected boolean isAccessGranted(String[] securityConfigAttributes) {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
+        Authentication authentication = resolveAuthentication();
         if (authentication == null) {
             return false;
         }
+
         Set<String> authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
-        return
-                Stream.of(securityConfigAttributes).anyMatch(authorities::contains);
+
+        if (caseSensitiveRoleDefs) {
+            return Stream.of(securityConfigAttributes)
+                .anyMatch(authorities::contains);
+        }
+
+        Set<String> normalizedAuthorities = authorities.stream()
+                .map(SecuredViewAccessControl::normalizeAuthority)
+                .collect(Collectors.toSet());
+
+        return Stream.of(securityConfigAttributes)
+                .map(SecuredViewAccessControl::normalizeAuthority)
+                .anyMatch(normalizedAuthorities::contains);
     }
 
     /**
@@ -121,4 +168,39 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
 
         return applicationContext;
     }
+
+    private Authentication resolveAuthentication() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        if (context != null && context.getAuthentication() != null) {
+            return context.getAuthentication();
+        }
+
+        VaadinRequest request = VaadinService.getCurrentRequest();
+        if (request instanceof VaadinServletRequest servletRequest) {
+            Principal principal = servletRequest.getUserPrincipal();
+            if (principal instanceof Authentication authentication) {
+                return authentication;
+            }
+
+            HttpSession session = servletRequest.getHttpServletRequest()
+                    .getSession(false);
+            if (session != null) {
+                Object securityContextAttribute = session.getAttribute(
+                        HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+                if (securityContextAttribute instanceof SecurityContext securityContext) {
+                    return securityContext.getAuthentication();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Helper for case insensitivity
+     */
+    private static String normalizeAuthority(String authority) {
+        return authority == null ? "" : authority.trim().toUpperCase();
+    }
+
 }
