@@ -19,6 +19,12 @@ import com.vaadin.navigator.View;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.server.SpringVaadinServletService;
 import com.vaadin.ui.UI;
+import com.vaadin.server.VaadinRequest;
+import com.vaadin.server.VaadinService;
+import com.vaadin.server.VaadinServletRequest;
+
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -27,8 +33,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 
 import java.io.Serializable;
+import java.security.Principal;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,16 +65,17 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
      * @see Secured
      */
     protected boolean isAccessGranted(String[] securityConfigAttributes) {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
+        Authentication authentication = resolveAuthentication();
         if (authentication == null) {
             return false;
         }
+
         Set<String> authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
-        return
-                Stream.of(securityConfigAttributes).anyMatch(authorities::contains);
+
+        return Stream.of(securityConfigAttributes)
+            .anyMatch(authorities::contains);
     }
 
     /**
@@ -121,4 +130,32 @@ public class SecuredViewAccessControl implements ViewAccessControl, Serializable
 
         return applicationContext;
     }
+
+    private Authentication resolveAuthentication() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        if (context != null && context.getAuthentication() != null) {
+            return context.getAuthentication();
+        }
+
+        VaadinRequest request = VaadinService.getCurrentRequest();
+        if (request instanceof VaadinServletRequest servletRequest) {
+            Principal principal = servletRequest.getUserPrincipal();
+            if (principal instanceof Authentication authentication) {
+                return authentication;
+            }
+
+            HttpSession session = servletRequest.getHttpServletRequest()
+                    .getSession(false);
+            if (session != null) {
+                Object securityContextAttribute = session.getAttribute(
+                        HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+                if (securityContextAttribute instanceof SecurityContext securityContext) {
+                    return securityContext.getAuthentication();
+                }
+            }
+        }
+
+        return null;
+    }
+
 }
