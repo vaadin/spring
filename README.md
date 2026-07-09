@@ -11,7 +11,8 @@ See other branches for other framework versions:
 * 1.4 for Vaadin 7.7.47+ with Java 17+, Spring 6, Spring Boot 3 and Jakarta
 * 2.0 and 2.1 for Vaadin 8.0...8.1 versions
 * 3.x for Vaadin V8.2+
-* 4.0 for Vaadin 8.27.7+ with Java 17+, Spring 6, Spring Boot 3 and Jakarta
+* 4.0 for Vaadin 8.27.7+ with Java 17+, Spring 6, Spring Boot 3 and Jakarta EE 10
+* 4.5 for Vaadin 8.31.1+ with Java 17+, Spring 7, Spring Boot 4 and Jakarta EE 11
 * 10.0 for Vaadin 10 
 * 11.0 for Vaadin 13 
 * 12.0 for Vaadin 14.0
