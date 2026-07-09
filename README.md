@@ -7,8 +7,8 @@ Vaadin Spring is the official Spring integration for [Vaadin Framework](https://
 This branch is Vaadin Framework 8.2+ compatible. See other branches for other framework versions:
 * master for Vaadin 22 (no longer developed)
 * 14.x for Vaadin 14 (default)
-* 4.5 for Vaadin 8.31.1+ with Java 17+, Spring 7, Spring Boot 4 and Jakarta EE 11+
-* 4.0 for Vaadin 8.27.7+ with Java 17+, Spring 6, Spring Boot 3 and Jakarta
+* 4.5 for Vaadin 8.31.1+ with Java 17+, Spring 7, Spring Boot 4 and Jakarta EE 11
+* 4.0 for Vaadin 8.27.7+ with Java 17+, Spring 6, Spring Boot 3 and Jakarta EE 10
 * 3.x for Vaadin 8.2+
 * 2.0 and 2.1 for Vaadin 8.0...8.1 versions
 * 1.3 for Vaadin 7.7.44+ with Java 8
