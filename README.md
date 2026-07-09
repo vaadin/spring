@@ -17,34 +17,34 @@ This branch is Vaadin Framework 8.2+ compatible. See other branches for other fr
 Since Vaadin 23, the code for the Spring Boot add-on has been migrated to the 
 [Flow](https://github.com/vaadin/flow) repository.
 
+
 Download release
 ----
-
 Official releases of this add-on are available at
 [Vaadin Directory](https://vaadin.com/directory/component/vaadin-spring).
+
 
 Building the project
 ----
 Execute `mvn clean install` in the root directory to build vaadin-spring and vaadin-spring-boot.
 
 
-Vaadin Spring 4.0
+Vaadin Spring 4.5
 ----
-This version of Vaadin Spring is made to be compatible with Wildfly 27 and Jakarta EE 10,
-featuring Spring 6.1, Spring Security 6.1 and Spring Boot 3.2. Due to technical limitations,
-the Push implementation of Vaadin 8 is not (yet) compatible with this stack. A future
-version may remedy this.
+This version of Vaadin Spring is made to be compatible with Jakarta EE 11,
+featuring Spring 7.0, Spring Security 7.1 and Spring Boot 4.1.
 
 
 Experimental release
 ----
-Vaadin Spring 4.0 is considered experimental until further notice.
+Vaadin Spring 4.5 is considered experimental until further notice.
 
 
 Vaadin community addons and extensions in Vaadin Spring 4.x
 ----
-Vaadin Spring 4.0 contains Vaadin 8 compatible versions of code in the Vaadin4Spring and
-Spring Data Provider community addons, and retains their `org.vaadin.*` namespaces.
+Vaadin Spring 4.0 and onwards contains Vaadin 8 compatible versions of code in the
+Vaadin4Spring and Spring Data Provider community addons, and retains their `org.vaadin.*`
+namespaces.
 These are available through a new vaadin-spring-addons package, which is version-
 synced with the main Spring add-on. This has been done for compatibility reasons,
 as minor changes (such as moving to the Jakarta namespace) have to have been made.
@@ -61,7 +61,7 @@ as they are provided for compatibility reasons only when moving to newer version
 Java, Spring, Spring Boot and Spring Security.
 
 
-Making your application compatible with Vaadin Spring 4.0
+Making your application compatible with Vaadin Spring 4.5
 ----
 
 * Replace all instances of `javax.` with `jakarta.` and import the relevant
@@ -88,7 +88,7 @@ Making your application compatible with Vaadin Spring 4.0
     <dependency>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-charts</artifactId>
-        <version>4.0.4</version>
+        <version>4.3.5</version>
         <exclusions>
             <exclusion>
                 <groupId>com.vaadin</groupId>
@@ -98,15 +98,15 @@ Making your application compatible with Vaadin Spring 4.0
     </dependency>
   ```
 * If you're inhereiting from spring-boot-starter-parent, remember to update the
-  version to a relevant one (at the time of writing this is 3.2.2).
+  version to a relevant one (at the time of writing this is 4.1.0).
   ```xml
   	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.2</version>
+		<version>4.1.0</version>
 	</parent>
   ```
-* Rewrite your Spring Security configuration the Spring 6 way. You no longer
+* Rewrite your Spring Security configuration the Spring 7 way. You no longer
   extend a security configuration adapter type, rather you annotate a class with
   `@Configuration` and expose configuration beans. You can read more about it
   in [this article](https://spring.io/blog/2022/02/21/spring-security-without-the-websecurityconfigureradapter).
@@ -116,6 +116,7 @@ Contributions
 ----
 Contributions to the project can be done using pull requests.
 You will be asked to sign a contribution agreement after creating the first one.
+
 
 Maintenance instructions
 ----
@@ -127,6 +128,7 @@ the Java files.
 If Checkstyle fails to recognise the new year range, make a temporary change to
 `checkstyle/vaadin-checkstyle.xml` (e.g. one extra whitespace) and then clean
 and rebuild the project. Remember to revert the temporary change afterwards.
+
 
 License
 ----
