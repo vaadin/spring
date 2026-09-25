@@ -95,20 +95,20 @@
         <maven.compiler.release>17</maven.compiler.release>
         
         <!-- These are typically overridden with BOMs -->
-        <vaadin.version>7.7.47</vaadin.version>
-        <spring.version>6.2.7</spring.version>
-        <spring.context.version>6.2.7</spring.context.version>
-        <spring.security.version>6.4.6</spring.security.version>
-        <spring.boot.version>3.4.6</spring.boot.version>
+        <vaadin.version>7.7.54</vaadin.version>
+        <spring.version>7.0.8</spring.version>
+        <spring.context.version>7.0.8</spring.context.version>
+        <spring.security.version>7.1.0</spring.security.version>
+        <spring.boot.version>4.1.0</spring.boot.version>
         
         <jakarta-api.version>3.0.0</jakarta-api.version>
-        <jakarta.servlet.version>6.0.0</jakarta.servlet.version>
+        <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
         <jakarta.websocket.version>2.1.1</jakarta.websocket.version>
-        <jakarta.annotation.version>2.1.1</jakarta.annotation.version>
+        <jakarta.annotation.version>3.0.0</jakarta.annotation.version>
 
 		<javassist.version>3.29.2-GA</javassist.version>
 		
-        <mockito.version>5.11.0</mockito.version>
+        <mockito.version>5.23.0</mockito.version>
         <hamcrest.version>1.3</hamcrest.version>
         <h2.version>2.2.224</h2.version>
 
@@ -121,7 +121,7 @@
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
 
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.11.0</mockito.version>
+        <mockito.version>5.23.0</mockito.version>
         <hamcrest.version>1.3</hamcrest.version>
         <h2.version>2.2.224</h2.version>
     </properties>
