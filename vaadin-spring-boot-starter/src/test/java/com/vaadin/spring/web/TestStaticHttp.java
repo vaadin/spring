@@ -15,34 +15,32 @@
  */
 package com.vaadin.spring.web;
 
-import com.gargoylesoftware.htmlunit.WebClient;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.annotation.SpringUI;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import org.junit.Test;
-import org.junit.Assert;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Bean;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Web based test {@link com.vaadin.spring.server.SpringVaadinServlet} static resource handling
  *
  * @author Vaadin Ltd
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class TestStaticHttp {
     private static final String MANDATORY_BOOTSTRAP_PART = "log('Vaadin bootstrap loaded');";
-    @Autowired
-    private WebClient webClient;
 
     @LocalServerPort
     private int port;
@@ -50,9 +48,12 @@ public class TestStaticHttp {
     @Test
     public void testExample() throws Exception {
         String javaScriptUrl = "http://localhost:" + port + "/VAADIN/vaadinBootstrap.js?v=8.0-SNAPSHOT";
-        String content = this.webClient.getPage(javaScriptUrl).getWebResponse().getContentAsString();
-        Assert.assertTrue("Mandatory part of bootstrap is not found",
-                content.contains(MANDATORY_BOOTSTRAP_PART));
+        HttpRequest request = HttpRequest.newBuilder(URI.create(javaScriptUrl))
+            .build();
+        String content = HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.ofString()).body();
+        Assertions.assertTrue(content.contains(MANDATORY_BOOTSTRAP_PART),
+            "Mandatory part of bootstrap is not found");
     }
 
     @SpringUI
@@ -70,11 +71,6 @@ public class TestStaticHttp {
         @Bean
         public MyUI createUI() {
             return new MyUI();
-        }
-
-        @Bean
-        public WebClient createWebClient() {
-            return new WebClient();
         }
     }
 }
