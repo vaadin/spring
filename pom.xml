@@ -98,19 +98,58 @@
         <!-- These are typically overridden with BOMs -->
         <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
         <jakarta.annotation.version>3.0.0</jakarta.annotation.version>
-        <vaadin.version>8.31.1</vaadin.version>
+        <vaadin.version>8.32.1</vaadin.version>
         <spring.version>7.0.8</spring.version>
         <spring.boot.version>4.1.0</spring.boot.version>
+        <spring.data.version>4.1.0</spring.data.version>
         <spring.security.version>7.1.0</spring.security.version>
-        <slf4j.version>2.0.17</slf4j.version>
+        <tomcat.version>11.0.25</tomcat.version>
+        <jackson.version>3.1.6</jackson.version>
+        <log4j.version>2.25.5</log4j.version>
+        <slf4j.version>2.0.18</slf4j.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.23.0</mockito.version>
+        <junit.vintage.version>6.0.3</junit.vintage.version>
+        <mockito.version>5.24.0</mockito.version>
         <hamcrest.version>1.3</hamcrest.version>
-        <h2.version>2.2.224</h2.version>
+        <h2.version>2.5.252</h2.version>
 
         <!-- Additional manifest fields -->
         <Vaadin-License-Title>Apache License 2.0</Vaadin-License-Title>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-bom</artifactId>
+                <version>${log4j.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
@@ -124,7 +163,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.3.1</version>
                 <configuration>
                     <excludeResources>true</excludeResources>
                 </configuration>

@@ -98,6 +98,12 @@
             <version>${spring.boot.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit.vintage.version}</version>
+            <scope>test</scope>
+        </dependency>
         <!--
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -118,12 +124,6 @@
             <artifactId>spring-boot-properties-migrator</artifactId>
             <version>${spring.boot.version}</version>
             <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-autoconfigure-processor</artifactId>
-            <optional>true</optional>
-            <version>${spring.boot.version}</version>
         </dependency>
     </dependencies>
 
