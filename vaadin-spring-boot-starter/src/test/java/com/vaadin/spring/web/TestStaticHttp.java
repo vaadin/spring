@@ -51,10 +51,18 @@ public class TestStaticHttp {
         String javaScriptUrl = "http://localhost:" + port + "/VAADIN/vaadinBootstrap.js?v=8.23.0";
     HttpRequest request = HttpRequest.newBuilder(URI.create(javaScriptUrl))
         .build();
-    String content = HttpClient.newHttpClient()
-        .send(request, HttpResponse.BodyHandlers.ofString()).body();
-    Assertions.assertTrue(content.contains(MANDATORY_BOOTSTRAP_PART),
-        "Mandatory part of bootstrap is not found");
+@Test
+public void testExample() throws Exception {
+    String javaScriptUrl = "http://localhost:" + port + "/VAADIN/vaadinBootstrap.js";
+    HttpRequest request = HttpRequest.newBuilder(URI.create(javaScriptUrl)).build();
+    HttpResponse<String> response = HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.ofString());
+
+    Assertions.assertEquals(200, response.statusCode(),
+            "Unexpected status for " + javaScriptUrl);
+    Assertions.assertTrue(response.body().contains(MANDATORY_BOOTSTRAP_PART),
+            "Mandatory part of bootstrap is not found");
+}
     }
 
     @SpringUI
