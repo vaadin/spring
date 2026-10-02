@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2025 The original authors
+ * Copyright 2015-2026 The original authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.context.annotation.Bean;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class TestStaticHttp {
+
     private static final String MANDATORY_BOOTSTRAP_PART = "log('Vaadin bootstrap loaded');";
 
     @LocalServerPort
@@ -47,22 +48,23 @@ public class TestStaticHttp {
 
     @Test
     public void testExample() throws Exception {
-        String javaScriptUrl = "http://localhost:" + port + "/VAADIN/vaadinBootstrap.js?v=8.0-SNAPSHOT";
-        HttpRequest request = HttpRequest.newBuilder(URI.create(javaScriptUrl))
-            .build();
-        String content = HttpClient.newHttpClient()
-            .send(request, HttpResponse.BodyHandlers.ofString()).body();
-        Assertions.assertTrue(content.contains(MANDATORY_BOOTSTRAP_PART),
-            "Mandatory part of bootstrap is not found");
-    }
+        String javaScriptUrl = "http://localhost:" + port + "/VAADIN/vaadinBootstrap.js";
+        HttpRequest request = HttpRequest.newBuilder(URI.create(javaScriptUrl)).build();
+        HttpResponse<String> response = HttpClient.newHttpClient()
+                .send(request, HttpResponse.BodyHandlers.ofString());
 
+        Assertions.assertEquals(200, response.statusCode(),
+                "Unexpected status for " + javaScriptUrl);
+        Assertions.assertTrue(response.body().contains(MANDATORY_BOOTSTRAP_PART),
+                "Mandatory part of bootstrap is not found");
+    }
     @SpringUI
     public static class MyUI extends UI {
         @Override
         protected void init(VaadinRequest vaadinRequest) {
             setContent(
-                    new VerticalLayout(
-                            new Button("Click me", event -> Notification.show("Thanks"))));
+                new VerticalLayout(
+                    new Button("Click me", event -> Notification.show("Thanks"))));
         }
     }
 
