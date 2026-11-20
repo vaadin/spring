@@ -102,7 +102,7 @@
         <spring.version>7.0.8</spring.version>
         <spring.boot.version>4.1.0</spring.boot.version>
         <spring.data.version>4.1.0</spring.data.version>
-        <spring.security.version>7.1.0</spring.security.version>
+        <spring.security.version>7.1.2</spring.security.version>
         <tomcat.version>11.0.25</tomcat.version>
         <jackson.version>3.1.6</jackson.version>
         <log4j.version>2.25.5</log4j.version>
